@@ -5,8 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام رنان الإبداعي</title>
-    <link rel="icon" type="image/png" href="https://ia902801.us.archive.org/4/items/1-22_20260517/%D8%B4%D8%B9%D8%A7%D8%B1%5B1%5D332-0%D9%A4.png">
-    <link rel="apple-touch-icon" href="https://ia902801.us.archive.org/4/items/1-22_20260517/%D8%B4%D8%B9%D8%A7%D8%B1%5B1%5D332-0%D9%A4.png">
+    <link rel="icon" type="image/svg+xml" href="images/ranan-logo.svg">
+    <link rel="apple-touch-icon" href="images/ranan-logo.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;600&display=swap"
@@ -85,18 +85,18 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    // ONYX · Premium Black Mode
+                    // RANNAN · Midnight Mint (ألوان الشعار)
                     colors: {
-                        primary: '#e6e6ea',
-                        secondary: '#9d9da8',
-                        "accent-green": "#34d399",
-                        "bg-main": "#050506",
-                        "bg-card": "#0a0a0c",
-                        "border-glass": "rgba(255,255,255,0.07)",
-                        muted: '#6b6b74',
-                        "card-dark": "#0a0a0c",
-                        "card-border": "rgba(255,255,255,0.07)",
-                        "accent": "#e6e6ea",
+                        primary: '#47E0AC',
+                        secondary: '#24b184',
+                        "accent-green": "#47E0AC",
+                        "bg-main": "#02083A",
+                        "bg-card": "#0a1250",
+                        "border-glass": "rgba(71,224,172,0.15)",
+                        muted: '#8590c4',
+                        "card-dark": "#0a1250",
+                        "card-border": "rgba(71,224,172,0.15)",
+                        "accent": "#47E0AC",
                     },
                     fontFamily: {
                         display: ['Cairo', 'sans-serif'],
@@ -110,11 +110,11 @@
                         '3xl': '24px',
                     },
                     boxShadow: {
-                        'glow-primary': '0 0 32px -6px rgba(255, 255, 255, 0.16)',
-                        'glow-accent': '0 0 32px -6px rgba(255, 255, 255, 0.14)',
-                        'glow-secondary': '0 0 32px -6px rgba(255, 255, 255, 0.12)',
-                        'glow-cyan': '0 0 32px -6px rgba(255, 255, 255, 0.12)',
-                        'glass': '0 18px 50px -12px rgba(0, 0, 0, 0.85)',
+                        'glow-primary': '0 0 32px -6px rgba(71, 224, 172, 0.30)',
+                        'glow-accent': '0 0 32px -6px rgba(71, 224, 172, 0.26)',
+                        'glow-secondary': '0 0 32px -6px rgba(67, 217, 196, 0.24)',
+                        'glow-cyan': '0 0 32px -6px rgba(67, 217, 196, 0.24)',
+                        'glass': '0 18px 50px -12px rgba(1, 4, 26, 0.85)',
                     },
                     animation: {
                         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
@@ -882,14 +882,14 @@
     <div class="glow-orb orb-accent"></div>
 
     <div id="login-overlay"
-        class="fixed inset-0 z-[100] bg-[#06060a] flex flex-col items-center justify-center">
+        class="fixed inset-0 z-[100] bg-[#02083A] flex flex-col items-center justify-center">
         <div
             class="glass-panel p-10 rounded-3xl w-full max-w-md shadow-2xl border border-white/[0.06] flex flex-col items-center animate-fadeIn mx-4">
             <div class="relative group cursor-pointer mb-8">
                 <div
                     class="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-full opacity-25 group-hover:opacity-75 blur transition duration-500">
                 </div>
-                <img src="https://ia902801.us.archive.org/4/items/1-22_20260517/%D8%B4%D8%B9%D8%A7%D8%B1%5B1%5D.png" alt="Logo"
+                <img src="images/ranan-logo.svg" alt="Logo"
                     class="relative h-28 object-contain drop-shadow-xl">
             </div>
             <h2 class="text-2xl font-black text-white mb-2">تسجيل الدخول</h2>
@@ -931,7 +931,7 @@
                     <div
                         class="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-full opacity-25 group-hover:opacity-75 blur transition duration-500">
                     </div>
-                    <img src="https://ia902801.us.archive.org/4/items/1-22_20260517/%D8%B4%D8%B9%D8%A7%D8%B1%5B1%5D.png" alt="Logo"
+                    <img src="images/ranan-logo.svg" alt="Logo"
                         class="relative h-20 object-contain drop-shadow-xl transform transition hover:scale-105">
                 </div>
                 <div class="text-center">
@@ -1009,7 +1009,7 @@
 
             <div class="lg:hidden flex justify-between items-center mb-6">
                 <div class="flex items-center gap-2">
-                    <img src="https://ia902801.us.archive.org/4/items/1-22_20260517/%D8%B4%D8%B9%D8%A7%D8%B1%5B1%5D.png" alt="Logo" class="h-10 object-contain">
+                    <img src="images/ranan-logo.svg" alt="Logo" class="h-10 object-contain">
                     <span class="font-bold text-white">رنان</span>
                 </div>
                 <div class="flex items-center gap-3">
@@ -2032,7 +2032,7 @@
                     <h2 class="font-bold text-2xl text-black mb-1">رنان لخدمات التصميم</h2>
                     <p class="text-sm text-gray-500 font-medium">المملكة العربية السعودية</p>
                 </div>
-                <img src="https://ia902801.us.archive.org/4/items/1-22_20260517/%D8%B4%D8%B9%D8%A7%D8%B1%5B1%5D22.png" alt="Rannan Logo" class="h-24 w-auto object-contain">
+                <img src="images/ranan-logo-dark.svg" alt="Rannan Logo" class="h-24 w-auto object-contain">
             </div>
             <div class="text-left">
                 <h1 class="text-3xl font-black uppercase text-slate-900 mb-1">تقرير أرشيف المشاريع</h1>
@@ -2187,7 +2187,7 @@
                                     <h2 class="font-bold text-xl sm:text-2xl text-black mb-1">رنان لخدمات التصميم</h2>
                                     <p class="text-sm text-gray-500 font-medium">المملكة العربية السعودية</p>
                                 </div>
-                                <img src="https://ia902801.us.archive.org/4/items/1-22_20260517/%D8%B4%D8%B9%D8%A7%D8%B1%5B1%5D22.png" alt="Rannan Logo"
+                                <img src="images/ranan-logo-dark.svg" alt="Rannan Logo"
                                     class="h-16 sm:h-24 w-auto object-contain">
                             </div>
                             <div class="text-left" dir="ltr">

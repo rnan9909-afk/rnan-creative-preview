@@ -1,12 +1,14 @@
 /* ============================================================
-   RANNAN · ONYX GOLD THEME  (الطبقة النهائية)
+   RANNAN · MIDNIGHT MINT THEME  (الطبقة النهائية)
    ------------------------------------------------------------
-   واجهة سوداء فاخرة بإضاءة ذهبية مستوحاة من هوية رنان:
-     · جدار أسود بإضاءة ذهبية تنسكب من أعلى اليمين
-     · نقاط هالفتون ذهبية أسفل اليسار (عنصر الهوية)
-     · بطاقات زجاجية بحواف 20px وحدود ذهبية شعرية
-     · قائمة جانبية عائمة وعنصر نشط بحبّة ذهبية مضيئة
-     · صفر أزرق: كل الأزرق/البنفسجي/السماوي يتحوّل ذهبيًا
+   مستمدة حرفيًا من ألوان الشعار الجديد:
+     · كحلي عميق  #101965 → #090F50 → #02083A  (تدرّج الشعار)
+     · أخضر نعناعي #47E0AC → #43D9C4  (لمسة الشعار)
+     · أبيض نقي للنصوص الأساسية
+   ------------------------------------------------------------
+   · بطاقات زجاجية بحواف 20px وحدود نعناعية شعرية
+   · قائمة جانبية عائمة وعنصر نشط بحبّة نعناعية مضيئة
+   · صفر ذهب/أسود: كل اللمسات تتبع لوحة الشعار
    ------------------------------------------------------------
    استثناء: #mainModal وقوالب الطباعة تبقى ورقًا أبيض مقروءًا.
    ------------------------------------------------------------
@@ -14,44 +16,47 @@
    ============================================================ */
 
 :root {
-    /* ── الأسطح ── */
-    --onyx-void: #000000;
-    --onyx-canvas: #050506;
-    --onyx-1: #0a0a0c;
-    --onyx-2: #101013;
-    --onyx-3: #17171b;
-    --onyx-4: #1f1f24;
+    /* ── الأسطح: كحلي الشعار ── */
+    --onyx-void: #02083A;
+    --onyx-canvas: #050c3f;
+    --onyx-1: #0a1250;
+    --onyx-2: #0e1660;
+    --onyx-3: #141d6e;
+    --onyx-4: #1b257e;
 
-    /* ── الذهب: مأخوذ من هوية رنان ── */
-    --gold: #d8b06a;
-    --gold-light: #f0dcaa;
-    --gold-deep: #a67c3c;
-    --gold-dark: #6d5024;
-    --gold-rgb: 216, 176, 106;
-    /* تدرّج معدني للحواف واللمسات الذهبية */
-    --gold-metal: linear-gradient(135deg, #f3e2b4 0%, #d8b06a 32%, #a67c3c 62%, #ecd79f 100%);
+    /* ── ألوان الشعار الرسمية ── */
+    --mint: #47E0AC;
+    --mint-light: #7df0c9;
+    --mint-deep: #24b184;
+    --mint-dark: #0f6b50;
+    --mint-rgb: 71, 224, 172;
+    --navy-core: #101965;
+    --navy-mid: #090F50;
+    --navy-edge: #02083A;
+    --brand-metal: linear-gradient(135deg, #7df0c9 0%, #47E0AC 38%, #43D9C4 100%);
 
-    /* ── الحدود: حواف دافئة بلمسة ذهبية ── */
-    --onyx-line: rgba(216, 176, 106, 0.14);
-    --onyx-line-2: rgba(216, 176, 106, 0.28);
-    --onyx-line-3: rgba(216, 176, 106, 0.48);
+    /* ── الحدود: حواف باردة بلمسة نعناعية ── */
+    --onyx-line: rgba(71, 224, 172, 0.15);
+    --onyx-line-2: rgba(71, 224, 172, 0.30);
+    --onyx-line-3: rgba(71, 224, 172, 0.52);
 
     /* ── النص ── */
-    --onyx-text: #f5f1e8;
-    --onyx-text-2: #b0a894;
-    --onyx-text-3: #7d7466;
+    --onyx-text: #f2f5ff;
+    --onyx-text-2: #a9b3e0;
+    /* مضبوط ليحقّق 4.9:1 فوق أفتح سطح بطاقة (#242b63) — لا تُدكّنه */
+    --onyx-text-3: #929cd0;
 
-    /* ── اللون المميّز: ذهبي ── */
-    --onyx-accent: #d8b06a;
-    --onyx-accent-2: #a67c3c;
-    --onyx-accent-soft: rgba(216, 176, 106, 0.10);
-    --onyx-glow: rgba(216, 176, 106, 0.16);
-    --onyx-glow-strong: rgba(216, 176, 106, 0.30);
+    /* ── اللون المميّز: نعناعي ── */
+    --onyx-accent: #47E0AC;
+    --onyx-accent-2: #24b184;
+    --onyx-accent-soft: rgba(71, 224, 172, 0.12);
+    --onyx-glow: rgba(71, 224, 172, 0.18);
+    --onyx-glow-strong: rgba(71, 224, 172, 0.34);
 
     /* ── حالات ── */
-    --onyx-success: #34d399;
+    --onyx-success: #47E0AC;
     --onyx-warning: #fbbf24;
-    --onyx-danger: #f87171;
+    --onyx-danger: #ff7a8a;
 
     /* ── أنصاف الأقطار ── */
     --onyx-r: 20px;
@@ -59,8 +64,8 @@
     --onyx-r-xs: 10px;
 
     /* ── الظلال ── */
-    --onyx-shadow: 0 18px 50px -12px rgba(0, 0, 0, 0.85);
-    --onyx-shadow-lg: 0 32px 80px -20px rgba(0, 0, 0, 0.95);
+    --onyx-shadow: 0 18px 50px -12px rgba(1, 4, 26, 0.85);
+    --onyx-shadow-lg: 0 32px 80px -20px rgba(1, 4, 26, 0.95);
 
     --onyx-ease: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -77,16 +82,16 @@
     --b2b-text-2: var(--onyx-text-2);
     --b2b-text-3: var(--onyx-text-3);
     --b2b-primary: var(--onyx-accent);
-    --b2b-primary-hover: #ffffff;
+    --b2b-primary-hover: var(--mint-light);
     --b2b-primary-soft: var(--onyx-accent-soft);
     --b2b-radius: var(--onyx-r);
     --b2b-radius-sm: var(--onyx-r-sm);
     --b2b-radius-xs: var(--onyx-r-xs);
 
     --primary: var(--onyx-accent);
-    --primary-rgb: 216, 176, 106;
+    --primary-rgb: 71, 224, 172;
     --secondary: var(--onyx-accent-2);
-    --secondary-rgb: 166, 124, 60;
+    --secondary-rgb: 36, 177, 132;
     --accent: var(--onyx-accent);
     --primary-glow: var(--onyx-glow);
     --secondary-glow: var(--onyx-glow);
@@ -103,20 +108,19 @@
    ============================================================ */
 html:not(.light-mode) body {
     background-color: var(--onyx-void) !important;
-    /* الإضاءة الذهبية: بؤرة ساطعة أعلى اليمين تنسكب على الجدار الأسود
-       تمامًا كما في صورة الهوية، مع انعكاس دافئ أسفل اليسار. */
+    /* تدرّج الشعار الشعاعي نفسه: قلب #101965 يبهت إلى #02083A،
+       مع وهج نعناعي خفيف أعلى اليمين وانعكاس أسفل اليسار. */
     background-image:
-        radial-gradient(720px 520px at 97% -6%, rgba(245, 216, 150, 0.30), transparent 58%),
-        radial-gradient(1250px 900px at 88% -14%, rgba(216, 176, 106, 0.15), transparent 66%),
-        radial-gradient(900px 700px at 2% 104%, rgba(216, 176, 106, 0.10), transparent 62%),
-        radial-gradient(760px 620px at 30% 34%, rgba(216, 176, 106, 0.045), transparent 70%),
-        linear-gradient(160deg, #14120d 0%, #0a0908 34%, #000000 72%, #060505 100%) !important;
+        radial-gradient(680px 500px at 96% -4%, rgba(71, 224, 172, 0.16), transparent 58%),
+        radial-gradient(820px 640px at 3% 103%, rgba(67, 217, 196, 0.10), transparent 62%),
+        radial-gradient(1200px 900px at 52% 34%, #101965 0%, #090F50 46%, transparent 78%),
+        linear-gradient(165deg, #0a1152 0%, #060c44 40%, #02083A 100%) !important;
     background-attachment: fixed !important;
     color: var(--onyx-text);
     font-family: 'Cairo', 'IBM Plex Sans Arabic', sans-serif;
 }
 
-/* شبكة خفيفة جدًا تعطي إحساس عمق الجدار */
+/* شبكة خفيفة جدًا تعطي إحساس العمق */
 html:not(.light-mode) body::before {
     content: '';
     position: fixed;
@@ -125,14 +129,14 @@ html:not(.light-mode) body::before {
     z-index: 0;
     opacity: 0.55;
     background-image:
-        linear-gradient(rgba(216, 176, 106, 0.022) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(216, 176, 106, 0.022) 1px, transparent 1px);
+        linear-gradient(rgba(71, 224, 172, 0.022) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(71, 224, 172, 0.022) 1px, transparent 1px);
     background-size: 64px 64px;
     mask-image: radial-gradient(circle at 60% 26%, #000 0%, transparent 76%);
     -webkit-mask-image: radial-gradient(circle at 60% 26%, #000 0%, transparent 76%);
 }
 
-/* نقاط الهالفتون الذهبية أسفل اليسار — نفس عنصر صورة الهوية */
+/* نقاط هالفتون نعناعية أسفل اليسار */
 html:not(.light-mode) body::after {
     content: '';
     position: fixed;
@@ -144,7 +148,7 @@ html:not(.light-mode) body::after {
     max-height: 620px;
     pointer-events: none;
     z-index: 0;
-    background-image: radial-gradient(circle, rgba(216, 176, 106, 0.55) 1.6px, transparent 1.7px);
+    background-image: radial-gradient(circle, rgba(71, 224, 172, 0.42) 1.6px, transparent 1.7px);
     background-size: 17px 17px;
     /* تتلاشى النقاط كلما ابتعدت عن الزاوية */
     mask-image: linear-gradient(38deg, #000 0%, rgba(0, 0, 0, 0.55) 26%, transparent 62%);
@@ -153,12 +157,12 @@ html:not(.light-mode) body::after {
 }
 
 html:not(.light-mode) ::selection {
-    background: rgba(216, 176, 106, 0.32);
+    background: rgba(71, 224, 172, 0.32);
     color: #fff;
 }
 
 /* ============================================================
-   2 · هالات ضوئية رمادية (بديل الكرات الزرقاء)
+   2 · هالات ضوئية نعناعية
    ============================================================ */
 html:not(.light-mode) .glow-orb {
     display: block !important;
@@ -175,7 +179,7 @@ html:not(.light-mode) .glow-orb.orb-primary {
     height: 560px;
     top: -220px;
     right: -160px;
-    background: rgba(240, 214, 160, 0.16);
+    background: rgba(125, 240, 201, 0.16);
 }
 
 html:not(.light-mode) .glow-orb.orb-secondary {
@@ -183,7 +187,7 @@ html:not(.light-mode) .glow-orb.orb-secondary {
     height: 460px;
     bottom: -200px;
     left: -140px;
-    background: rgba(216, 176, 106, 0.10);
+    background: rgba(71, 224, 172, 0.10);
 }
 
 html:not(.light-mode) .glow-orb.orb-accent {
@@ -191,7 +195,7 @@ html:not(.light-mode) .glow-orb.orb-accent {
     height: 380px;
     top: 42%;
     left: 38%;
-    background: rgba(216, 176, 106, 0.045);
+    background: rgba(71, 224, 172, 0.045);
 }
 
 /* ============================================================
@@ -225,14 +229,14 @@ html:not(.light-mode) .card,
 html:not(.light-mode) .stat-card {
     position: relative;
     background:
-        linear-gradient(160deg, rgba(240, 214, 160, 0.055) 0%, rgba(216, 176, 106, 0.014) 34%, rgba(255, 255, 255, 0) 100%),
-        linear-gradient(180deg, #0d0c0a 0%, #08080a 100%) !important;
+        linear-gradient(160deg, rgba(125, 240, 201, 0.055) 0%, rgba(71, 224, 172, 0.014) 34%, rgba(255, 255, 255, 0) 100%),
+        linear-gradient(180deg, #0b1352 0%, #060d42 100%) !important;
     backdrop-filter: blur(20px) saturate(120%) !important;
     -webkit-backdrop-filter: blur(20px) saturate(120%) !important;
     border: 1px solid var(--onyx-line) !important;
     box-shadow:
         var(--onyx-shadow),
-        inset 0 1px 0 rgba(240, 214, 160, 0.07) !important;
+        inset 0 1px 0 rgba(125, 240, 201, 0.07) !important;
     transition: border-color 260ms var(--onyx-ease), box-shadow 260ms var(--onyx-ease), transform 260ms var(--onyx-ease);
 }
 
@@ -246,7 +250,7 @@ html:not(.light-mode) .stat-card::after {
     right: 14%;
     height: 1px;
     pointer-events: none;
-    background: linear-gradient(90deg, transparent, rgba(240, 214, 160, 0.55), transparent);
+    background: linear-gradient(90deg, transparent, rgba(125, 240, 201, 0.55), transparent);
     opacity: 0.7;
 }
 
@@ -256,19 +260,19 @@ html:not(.light-mode) .stat-card:hover {
     border-color: var(--onyx-line-2) !important;
     box-shadow:
         var(--onyx-shadow-lg),
-        inset 0 1px 0 rgba(240, 214, 160, 0.12),
-        0 0 26px -10px rgba(216, 176, 106, 0.35) !important;
+        inset 0 1px 0 rgba(125, 240, 201, 0.12),
+        0 0 26px -10px rgba(71, 224, 172, 0.35) !important;
     transform: translateY(-2px);
 }
 
 html:not(.light-mode) .glass-modal {
     background:
-        linear-gradient(160deg, rgba(240, 214, 160, 0.06) 0%, rgba(216, 176, 106, 0.015) 40%, transparent 100%),
-        linear-gradient(180deg, #0d0d10 0%, #060608 100%) !important;
+        linear-gradient(160deg, rgba(125, 240, 201, 0.06) 0%, rgba(71, 224, 172, 0.015) 40%, transparent 100%),
+        linear-gradient(180deg, #0c1456 0%, #04093c 100%) !important;
     backdrop-filter: blur(28px) saturate(120%) !important;
     -webkit-backdrop-filter: blur(28px) saturate(120%) !important;
     border: 1px solid var(--onyx-line-2) !important;
-    box-shadow: var(--onyx-shadow-lg), inset 0 1px 0 rgba(240, 214, 160, 0.09) !important;
+    box-shadow: var(--onyx-shadow-lg), inset 0 1px 0 rgba(125, 240, 201, 0.09) !important;
 }
 
 html:not(.light-mode) .modal {
@@ -304,8 +308,8 @@ html:not(.light-mode) .border-card-border {
    ============================================================ */
 html:not(.light-mode) #sidebar {
     background:
-        linear-gradient(180deg, rgba(216, 176, 106, 0.06) 0%, rgba(216, 176, 106, 0.012) 26%, transparent 70%),
-        linear-gradient(180deg, #0b0b0e 0%, #050507 100%) !important;
+        linear-gradient(180deg, rgba(71, 224, 172, 0.06) 0%, rgba(71, 224, 172, 0.012) 26%, transparent 70%),
+        linear-gradient(180deg, #0a1250 0%, #040a3b 100%) !important;
     backdrop-filter: blur(22px) !important;
     -webkit-backdrop-filter: blur(22px) !important;
     border: 1px solid var(--onyx-line) !important;
@@ -333,7 +337,7 @@ html:not(.light-mode) #sidebar nav > button {
 
 html:not(.light-mode) #sidebar nav > button:hover {
     color: var(--onyx-text);
-    background: rgba(216, 176, 106, 0.07) !important;
+    background: rgba(71, 224, 172, 0.07) !important;
     border-color: var(--onyx-line) !important;
 }
 
@@ -350,21 +354,21 @@ html:not(.light-mode) #sidebar nav > button:hover .material-symbols-rounded {
 html:not(.light-mode) #sidebar nav > button.bg-primary,
 html:not(.light-mode) #sidebar nav > button.active-nav-link,
 html:not(.light-mode) #sidebar nav > button.active {
-    color: var(--gold-light) !important;
+    color: var(--mint-light) !important;
     background:
-        linear-gradient(180deg, rgba(216, 176, 106, 0.20) 0%, rgba(216, 176, 106, 0.05) 100%) !important;
+        linear-gradient(180deg, rgba(71, 224, 172, 0.20) 0%, rgba(71, 224, 172, 0.05) 100%) !important;
     border-color: var(--onyx-line-2) !important;
     box-shadow:
-        inset 0 1px 0 rgba(240, 220, 170, 0.22),
-        0 0 24px -10px rgba(216, 176, 106, 0.45),
+        inset 0 1px 0 rgba(125, 240, 201, 0.22),
+        0 0 24px -10px rgba(71, 224, 172, 0.45),
         0 8px 26px -10px rgba(0, 0, 0, 0.9) !important;
 }
 
 html:not(.light-mode) #sidebar nav > button.bg-primary .material-symbols-rounded,
 html:not(.light-mode) #sidebar nav > button.active-nav-link .material-symbols-rounded,
 html:not(.light-mode) #sidebar nav > button.active .material-symbols-rounded {
-    color: var(--gold) !important;
-    filter: drop-shadow(0 0 8px rgba(216, 176, 106, 0.55));
+    color: var(--mint) !important;
+    filter: drop-shadow(0 0 8px rgba(71, 224, 172, 0.55));
 }
 
 /* المؤشر الجانبي للعنصر النشط */
@@ -378,23 +382,18 @@ html:not(.light-mode) #sidebar nav > button.active::before {
     height: 48%;
     width: 3px;
     border-radius: 3px;
-    background: linear-gradient(180deg, #f3e2b4, #a67c3c);
-    box-shadow: 0 0 16px rgba(216, 176, 106, 0.75);
+    background: linear-gradient(180deg, #7df0c9, #24b184);
+    box-shadow: 0 0 16px rgba(71, 224, 172, 0.75);
 }
 
-/* شعار القائمة — يُصبَغ بذهب الهوية.
-   ملاحظة: لا تستخدم brightness(0) هنا، فهي تُسطّح الشعار وتملأ
-   حرف الـ R داخل الدرع. سلسلة grayscale→sepia تحافظ على التفاصيل. */
+/* الشعار صار SVG بألوان الهوية الصحيحة — لا يحتاج أي مرشّح تلوين */
 html:not(.light-mode) #sidebar img {
-    filter:
-        grayscale(1) brightness(0.78) sepia(1) saturate(3.6)
-        hue-rotate(326deg) brightness(0.86) saturate(0.78)
-        drop-shadow(0 0 20px rgba(216, 176, 106, 0.32)) !important;
+    filter: drop-shadow(0 0 22px rgba(71, 224, 172, 0.28)) !important;
 }
 
 /* رأس القائمة الجانبية: انسكاب ضوء ذهبي خفيف */
 html:not(.light-mode) #sidebar > div:first-child {
-    background-image: linear-gradient(180deg, rgba(216, 176, 106, 0.10) 0%, transparent 88%) !important;
+    background-image: linear-gradient(180deg, rgba(71, 224, 172, 0.10) 0%, transparent 88%) !important;
     border-bottom: 1px solid var(--onyx-line) !important;
 }
 
@@ -510,13 +509,13 @@ html:not(.light-mode) [class*="bg-gradient-to-"][class*="from-violet-"]:not(#mai
 html:not(.light-mode) [class*="bg-gradient-to-"][class*="from-purple-"]:not(#mainModal *),
 html:not(.light-mode) [class*="bg-gradient-to-"][class*="from-cyan-"]:not(#mainModal *),
 html:not(.light-mode) [class*="bg-gradient-to-"][class*="from-sky-"]:not(#mainModal *) {
-    background-image: linear-gradient(135deg, rgba(216, 176, 106, 0.26), rgba(216, 176, 106, 0.07)) !important;
+    background-image: linear-gradient(135deg, rgba(71, 224, 172, 0.26), rgba(71, 224, 172, 0.07)) !important;
 }
 
 /* حلقة التوهج حول الشعار */
 html:not(.light-mode) .bg-gradient-to-r.from-primary.to-secondary.blur,
 html:not(.light-mode) .absolute.-inset-1[class*="from-primary"] {
-    background-image: radial-gradient(circle, rgba(216, 176, 106, 0.45), transparent 70%) !important;
+    background-image: radial-gradient(circle, rgba(71, 224, 172, 0.45), transparent 70%) !important;
 }
 
 html:not(.light-mode) .text-accent-green {
@@ -535,13 +534,13 @@ html:not(.light-mode) .stat-value,
 html:not(.light-mode) .stat-number {
     color: #ffffff !important;
     letter-spacing: -0.02em;
-    text-shadow: 0 0 28px rgba(216, 176, 106, 0.28);
+    text-shadow: 0 0 28px rgba(71, 224, 172, 0.28);
 }
 
 /* أيقونة داخل مربّع مضيء (نمط اللوحة المرجعية) */
 html:not(.light-mode) .icon-box,
 html:not(.light-mode) .stat-card > div > .material-symbols-rounded {
-    background: linear-gradient(180deg, rgba(216, 176, 106, 0.16), rgba(216, 176, 106, 0.05)) !important;
+    background: linear-gradient(180deg, rgba(71, 224, 172, 0.16), rgba(71, 224, 172, 0.05)) !important;
     border: 1px solid var(--onyx-line) !important;
     border-radius: 14px !important;
 }
@@ -571,8 +570,8 @@ html:not(.light-mode) textarea:focus,
 html:not(.light-mode) .form-input-modern:focus {
     outline: none !important;
     border-color: var(--onyx-line-3) !important;
-    background: rgba(216, 176, 106, 0.06) !important;
-    box-shadow: 0 0 0 3px rgba(216, 176, 106, 0.14) !important;
+    background: rgba(71, 224, 172, 0.06) !important;
+    box-shadow: 0 0 0 3px rgba(71, 224, 172, 0.14) !important;
 }
 
 html:not(.light-mode) select option {
@@ -643,17 +642,14 @@ html:not(.light-mode) .border-red-500\/20 {
    ============================================================ */
 html:not(.light-mode) #login-overlay {
     background:
-        radial-gradient(680px 480px at 96% -4%, rgba(245, 216, 150, 0.26), transparent 58%),
-        radial-gradient(1100px 780px at 84% -12%, rgba(216, 176, 106, 0.13), transparent 66%),
-        radial-gradient(800px 620px at 4% 106%, rgba(216, 176, 106, 0.09), transparent 62%),
-        linear-gradient(160deg, #14120d 0%, #0a0908 38%, #000000 100%) !important;
+        radial-gradient(680px 480px at 96% -4%, rgba(125, 240, 201, 0.26), transparent 58%),
+        radial-gradient(1100px 780px at 84% -12%, rgba(71, 224, 172, 0.13), transparent 66%),
+        radial-gradient(800px 620px at 4% 106%, rgba(71, 224, 172, 0.09), transparent 62%),
+        linear-gradient(160deg, #0a1250 0%, #060d42 38%, #000000 100%) !important;
 }
 
 html:not(.light-mode) #login-overlay img {
-    filter:
-        grayscale(1) brightness(0.78) sepia(1) saturate(3.6)
-        hue-rotate(326deg) brightness(0.86) saturate(0.78)
-        drop-shadow(0 0 32px rgba(216, 176, 106, 0.42)) !important;
+    filter: drop-shadow(0 0 34px rgba(71, 224, 172, 0.34)) !important;
 }
 
 /* نقاط الهالفتون الذهبية في شاشة الدخول */
@@ -667,7 +663,7 @@ html:not(.light-mode) #login-overlay::before {
     height: 44vh;
     max-height: 580px;
     pointer-events: none;
-    background-image: radial-gradient(circle, rgba(216, 176, 106, 0.55) 1.6px, transparent 1.7px);
+    background-image: radial-gradient(circle, rgba(71, 224, 172, 0.55) 1.6px, transparent 1.7px);
     background-size: 17px 17px;
     mask-image: linear-gradient(38deg, #000 0%, rgba(0, 0, 0, 0.5) 26%, transparent 62%);
     -webkit-mask-image: linear-gradient(38deg, #000 0%, rgba(0, 0, 0, 0.5) 26%, transparent 62%);
@@ -687,12 +683,12 @@ html:not(.light-mode) ::-webkit-scrollbar-track {
 }
 
 html:not(.light-mode) ::-webkit-scrollbar-thumb {
-    background: rgba(216, 176, 106, 0.28);
+    background: rgba(71, 224, 172, 0.28);
     border-radius: 8px;
 }
 
 html:not(.light-mode) ::-webkit-scrollbar-thumb:hover {
-    background: rgba(216, 176, 106, 0.5);
+    background: rgba(71, 224, 172, 0.5);
 }
 
 /* ============================================================
@@ -718,7 +714,7 @@ html:not(.light-mode) #main-content {
 /* أشرطة التقدّم */
 html:not(.light-mode) .progress-bar,
 html:not(.light-mode) [class*="progress"] > div {
-    background-image: linear-gradient(90deg, #f3e2b4, #a67c3c) !important;
+    background-image: linear-gradient(90deg, #7df0c9, #24b184) !important;
 }
 
 /* ============================================================
@@ -734,16 +730,16 @@ html:not(.light-mode) button[class*="bg-gradient-to-"][class*="from-blue-"]:not(
 html:not(.light-mode) button[class*="bg-gradient-to-"][class*="from-indigo-"]:not(#mainModal *):not(#archive-print-template *),
 html:not(.light-mode) button[class*="bg-gradient-to-"][class*="from-purple-"]:not(#mainModal *):not(#archive-print-template *),
 html:not(.light-mode) button[class*="bg-gradient-to-"][class*="from-primary"]:not(#mainModal *):not(#archive-print-template *) {
-    background-color: #12100c !important;
+    background-color: #081046 !important;
     background-image:
-        linear-gradient(180deg, rgba(240, 214, 160, 0.16) 0%, rgba(216, 176, 106, 0.04) 52%, rgba(255, 255, 255, 0) 100%),
-        linear-gradient(180deg, #201c14 0%, #0e0d0b 100%) !important;
-    border: 1px solid rgba(216, 176, 106, 0.42) !important;
-    color: var(--gold-light) !important;
+        linear-gradient(180deg, rgba(125, 240, 201, 0.16) 0%, rgba(71, 224, 172, 0.04) 52%, rgba(255, 255, 255, 0) 100%),
+        linear-gradient(180deg, #101a63 0%, #070e46 100%) !important;
+    border: 1px solid rgba(71, 224, 172, 0.42) !important;
+    color: var(--mint-light) !important;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
     box-shadow:
-        inset 0 1px 0 rgba(240, 220, 170, 0.26),
-        0 0 26px -8px rgba(216, 176, 106, 0.32),
+        inset 0 1px 0 rgba(125, 240, 201, 0.26),
+        0 0 26px -8px rgba(71, 224, 172, 0.32),
         0 12px 30px -14px rgba(0, 0, 0, 0.95) !important;
 }
 
@@ -753,19 +749,19 @@ html:not(.light-mode) button[class*="bg-gradient-to-"][class*="from-indigo-"]:no
 html:not(.light-mode) button[class*="bg-gradient-to-"][class*="from-purple-"]:not(#mainModal *):hover,
 html:not(.light-mode) button[class*="bg-gradient-to-"][class*="from-primary"]:not(#mainModal *):hover {
     background-image:
-        linear-gradient(180deg, rgba(240, 214, 160, 0.24) 0%, rgba(216, 176, 106, 0.07) 52%, rgba(255, 255, 255, 0) 100%),
-        linear-gradient(180deg, #2b2418 0%, #15120d 100%) !important;
-    border-color: rgba(216, 176, 106, 0.68) !important;
-    color: #f7ecd2 !important;
+        linear-gradient(180deg, rgba(125, 240, 201, 0.24) 0%, rgba(71, 224, 172, 0.07) 52%, rgba(255, 255, 255, 0) 100%),
+        linear-gradient(180deg, #16217a 0%, #0b1352 100%) !important;
+    border-color: rgba(71, 224, 172, 0.68) !important;
+    color: #e8fff7 !important;
     box-shadow:
-        inset 0 1px 0 rgba(243, 226, 180, 0.36),
-        0 0 38px -6px rgba(216, 176, 106, 0.45),
+        inset 0 1px 0 rgba(125, 240, 201, 0.36),
+        0 0 38px -6px rgba(71, 224, 172, 0.45),
         0 14px 34px -14px rgba(0, 0, 0, 0.95) !important;
 }
 
 /* أيقونة الزر ذهبية */
 html:not(.light-mode) button[class*="bg-gradient-to-"] .material-symbols-rounded:not(#mainModal *) {
-    color: var(--gold-light) !important;
+    color: var(--mint-light) !important;
 }
 
 /* ============================================================
@@ -779,9 +775,9 @@ html:not(.light-mode) button[class*="bg-gradient-to-"] .material-symbols-rounded
    النافذة إلى فحمي داكن.
    ============================================================ */
 html:not(.light-mode) #mainModal {
-    --b2b-primary: #17130c;
-    --b2b-primary-hover: #2a2214;
-    --primary: #6d5024;
+    --b2b-primary: #0a1250;
+    --b2b-primary-hover: #141e72;
+    --primary: #0f6b50;
 }
 
 /* الحاوية الورقية */
@@ -825,14 +821,14 @@ html:not(.light-mode) #mainModal [class*="text-purple-"],
 html:not(.light-mode) #mainModal [class*="text-cyan-"],
 html:not(.light-mode) #mainModal .text-primary,
 html:not(.light-mode) #mainModal #edit-total {
-    color: var(--gold-dark) !important;
+    color: var(--mint-dark) !important;
 }
 
 /* شارة رقم الفاتورة (NEW) */
 html:not(.light-mode) #mainModal #edit-invoice-id {
-    background-color: #f6eeda !important;
-    border: 1px solid rgba(216, 176, 106, 0.45) !important;
-    color: var(--gold-dark) !important;
+    background-color: #e4fbf2 !important;
+    border: 1px solid rgba(71, 224, 172, 0.45) !important;
+    color: var(--mint-dark) !important;
 }
 
 /* زر "إضافة بند جديد": الخلفية عند المرور فقط.
@@ -843,32 +839,34 @@ html:not(.light-mode) #mainModal button[onclick="addItemRow()"] {
 }
 
 html:not(.light-mode) #mainModal button[onclick="addItemRow()"]:hover {
-    background-color: #f6eeda !important;
+    background-color: #e4fbf2 !important;
 }
 
 /* زر (+) لإضافة عميل — فحمي بنص ذهبي */
 html:not(.light-mode) #mainModal button[class*="bg-blue-6"],
 html:not(.light-mode) #mainModal button[class*="bg-blue-7"] {
-    background: linear-gradient(180deg, #26200f 0%, #14110b 100%) !important;
-    border: 1px solid rgba(216, 176, 106, 0.45) !important;
-    color: var(--gold-light) !important;
+    background-color: #0e1660 !important;
+    background-image: linear-gradient(180deg, #131c6b 0%, #0a1250 100%) !important;
+    border: 1px solid rgba(71, 224, 172, 0.45) !important;
+    color: var(--mint-light) !important;
 }
 
 /* الإجراء الأساسي "حفظ وإصدار" — أسود بلمسة ذهبية */
 html:not(.light-mode) #mainModal button.bg-slate-900 {
-    background: linear-gradient(180deg, #262013 0%, #12100b 100%) !important;
-    border: 1px solid rgba(216, 176, 106, 0.45) !important;
-    color: var(--gold-light) !important;
+    background-color: #0d1558 !important;
+    background-image: linear-gradient(180deg, #141e72 0%, #090f4a 100%) !important;
+    border: 1px solid rgba(71, 224, 172, 0.45) !important;
+    color: var(--mint-light) !important;
     box-shadow: 0 6px 18px -6px rgba(15, 12, 6, 0.55) !important;
 }
 
 html:not(.light-mode) #mainModal button.bg-slate-900:hover {
-    background: linear-gradient(180deg, #332917 0%, #1d1810 100%) !important;
-    border-color: rgba(216, 176, 106, 0.75) !important;
+    background: linear-gradient(180deg, #1a2589 0%, #0f1860 100%) !important;
+    border-color: rgba(71, 224, 172, 0.75) !important;
 }
 
 html:not(.light-mode) #mainModal button.bg-slate-900 .material-symbols-rounded {
-    color: var(--gold-light) !important;
+    color: var(--mint-light) !important;
 }
 
 /* الحقول تبقى بيضاء ونصّها داكن */
@@ -885,9 +883,9 @@ html:not(.light-mode) #mainModal .form-input {
 html:not(.light-mode) #mainModal input:focus,
 html:not(.light-mode) #mainModal select:focus,
 html:not(.light-mode) #mainModal textarea:focus {
-    border-color: var(--gold) !important;
+    border-color: var(--mint) !important;
     background-color: #ffffff !important;
-    box-shadow: 0 0 0 3px rgba(216, 176, 106, 0.22) !important;
+    box-shadow: 0 0 0 3px rgba(71, 224, 172, 0.22) !important;
 }
 
 html:not(.light-mode) #mainModal input::placeholder,
@@ -1039,7 +1037,7 @@ html:not(.light-mode) #invoice-preview-template .quotation-stamp {
 /* صندوق البيانات البنكية أسفل الفاتورة — أسود بدل الكحلي ليطابق الهوية */
 html:not(.light-mode) #invoice-preview-template .bg-slate-900,
 html:not(.light-mode) #archive-print-template .bg-slate-900 {
-    background: linear-gradient(180deg, #14141a 0%, #0a0a0d 100%) !important;
+    background: linear-gradient(180deg, #0d1558 0%, #070e46 100%) !important;
     color: #f4f4f5 !important;
 }
 
@@ -1059,4 +1057,51 @@ html:not(.light-mode) #archive-print-template .bg-slate-900 {
     html:not(.light-mode) .glow-orb {
         display: none !important;
     }
+}
+
+/* ============================================================
+   18 · إصلاحات تباين رصدها فحص WCAG الآلي
+   ============================================================ */
+
+/* الصورة الرمزية: حرف أبيض فوق دائرة نعناعية = تباين 2.03.
+   النص يصبح كحليًا داكنًا فوق النعناعي. */
+html:not(.light-mode) #user-avatar,
+html:not(.light-mode) [class*="rounded-full"][class*="from-primary"],
+html:not(.light-mode) [class*="rounded-full"][class*="bg-primary"] {
+    background-color: #47E0AC !important;
+    background-image: var(--brand-metal) !important;
+    color: #04093c !important;
+    font-weight: 800;
+    text-shadow: none !important;
+}
+
+/* أزرار .bg-primary الصلبة: كان نصّها أبيض فوق سطح فاتح شفاف
+   (زر "التالي" في ترقيم الصفحات = تباين 1.0). */
+html:not(.light-mode) button.bg-primary:not(#mainModal *):not(#archive-print-template *),
+html:not(.light-mode) a.bg-primary:not(#mainModal *) {
+    background: linear-gradient(180deg, rgba(71, 224, 172, 0.22) 0%, rgba(71, 224, 172, 0.08) 100%) !important;
+    border: 1px solid var(--onyx-line-2) !important;
+    color: var(--mint-light) !important;
+}
+
+html:not(.light-mode) button.bg-primary:not(#mainModal *):hover {
+    background: linear-gradient(180deg, rgba(71, 224, 172, 0.32) 0%, rgba(71, 224, 172, 0.14) 100%) !important;
+    border-color: var(--onyx-line-3) !important;
+    color: #ffffff !important;
+}
+
+/* أي نص/أيقونة فوق دائرة أو سطح نعناعي ممتلئ: الأبيض يعطي 1.68 فقط.
+   النعناعي لون فاتح، فما يعلوه يجب أن يكون كحليًا داكنًا. */
+html:not(.light-mode) [class*="rounded-full"][class*="from-primary"] > .text-white,
+html:not(.light-mode) [class*="rounded-full"][class*="from-primary"] > .material-symbols-rounded,
+html:not(.light-mode) [class*="rounded-full"][class*="bg-primary"] > .text-white,
+html:not(.light-mode) [class*="rounded-full"][class*="bg-primary"] > .material-symbols-rounded {
+    color: #04093c !important;
+}
+
+/* أيقونة الحذف داخل ورقة الفاتورة: أحمر فاتح على أبيض = 2.77 */
+html:not(.light-mode) #mainModal .text-red-400,
+html:not(.light-mode) #mainModal .text-red-500,
+html:not(.light-mode) #mainModal [onclick*="remove"] .material-symbols-rounded {
+    color: #c81e1e !important;
 }

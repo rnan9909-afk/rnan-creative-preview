@@ -738,8 +738,8 @@ export const DashboardComponent = {
         
         // Gradient background
         const primaryGlow = ctx.createLinearGradient(0, 0, 0, ctx.canvas.clientHeight);
-        primaryGlow.addColorStop(0, 'rgba(216, 176, 106, 0.34)');
-        primaryGlow.addColorStop(1, 'rgba(216, 176, 106, 0.0)');
+        primaryGlow.addColorStop(0, 'rgba(71, 224, 172, 0.34)');
+        primaryGlow.addColorStop(1, 'rgba(71, 224, 172, 0.0)');
 
         this.chartInstance = new Chart(ctx, {
             type: 'line',
@@ -748,15 +748,15 @@ export const DashboardComponent = {
                 datasets: [{
                     label: 'المدفوعات',
                     data: revenueValues,
-                    borderColor: '#d8b06a',
+                    borderColor: '#47E0AC',
                     borderWidth: 2.5,
                     backgroundColor: primaryGlow,
                     fill: true,
                     tension: 0.4,
-                    pointBackgroundColor: '#f0dcaa',
+                    pointBackgroundColor: '#7df0c9',
                     pointBorderColor: 'rgba(0,0,0,0.6)',
                     pointHoverRadius: 7,
-                    pointHoverBackgroundColor: '#f3e2b4'
+                    pointHoverBackgroundColor: '#ffffff'
                 }]
             },
             options: {
@@ -768,8 +768,8 @@ export const DashboardComponent = {
                         rtl: true,
                         titleFont: { family: 'Cairo', size: 12 },
                         bodyFont: { family: 'Cairo', size: 12 },
-                        backgroundColor: 'rgba(14, 12, 9, 0.95)',
-                        borderColor: 'rgba(216,176,106,0.35)',
+                        backgroundColor: 'rgba(6, 12, 66, 0.95)',
+                        borderColor: 'rgba(71,224,172,0.35)',
                         borderWidth: 1,
                         padding: 10,
                         displayColors: false,
@@ -784,14 +784,14 @@ export const DashboardComponent = {
                     x: {
                         grid: { display: false },
                         ticks: {
-                            color: '#7d7466',
+                            color: '#8590c4',
                             font: { family: 'Cairo', size: 10 }
                         }
                     },
                     y: {
-                        grid: { color: 'rgba(216,176,106,0.06)' },
+                        grid: { color: 'rgba(71,224,172,0.08)' },
                         ticks: {
-                            color: '#7d7466',
+                            color: '#8590c4',
                             font: { family: 'Cairo', size: 10 },
                             callback: function(value) {
                                 return value.toLocaleString('ar-SA') + ' ر.س';
