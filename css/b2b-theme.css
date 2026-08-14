@@ -1,0 +1,983 @@
+/* ============================================================
+   RANNAN  ·  B2B PROFESSIONAL THEME
+   ------------------------------------------------------------
+   واجهة B2B احترافية · سمة داكنة (Dark Mode) صارمة
+   زوايا دائرية 12px للبطاقات والأزرار
+   ------------------------------------------------------------
+   هذه الطبقة تُحمّل بعد style.css وبعد الـ <style> الداخلي،
+   فهي المصدر النهائي للحقيقة في الشكل البصري.
+   المبادئ:
+     · أسطح مصمتة (بدون Glassmorphism / بدون blur)
+     · حدود 1px واضحة تفصل كل سطح
+     · بدون هالات ضوئية (glow) ولا تدرّجات زخرفية
+     · نصف قطر موحّد: 12px بطاقات وأزرار · 8px عناصر صغيرة
+   ============================================================ */
+
+/* ── 1. Design Tokens ─────────────────────────────────────── */
+:root {
+    /* Surfaces — strict, neutral, opaque */
+    --b2b-canvas: #0b0d11;
+    --b2b-surface: #12151b;
+    --b2b-surface-2: #171b22;
+    --b2b-surface-3: #1d222b;
+    --b2b-surface-4: #232932;
+
+    /* Borders — always visible, never decorative */
+    --b2b-border: #232932;
+    --b2b-border-strong: #2e3641;
+    --b2b-border-focus: #3b82f6;
+
+    /* Text */
+    --b2b-text: #e8ebf0;
+    --b2b-text-2: #9aa4b2;
+    --b2b-text-3: #6b7482;
+
+    /* Accents — one primary, semantics for state only */
+    --b2b-primary: #3b82f6;
+    --b2b-primary-hover: #2563eb;
+    --b2b-primary-soft: rgba(59, 130, 246, 0.12);
+    --b2b-success: #22c55e;
+    --b2b-warning: #f59e0b;
+    --b2b-danger: #ef4444;
+
+    /* Radii */
+    --b2b-radius: 12px;
+    --b2b-radius-sm: 8px;
+    --b2b-radius-xs: 6px;
+
+    /* Elevation — flat, functional shadows only */
+    --b2b-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --b2b-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    --b2b-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
+
+    /* Motion — short and purposeful */
+    --b2b-ease: cubic-bezier(0.2, 0, 0.2, 1);
+    --b2b-fast: 120ms;
+    --b2b-normal: 180ms;
+
+    /* Legacy token remap so old rules inherit the new theme */
+    --bg-base: var(--b2b-canvas);
+    --bg-elevated: var(--b2b-surface);
+    --bg-surface: var(--b2b-surface);
+    --bg-surface-solid: var(--b2b-surface);
+    --bg-surface-hover: var(--b2b-surface-3);
+    --glass-bg: var(--b2b-surface);
+    --glass-bg-hover: var(--b2b-surface-2);
+    --glass-border: var(--b2b-border);
+    --glass-border-hover: var(--b2b-border-strong);
+    --glass-blur: 0px;
+    --glass-shadow: var(--b2b-shadow-sm);
+    --primary-glow: transparent;
+    --secondary-glow: transparent;
+    --accent-glow: transparent;
+    --text-primary: var(--b2b-text);
+    --text-secondary: var(--b2b-text-2);
+    --text-muted: var(--b2b-text-3);
+    --radius-sm: var(--b2b-radius-sm);
+    --radius-md: var(--b2b-radius);
+    --radius-lg: var(--b2b-radius);
+    --radius-xl: var(--b2b-radius);
+    --radius-2xl: var(--b2b-radius);
+    --radius-3xl: var(--b2b-radius);
+    --ease-spring: var(--b2b-ease);
+    --ease-smooth: var(--b2b-ease);
+}
+
+/* ============================================================
+   كل ما يلي محصور بـ html:not(.light-mode)
+   حتى يبقى الوضع الفاتح (Light Mode) يعمل كما هو.
+   ============================================================ */
+
+/* ── 2. Canvas ────────────────────────────────────────────── */
+html:not(.light-mode) body {
+    background-color: var(--b2b-canvas) !important;
+    background-image: none !important;
+    color: var(--b2b-text);
+    font-family: 'Cairo', 'IBM Plex Sans Arabic', sans-serif;
+    letter-spacing: 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* إخفاء الزخارف المضيئة: الكرات العائمة، البقع الضبابية، هالات الشعار */
+html:not(.light-mode) .glow-orb,
+html:not(.light-mode) .absolute.blur-3xl,
+html:not(.light-mode) .absolute.blur-2xl,
+html:not(.light-mode) .absolute.blur-xl,
+html:not(.light-mode) .absolute.blur-lg,
+html:not(.light-mode) .absolute.blur,
+html:not(.light-mode) .absolute.h-px[class*="bg-gradient-to-"] {
+    display: none !important;
+}
+
+html:not(.light-mode) ::selection {
+    background: rgba(59, 130, 246, 0.32);
+    color: #fff;
+}
+
+/* ── 3. Radius: 12px موحّد للبطاقات والأزرار ──────────────── */
+/* عناصر بنصف قطر موحّد من كل الجهات */
+html:not(.light-mode) [class*="rounded"]:not(.material-symbols-rounded):not([class*="rounded-full"]):not([class*="rounded-none"]):not([class*="rounded-t-"]):not([class*="rounded-b-"]):not([class*="rounded-r-"]):not([class*="rounded-l-"]):not([class*="rounded-tr-"]):not([class*="rounded-tl-"]):not([class*="rounded-br-"]):not([class*="rounded-bl-"]):not(#invoice-preview-template *):not(#archive-print-template *) {
+    border-radius: var(--b2b-radius) !important;
+}
+
+/* الحفاظ على الاتجاهية في الزوايا الجزئية (رؤوس الجداول، التبويبات) */
+html:not(.light-mode) [class*="rounded-t-"]:not([class*="rounded-t-full"]) {
+    border-radius: var(--b2b-radius) var(--b2b-radius) 0 0 !important;
+}
+
+html:not(.light-mode) [class*="rounded-b-"]:not([class*="rounded-b-full"]) {
+    border-radius: 0 0 var(--b2b-radius) var(--b2b-radius) !important;
+}
+
+html:not(.light-mode) [class*="rounded-r-"]:not([class*="rounded-r-full"]) {
+    border-radius: 0 var(--b2b-radius) var(--b2b-radius) 0 !important;
+}
+
+html:not(.light-mode) [class*="rounded-l-"]:not([class*="rounded-l-full"]) {
+    border-radius: var(--b2b-radius) 0 0 var(--b2b-radius) !important;
+}
+
+/* العناصر الدائرية تبقى دائرية: الصور الرمزية، النقاط، المؤشرات */
+html:not(.light-mode) [class*="rounded-full"] {
+    border-radius: 9999px !important;
+}
+
+/* لكن الأزرار الأيقونية تصبح مربّعة 12px — الأزرار كلها 12px */
+html:not(.light-mode) button[class*="rounded-full"],
+html:not(.light-mode) a[class*="rounded-full"]:not(.dot) {
+    border-radius: var(--b2b-radius) !important;
+}
+
+/* عناصر دقيقة: أيقونات صغيرة وشرائح — 8px */
+html:not(.light-mode) .w-6[class*="rounded"],
+html:not(.light-mode) .w-7[class*="rounded"],
+html:not(.light-mode) .w-8[class*="rounded"],
+html:not(.light-mode) button.w-8[class*="rounded-full"],
+html:not(.light-mode) button.w-9[class*="rounded-full"] {
+    border-radius: var(--b2b-radius-sm) !important;
+}
+
+/* استثناءات تبقى دائرية: النقاط والشارات والصور الرمزية */
+html:not(.light-mode) .dot,
+html:not(.light-mode) .notification-badge,
+html:not(.light-mode) #user-avatar,
+html:not(.light-mode) .w-2[class*="rounded-full"],
+html:not(.light-mode) .w-3[class*="rounded-full"],
+html:not(.light-mode) img[class*="rounded-full"] {
+    border-radius: 9999px !important;
+}
+
+/* ── 4. الأسطح: من Glassmorphism إلى أسطح مصمتة ───────────── */
+html:not(.light-mode) .glass-panel {
+    background: var(--b2b-surface) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid var(--b2b-border) !important;
+    box-shadow: var(--b2b-shadow-sm) !important;
+    transition: border-color var(--b2b-fast) var(--b2b-ease),
+                background-color var(--b2b-fast) var(--b2b-ease);
+}
+
+html:not(.light-mode) .glass-panel:hover {
+    border-color: var(--b2b-border-strong) !important;
+    transform: none !important;
+    box-shadow: var(--b2b-shadow-sm) !important;
+}
+
+html:not(.light-mode) .glass-modal {
+    background: var(--b2b-surface) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid var(--b2b-border-strong) !important;
+    box-shadow: var(--b2b-shadow-lg) !important;
+}
+
+/* خلفية الحوارات: تعتيم صارم بدون blur */
+html:not(.light-mode) .modal,
+html:not(.light-mode) [class*="bg-black/6"],
+html:not(.light-mode) [class*="bg-black/8"],
+html:not(.light-mode) [class*="bg-black/9"] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+html:not(.light-mode) .modal {
+    background-color: rgba(4, 6, 9, 0.78) !important;
+}
+
+html:not(.light-mode) #mobile-overlay {
+    background-color: rgba(4, 6, 9, 0.7) !important;
+    backdrop-filter: none !important;
+}
+
+/* الأسطح الشفافة المتداخلة تصبح طبقات مصمتة متدرّجة الارتفاع */
+html:not(.light-mode) .bg-white\/5,
+html:not(.light-mode) .bg-white\/\[0\.03\],
+html:not(.light-mode) .bg-black\/20 {
+    background-color: var(--b2b-surface-2) !important;
+}
+
+html:not(.light-mode) .bg-white\/10 {
+    background-color: var(--b2b-surface-3) !important;
+}
+
+html:not(.light-mode) .bg-white\/20 {
+    background-color: var(--b2b-surface-4) !important;
+}
+
+html:not(.light-mode) .hover\:bg-white\/5:hover {
+    background-color: var(--b2b-surface-2) !important;
+}
+
+html:not(.light-mode) .hover\:bg-white\/10:hover {
+    background-color: var(--b2b-surface-3) !important;
+}
+
+/* حدود موحّدة وواضحة */
+html:not(.light-mode) .border-white\/5,
+html:not(.light-mode) .border-white\/\[0\.04\],
+html:not(.light-mode) .border-white\/\[0\.06\],
+html:not(.light-mode) .border-border-glass,
+html:not(.light-mode) .border-card-border {
+    border-color: var(--b2b-border) !important;
+}
+
+html:not(.light-mode) .border-white\/10,
+html:not(.light-mode) .border-white\/20 {
+    border-color: var(--b2b-border-strong) !important;
+}
+
+html:not(.light-mode) .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
+    border-color: var(--b2b-border) !important;
+}
+
+/* ── 5. الشريط الجانبي والرأس ─────────────────────────────── */
+html:not(.light-mode) #sidebar {
+    background: var(--b2b-surface) !important;
+    border-left: 0 !important;
+    border-right: 1px solid var(--b2b-border) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+html:not(.light-mode) #sidebar > div:first-child {
+    background: transparent !important;
+    background-image: none !important;
+    padding-top: 1.75rem !important;
+    padding-bottom: 1.75rem !important;
+}
+
+/* عناصر التنقّل: مستطيلة الحس، 12px، مؤشّر حالة نشط واضح */
+html:not(.light-mode) #sidebar nav button {
+    border-radius: var(--b2b-radius) !important;
+    padding: 0.7rem 0.85rem !important;
+    border: 1px solid transparent !important;
+    color: var(--b2b-text-2) !important;
+    transition: background-color var(--b2b-fast) var(--b2b-ease),
+                color var(--b2b-fast) var(--b2b-ease) !important;
+}
+
+html:not(.light-mode) #sidebar nav button:hover {
+    background-color: var(--b2b-surface-2) !important;
+    color: var(--b2b-text) !important;
+}
+
+html:not(.light-mode) #sidebar nav button span {
+    transform: none !important;
+    transition: none !important;
+}
+
+html:not(.light-mode) #sidebar nav button .material-symbols-rounded {
+    font-size: 1.25rem !important;
+}
+
+html:not(.light-mode) #sidebar nav {
+    padding: 1rem !important;
+    gap: 0.25rem !important;
+}
+
+html:not(.light-mode) #sidebar nav > button + button {
+    margin-top: 0.25rem !important;
+}
+
+/* الحالة النشطة: خلفية خفيفة + شريط تمييز على الحافة اليمنى (RTL) */
+html:not(.light-mode) #sidebar nav button.bg-primary,
+html:not(.light-mode) #sidebar nav button[class*="bg-primary"] {
+    position: relative;
+    background-color: var(--b2b-primary-soft) !important;
+    border-color: rgba(59, 130, 246, 0.28) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
+
+html:not(.light-mode) #sidebar nav button[class*="bg-primary"]::before {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: 20%;
+    bottom: 20%;
+    width: 3px;
+    border-radius: 3px 0 0 3px;
+    background: var(--b2b-primary);
+}
+
+html:not(.light-mode) #sidebar nav button[class*="bg-primary"] .material-symbols-rounded {
+    color: var(--b2b-primary) !important;
+}
+
+/* ── 6. الأزرار ───────────────────────────────────────────── */
+html:not(.light-mode) button,
+html:not(.light-mode) .btn,
+html:not(.light-mode) a[class*="rounded"] {
+    transition: background-color var(--b2b-fast) var(--b2b-ease),
+                border-color var(--b2b-fast) var(--b2b-ease),
+                color var(--b2b-fast) var(--b2b-ease) !important;
+}
+
+/* إلغاء التوهّج والحركة الزائدة */
+html:not(.light-mode) .btn-glow {
+    box-shadow: none !important;
+    background-image: none !important;
+    background-color: var(--b2b-primary) !important;
+    border: 1px solid var(--b2b-primary) !important;
+    border-radius: var(--b2b-radius) !important;
+    font-weight: 700;
+}
+
+html:not(.light-mode) .btn-glow:hover {
+    background-color: var(--b2b-primary-hover) !important;
+    border-color: var(--b2b-primary-hover) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+html:not(.light-mode) .btn-glow::after {
+    display: none !important;
+}
+
+html:not(.light-mode) .btn-glow:active {
+    background-color: #1d4ed8 !important;
+}
+
+/* تحويل الأزرار المتدرّجة إلى ألوان مصمتة */
+html:not(.light-mode) button[class*="bg-gradient-to-"],
+html:not(.light-mode) .bg-gradient-to-r.from-primary,
+html:not(.light-mode) .bg-gradient-to-br.from-primary,
+html:not(.light-mode) .bg-gradient-to-tr.from-primary {
+    background-image: none !important;
+    background-color: var(--b2b-primary) !important;
+}
+
+html:not(.light-mode) [class*="from-emerald"][class*="bg-gradient"],
+html:not(.light-mode) [class*="from-green"][class*="bg-gradient"] {
+    background-image: none !important;
+    background-color: #16a34a !important;
+}
+
+html:not(.light-mode) [class*="from-red"][class*="bg-gradient"],
+html:not(.light-mode) [class*="from-rose"][class*="bg-gradient"] {
+    background-image: none !important;
+    background-color: #dc2626 !important;
+}
+
+html:not(.light-mode) [class*="from-amber"][class*="bg-gradient"],
+html:not(.light-mode) [class*="from-yellow"][class*="bg-gradient"] {
+    background-image: none !important;
+    background-color: #d97706 !important;
+}
+
+html:not(.light-mode) [class*="from-secondary"][class*="bg-gradient"],
+html:not(.light-mode) [class*="from-violet"][class*="bg-gradient"],
+html:not(.light-mode) [class*="from-purple"][class*="bg-gradient"] {
+    background-image: none !important;
+    background-color: #7c3aed !important;
+}
+
+/* الصور الرمزية تبقى دائرية بلون مصمت */
+html:not(.light-mode) #user-avatar {
+    background-image: none !important;
+    background-color: var(--b2b-primary) !important;
+    border-radius: 9999px !important;
+}
+
+/* إلغاء تكبير الأزرار عند المرور */
+html:not(.light-mode) [class*="hover\:scale-"]:hover,
+html:not(.light-mode) [class*="hover\:-translate-y"]:hover {
+    transform: none !important;
+}
+
+/* ── 7. الحقول والمدخلات ──────────────────────────────────── */
+html:not(.light-mode) .form-input-modern,
+html:not(.light-mode) input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):not(#mainModal input),
+html:not(.light-mode) select:not(#mainModal select),
+html:not(.light-mode) textarea:not(#mainModal textarea) {
+    background-color: var(--b2b-surface-2) !important;
+    border: 1px solid var(--b2b-border) !important;
+    border-radius: var(--b2b-radius) !important;
+    color: var(--b2b-text) !important;
+    box-shadow: none !important;
+    transition: border-color var(--b2b-fast) var(--b2b-ease) !important;
+}
+
+html:not(.light-mode) .form-input-modern:focus,
+html:not(.light-mode) input:focus:not(#mainModal input),
+html:not(.light-mode) select:focus:not(#mainModal select),
+html:not(.light-mode) textarea:focus:not(#mainModal textarea) {
+    border-color: var(--b2b-border-focus) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+    background-color: var(--b2b-surface-2) !important;
+    outline: none !important;
+}
+
+html:not(.light-mode) input:not(#mainModal input)::placeholder,
+html:not(.light-mode) textarea:not(#mainModal textarea)::placeholder {
+    color: var(--b2b-text-3) !important;
+}
+
+/* ── 7b. سطح المستند (محرّر/معاينة الفاتورة) يبقى فاتحًا ──── */
+/* #mainModal مصمّم أصلاً كورقة بيضاء تحاكي الفاتورة المطبوعة. */
+html:not(.light-mode) #mainModal input,
+html:not(.light-mode) #mainModal select,
+html:not(.light-mode) #mainModal textarea,
+html:not(.light-mode) #mainModal .form-input {
+    background-color: #ffffff !important;
+    border: 1px solid #d5dae2 !important;
+    border-radius: var(--b2b-radius) !important;
+    color: #1e293b !important;
+    box-shadow: none !important;
+}
+
+html:not(.light-mode) #mainModal input:focus,
+html:not(.light-mode) #mainModal select:focus,
+html:not(.light-mode) #mainModal textarea:focus {
+    border-color: var(--b2b-primary) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+}
+
+html:not(.light-mode) #mainModal input::placeholder,
+html:not(.light-mode) #mainModal textarea::placeholder {
+    color: #94a3b8 !important;
+}
+
+html:not(.light-mode) #mainModal select option {
+    background-color: #ffffff;
+    color: #1e293b;
+}
+
+/* توحيد لون الإجراء الأساسي داخل المستند على الأزرق (لون النظام) */
+#mainModal button.bg-slate-900 {
+    background-color: var(--b2b-primary) !important;
+}
+
+#mainModal button.bg-slate-900:hover {
+    background-color: var(--b2b-primary-hover) !important;
+}
+
+/* الإجراء الثانوي: محايد رمادي */
+#mainModal button.bg-slate-700 {
+    background-color: #475569 !important;
+    color: #fff !important;
+}
+
+#mainModal button.bg-slate-700:hover {
+    background-color: #334155 !important;
+}
+
+/* الجداول داخل المستند تبقى بألوان الورق */
+html:not(.light-mode) #mainModal table thead,
+html:not(.light-mode) #mainModal table thead th {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    border-bottom: 1px solid #cbd5e1 !important;
+}
+
+html:not(.light-mode) #mainModal .modern-table td,
+html:not(.light-mode) #mainModal table tbody td {
+    color: #1e293b !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+html:not(.light-mode) #mainModal table tbody tr:hover,
+html:not(.light-mode) #mainModal .modern-table tr:hover td {
+    background: #f8fafc !important;
+}
+
+/* حقول البحث الشفافة داخل الحوارات تبقى بلا إطار */
+html:not(.light-mode) input.bg-transparent {
+    background-color: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+html:not(.light-mode) select option {
+    background-color: var(--b2b-surface-2);
+    color: var(--b2b-text);
+}
+
+/* ── 8. الجداول ───────────────────────────────────────────── */
+html:not(.light-mode) .table-container {
+    background: var(--b2b-surface) !important;
+    border: 1px solid var(--b2b-border) !important;
+    border-radius: var(--b2b-radius) !important;
+    overflow: hidden;
+}
+
+html:not(.light-mode) .modern-table th,
+html:not(.light-mode) table thead th {
+    background: var(--b2b-surface-2) !important;
+    color: var(--b2b-text-2) !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.04em;
+    text-transform: none !important;
+    border-bottom: 1px solid var(--b2b-border-strong) !important;
+    border-radius: 0 !important;
+    padding: 12px 16px !important;
+}
+
+html:not(.light-mode) table thead {
+    background: var(--b2b-surface-2) !important;
+    border-radius: 0 !important;
+}
+
+html:not(.light-mode) .modern-table td {
+    color: var(--b2b-text) !important;
+    border-bottom: 1px solid var(--b2b-border) !important;
+    padding: 12px 16px !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+}
+
+html:not(.light-mode) .modern-table tr:hover td,
+html:not(.light-mode) table tbody tr:hover {
+    background: var(--b2b-surface-2) !important;
+}
+
+html:not(.light-mode) .modern-table tr:last-child td {
+    border-bottom: 0 !important;
+}
+
+/* ── 9. شرائح الحالة — مستطيلة صارمة، بلا توهّج ──────────── */
+html:not(.light-mode) .status-pill {
+    border-radius: var(--b2b-radius-xs) !important;
+    box-shadow: none !important;
+    padding: 4px 10px !important;
+    font-size: 0.7rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0;
+}
+
+html:not(.light-mode) .status-paid {
+    background: rgba(34, 197, 94, 0.12) !important;
+    color: #4ade80 !important;
+    border: 1px solid rgba(34, 197, 94, 0.28) !important;
+}
+
+html:not(.light-mode) .status-pending {
+    background: rgba(245, 158, 11, 0.12) !important;
+    color: #fbbf24 !important;
+    border: 1px solid rgba(245, 158, 11, 0.28) !important;
+}
+
+/* ── 10. إلغاء الهالات الضوئية بالكامل ───────────────────── */
+html:not(.light-mode) [class*="shadow-glow"],
+html:not(.light-mode) [class*="shadow-["],
+html:not(.light-mode) [class*="drop-shadow"],
+html:not(.light-mode) .shadow-glass,
+html:not(.light-mode) .box-shadow-glow-primary,
+html:not(.light-mode) [class*="hover\:shadow-"]:hover {
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+/* ظلال Tailwind الافتراضية داخل الأسطح المصمتة لا معنى لها */
+html:not(.light-mode) .shadow-lg:not(.glass-modal),
+html:not(.light-mode) .shadow-xl:not(.glass-modal),
+html:not(.light-mode) .shadow-2xl:not(.glass-modal),
+html:not(.light-mode) .shadow-md,
+html:not(.light-mode) .shadow-inner {
+    box-shadow: none !important;
+}
+
+/* الحوارات وحدها تحتفظ بارتفاع حقيقي */
+html:not(.light-mode) .glass-modal.shadow-2xl,
+html:not(.light-mode) .glass-modal {
+    box-shadow: var(--b2b-shadow-lg) !important;
+}
+
+html:not(.light-mode) .dot {
+    box-shadow: none !important;
+}
+
+html:not(.light-mode) .star-btn {
+    color: var(--b2b-surface-4);
+    transition: color var(--b2b-fast) var(--b2b-ease);
+}
+
+html:not(.light-mode) .star-btn:hover,
+html:not(.light-mode) .star-btn.active {
+    color: var(--b2b-warning);
+    transform: none !important;
+    filter: none !important;
+}
+
+/* شارة الإشعارات: نقطة ثابتة بحلقة، بدون نبض */
+html:not(.light-mode) .notification-badge {
+    width: 7px;
+    height: 7px;
+    background-color: var(--b2b-danger);
+    border: 2px solid var(--b2b-surface);
+    box-sizing: content-box;
+    top: 0;
+    right: 0;
+    animation: none !important;
+    box-shadow: none !important;
+}
+
+/* ── 11. الطبوغرافيا ─────────────────────────────────────── */
+/* العناوين المتدرّجة تصبح نصًّا مصمتًا مقروءًا */
+html:not(.light-mode) .text-transparent.bg-clip-text {
+    background-image: none !important;
+    -webkit-background-clip: border-box !important;
+    background-clip: border-box !important;
+    color: var(--b2b-text) !important;
+    -webkit-text-fill-color: var(--b2b-text) !important;
+}
+
+/* B2B: وزن 700 كحدّ أقصى — لا أوزان سوداء (900) */
+html:not(.light-mode) .font-black,
+html:not(.light-mode) h1,
+html:not(.light-mode) h2,
+html:not(.light-mode) h3 {
+    font-weight: 700 !important;
+    letter-spacing: -0.01em;
+}
+
+html:not(.light-mode) h2.text-3xl,
+html:not(.light-mode) h2.text-4xl,
+html:not(.light-mode) .lg\:text-4xl {
+    font-size: 1.6rem !important;
+    line-height: 1.3 !important;
+}
+
+html:not(.light-mode) .text-muted {
+    color: var(--b2b-text-2) !important;
+}
+
+html:not(.light-mode) .uppercase.tracking-widest,
+html:not(.light-mode) .tracking-widest {
+    letter-spacing: 0.06em !important;
+}
+
+html:not(.light-mode) .en-num {
+    font-family: 'IBM Plex Sans Arabic', 'Outfit', sans-serif;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+}
+
+/* ── 11b. تنفّس المحتوى: إفساح مجال لأزرار التحكّم العلوية ── */
+/* قاعدة تخطيط (لا لون) — تُطبَّق على الوضعين */
+@media (min-width: 1024px) {
+    main {
+        padding-top: 5.5rem !important;
+    }
+}
+
+/* حلقة التقدّم: مسار رمادي واضح بدل الأسود */
+html:not(.light-mode) circle.text-slate-800,
+html:not(.light-mode) circle.text-slate-700 {
+    color: var(--b2b-surface-4) !important;
+}
+
+/* ── 12. المكوّنات المتفرّقة ──────────────────────────────── */
+html:not(.light-mode) .calendar-day {
+    background: var(--b2b-surface-2);
+    border: 1px solid var(--b2b-border);
+    border-radius: var(--b2b-radius);
+    transition: background-color var(--b2b-fast) var(--b2b-ease),
+                border-color var(--b2b-fast) var(--b2b-ease);
+}
+
+html:not(.light-mode) .calendar-day:hover {
+    background: var(--b2b-surface-3);
+    border-color: var(--b2b-border-strong);
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+html:not(.light-mode) .notification-dropdown {
+    animation: none !important;
+}
+
+html:not(.light-mode) .custom-range {
+    background: var(--b2b-surface-4);
+    border-radius: 9999px;
+    height: 4px;
+}
+
+html:not(.light-mode) .custom-range::-webkit-slider-thumb {
+    background: var(--b2b-primary);
+    border: 2px solid var(--b2b-surface);
+    box-shadow: none;
+    width: 16px;
+    height: 16px;
+}
+
+html:not(.light-mode) .custom-range::-webkit-slider-thumb:hover {
+    transform: none;
+    background: var(--b2b-primary-hover);
+}
+
+html:not(.light-mode) .progress-ring-circle {
+    transition: stroke-dashoffset 400ms var(--b2b-ease);
+    filter: none !important;
+}
+
+/* شريط التمرير: رمادي محايد */
+html:not(.light-mode) ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+html:not(.light-mode) ::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+html:not(.light-mode) ::-webkit-scrollbar-thumb {
+    background: var(--b2b-surface-4) !important;
+    border-radius: 9999px;
+}
+
+html:not(.light-mode) ::-webkit-scrollbar-thumb:hover {
+    background: #384250 !important;
+}
+
+html:not(.light-mode) .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--b2b-surface-4) transparent;
+}
+
+/* حركة مختصرة عند فتح الحوارات */
+html:not(.light-mode) .modal.open {
+    animation: b2bFade 140ms var(--b2b-ease) forwards;
+}
+
+@keyframes b2bFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+html:not(.light-mode) .animate-fadeIn,
+html:not(.light-mode) .animate-fadeScaleUp {
+    animation-duration: 160ms !important;
+    animation-timing-function: var(--b2b-ease) !important;
+}
+
+/* شاشة الدخول: بطاقة واحدة مصمتة على خلفية صارمة */
+html:not(.light-mode) #login-overlay {
+    background-color: var(--b2b-canvas) !important;
+    background-image: none !important;
+}
+
+html:not(.light-mode) #login-overlay .glass-panel {
+    border-radius: var(--b2b-radius) !important;
+    box-shadow: var(--b2b-shadow-lg) !important;
+    padding: 2.25rem !important;
+}
+
+/* ============================================================
+   12b. الوضع الفاتح — نفس النظام (مسطّح · 12px · حدود واضحة)
+   حتى لا يختلف سلوك الواجهة بين الوضعين.
+   ============================================================ */
+html.light-mode {
+    --b2b-l-canvas: #f7f8fa;
+    --b2b-l-surface: #ffffff;
+    --b2b-l-surface-2: #f2f4f7;
+    --b2b-l-border: #e3e7ed;
+    --b2b-l-border-strong: #cfd6e0;
+}
+
+html.light-mode body {
+    background-color: var(--b2b-l-canvas) !important;
+    background-image: none !important;
+}
+
+html.light-mode .glow-orb,
+html.light-mode .absolute.blur-3xl,
+html.light-mode .absolute.blur-2xl,
+html.light-mode .absolute.blur-xl,
+html.light-mode .absolute.blur-lg,
+html.light-mode .absolute.blur,
+html.light-mode .absolute.h-px[class*="bg-gradient-to-"] {
+    display: none !important;
+}
+
+/* نفس منطق نصف القطر: 12px موحّد */
+html.light-mode [class*="rounded"]:not(.material-symbols-rounded):not([class*="rounded-full"]):not([class*="rounded-none"]):not([class*="rounded-t-"]):not([class*="rounded-b-"]):not([class*="rounded-r-"]):not([class*="rounded-l-"]):not(#invoice-preview-template *):not(#archive-print-template *) {
+    border-radius: var(--b2b-radius) !important;
+}
+
+html.light-mode button[class*="rounded-full"] {
+    border-radius: var(--b2b-radius) !important;
+}
+
+html.light-mode .dot,
+html.light-mode .notification-badge,
+html.light-mode #user-avatar,
+html.light-mode .w-2[class*="rounded-full"],
+html.light-mode .w-3[class*="rounded-full"],
+html.light-mode img[class*="rounded-full"] {
+    border-radius: 9999px !important;
+}
+
+html.light-mode .glass-panel,
+html.light-mode .glass-modal,
+html.light-mode aside,
+html.light-mode .notification-dropdown {
+    background: var(--b2b-l-surface) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid var(--b2b-l-border) !important;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05) !important;
+}
+
+html.light-mode .glass-modal {
+    box-shadow: 0 16px 48px rgba(16, 24, 40, 0.16) !important;
+}
+
+html.light-mode aside {
+    border-radius: 0 !important;
+    border-right: 0 !important;
+    border-left: 1px solid var(--b2b-l-border) !important;
+}
+
+html.light-mode #sidebar > div:first-child {
+    background-image: none !important;
+}
+
+html.light-mode [class*="shadow-glow"],
+html.light-mode [class*="shadow-["],
+html.light-mode [class*="drop-shadow"],
+html.light-mode .shadow-lg:not(.glass-modal),
+html.light-mode .shadow-xl:not(.glass-modal),
+html.light-mode .shadow-2xl:not(.glass-modal),
+html.light-mode .shadow-md {
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+html.light-mode button[class*="bg-gradient-to-"],
+html.light-mode .btn-glow {
+    background-image: none !important;
+    background-color: var(--b2b-primary) !important;
+    box-shadow: none !important;
+    border-color: var(--b2b-primary) !important;
+}
+
+html.light-mode .btn-glow::after {
+    display: none !important;
+}
+
+html.light-mode .btn-glow:hover {
+    background-color: var(--b2b-primary-hover) !important;
+    transform: none !important;
+}
+
+html.light-mode .text-transparent.bg-clip-text {
+    background-image: none !important;
+    -webkit-background-clip: border-box !important;
+    background-clip: border-box !important;
+    color: #101828 !important;
+    -webkit-text-fill-color: #101828 !important;
+}
+
+html.light-mode .font-black,
+html.light-mode h1,
+html.light-mode h2,
+html.light-mode h3 {
+    font-weight: 700 !important;
+}
+
+html.light-mode h2.text-3xl,
+html.light-mode h2.text-4xl,
+html.light-mode .lg\:text-4xl {
+    font-size: 1.6rem !important;
+    line-height: 1.3 !important;
+}
+
+html.light-mode .status-pill {
+    border-radius: var(--b2b-radius-xs) !important;
+    box-shadow: none !important;
+}
+
+html.light-mode .table-container {
+    background: var(--b2b-l-surface) !important;
+    border: 1px solid var(--b2b-l-border) !important;
+}
+
+html.light-mode .modern-table th {
+    background: var(--b2b-l-surface-2) !important;
+    text-transform: none !important;
+    border-bottom: 1px solid var(--b2b-l-border-strong) !important;
+    border-radius: 0 !important;
+}
+
+html.light-mode .modern-table td {
+    border-bottom: 1px solid var(--b2b-l-border) !important;
+}
+
+html.light-mode ::-webkit-scrollbar-thumb {
+    background: var(--b2b-l-border-strong) !important;
+}
+
+html.light-mode .calendar-day {
+    background: var(--b2b-l-surface-2) !important;
+    border: 1px solid var(--b2b-l-border) !important;
+    box-shadow: none !important;
+}
+
+html.light-mode .calendar-day:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+html.light-mode [class*="hover\:scale-"]:hover {
+    transform: none !important;
+}
+
+/* الشعار أبيض اللون: على خلفية فاتحة يحتاج قاعدة داكنة ليبقى مقروءًا */
+html.light-mode img[alt="Logo"] {
+    background: #101828;
+    border-radius: var(--b2b-radius);
+    padding: 10px 14px;
+    box-sizing: content-box;
+}
+
+/* ── 13. الطباعة: الفواتير تبقى بيضاء بلا تعديل ──────────── */
+/* قوالب الفواتير/الأرشيف مستثناة من قواعد الأسطح الداكنة أعلاه.
+   لا نلمس نصف قطرها هنا — تبقى كما صمّمها القالب نفسه. */
+html:not(.light-mode) #invoice-preview-template,
+html:not(.light-mode) #invoice-preview-template *,
+html:not(.light-mode) #archive-print-template,
+html:not(.light-mode) #archive-print-template * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+@media print {
+    html:not(.light-mode) body {
+        background: #fff !important;
+        color: #000 !important;
+    }
+}
+
+/* ── 14. تقليل الحركة (إمكانية الوصول) ───────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
