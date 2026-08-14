@@ -92,10 +92,11 @@
 html:not(.light-mode) body {
     background-color: var(--onyx-void) !important;
     background-image:
-        radial-gradient(1100px 620px at 78% -12%, rgba(255, 255, 255, 0.055), transparent 60%),
-        radial-gradient(900px 520px at 6% 8%, rgba(255, 255, 255, 0.032), transparent 62%),
-        radial-gradient(1000px 700px at 50% 118%, rgba(255, 255, 255, 0.022), transparent 64%),
-        linear-gradient(180deg, #08080a 0%, #000000 58%, #030304 100%) !important;
+        radial-gradient(1200px 700px at 80% -10%, rgba(255, 255, 255, 0.11), transparent 62%),
+        radial-gradient(950px 560px at 4% 6%, rgba(255, 255, 255, 0.075), transparent 64%),
+        radial-gradient(1100px 760px at 50% 116%, rgba(255, 255, 255, 0.05), transparent 66%),
+        radial-gradient(620px 620px at 28% 46%, rgba(255, 255, 255, 0.032), transparent 70%),
+        linear-gradient(180deg, #0e0e12 0%, #050506 46%, #000000 78%, #050507 100%) !important;
     background-attachment: fixed !important;
     color: var(--onyx-text);
     font-family: 'Cairo', 'IBM Plex Sans Arabic', sans-serif;
@@ -650,7 +651,175 @@ html:not(.light-mode) [class*="progress"] > div {
     background-image: linear-gradient(90deg, #ffffff, rgba(255, 255, 255, 0.42)) !important;
 }
 
-/* الطباعة تبقى بيضاء */
+/* ============================================================
+   15 · الأزرار الرئيسية — تأتي بعد قسم تحييد الألوان
+   ------------------------------------------------------------
+   قواعد القسم 7 لها أولوية أعلى من القسم 6، فكانت تحوّل الزر
+   إلى مستطيل فاتح ونصّه أبيض = غير مقروء. هذه القواعد أقوى
+   منها وتُطبَّق أخيرًا، فتستعيد المظهر الفحمي الصحيح.
+   ============================================================ */
+html:not(.light-mode) button.btn-glow[class*="bg-gradient-to-"]:not(#invoice-preview-template *):not(#archive-print-template *),
+html:not(.light-mode) a.btn-glow[class*="bg-gradient-to-"]:not(#invoice-preview-template *),
+html:not(.light-mode) button[class*="bg-gradient-to-"][class*="from-blue-"]:not(#invoice-preview-template *):not(#archive-print-template *),
+html:not(.light-mode) button[class*="bg-gradient-to-"][class*="from-indigo-"]:not(#invoice-preview-template *):not(#archive-print-template *),
+html:not(.light-mode) button[class*="bg-gradient-to-"][class*="from-purple-"]:not(#invoice-preview-template *):not(#archive-print-template *),
+html:not(.light-mode) button[class*="bg-gradient-to-"][class*="from-primary"]:not(#invoice-preview-template *):not(#archive-print-template *) {
+    background-color: #101014 !important;
+    background-image:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.03) 52%, rgba(255, 255, 255, 0) 100%),
+        linear-gradient(180deg, #1c1c22 0%, #0d0d11 100%) !important;
+    border: 1px solid var(--onyx-line-2) !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.20),
+        0 0 24px -8px rgba(255, 255, 255, 0.16),
+        0 12px 30px -14px rgba(0, 0, 0, 0.95) !important;
+}
+
+html:not(.light-mode) button.btn-glow[class*="bg-gradient-to-"]:not(#invoice-preview-template *):hover,
+html:not(.light-mode) button[class*="bg-gradient-to-"][class*="from-blue-"]:not(#invoice-preview-template *):hover,
+html:not(.light-mode) button[class*="bg-gradient-to-"][class*="from-indigo-"]:not(#invoice-preview-template *):hover,
+html:not(.light-mode) button[class*="bg-gradient-to-"][class*="from-purple-"]:not(#invoice-preview-template *):hover,
+html:not(.light-mode) button[class*="bg-gradient-to-"][class*="from-primary"]:not(#invoice-preview-template *):hover {
+    background-image:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.05) 52%, rgba(255, 255, 255, 0) 100%),
+        linear-gradient(180deg, #24242b 0%, #121217 100%) !important;
+    border-color: var(--onyx-line-3) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.28),
+        0 0 34px -6px rgba(255, 255, 255, 0.22),
+        0 14px 34px -14px rgba(0, 0, 0, 0.95) !important;
+}
+
+/* أيقونة الزر تبقى بيضاء كاملة */
+html:not(.light-mode) button[class*="bg-gradient-to-"] .material-symbols-rounded:not(#invoice-preview-template *) {
+    color: #ffffff !important;
+}
+
+/* ============================================================
+   16 · قوالب الفواتير والطباعة — مستند أبيض مقروء
+   ------------------------------------------------------------
+   هذه القوالب خلفيتها بيضاء، فيجب ألّا ترث أي لون من السمة
+   السوداء. كل النصوص هنا تُعاد إلى درجات رمادية داكنة.
+   ============================================================ */
+html:not(.light-mode) #invoice-preview-template,
+html:not(.light-mode) #archive-print-template {
+    background: #ffffff !important;
+    color: #1e293b !important;
+}
+
+/* العناوين: كانت ترث اللون الأبيض من القاعدة العامة فتختفي */
+html:not(.light-mode) #invoice-preview-template h1,
+html:not(.light-mode) #invoice-preview-template h2,
+html:not(.light-mode) #invoice-preview-template h3,
+html:not(.light-mode) #invoice-preview-template h4,
+html:not(.light-mode) #archive-print-template h1,
+html:not(.light-mode) #archive-print-template h2,
+html:not(.light-mode) #archive-print-template h3,
+html:not(.light-mode) #archive-print-template h4 {
+    color: #0f172a !important;
+}
+
+/* العنوان الرئيسي INVOICE — كان رماديًا باهتًا */
+html:not(.light-mode) #invoice-preview-template #preview-doc-title,
+html:not(.light-mode) #archive-print-template #preview-doc-title {
+    color: #0b1220 !important;
+}
+
+/* النصوص الثانوية الباهتة → رمادي داكن مقروء */
+html:not(.light-mode) #invoice-preview-template .text-slate-400,
+html:not(.light-mode) #invoice-preview-template .text-slate-500,
+html:not(.light-mode) #invoice-preview-template .text-gray-400,
+html:not(.light-mode) #invoice-preview-template .text-gray-500,
+html:not(.light-mode) #invoice-preview-template .text-muted,
+html:not(.light-mode) #archive-print-template .text-slate-400,
+html:not(.light-mode) #archive-print-template .text-slate-500,
+html:not(.light-mode) #archive-print-template .text-gray-400,
+html:not(.light-mode) #archive-print-template .text-gray-500,
+html:not(.light-mode) #archive-print-template .text-muted {
+    color: #52607a !important;
+}
+
+/* النصوص الأساسية */
+html:not(.light-mode) #invoice-preview-template .text-slate-800,
+html:not(.light-mode) #invoice-preview-template .text-slate-900,
+html:not(.light-mode) #invoice-preview-template .text-black,
+html:not(.light-mode) #archive-print-template .text-slate-800,
+html:not(.light-mode) #archive-print-template .text-slate-900,
+html:not(.light-mode) #archive-print-template .text-black {
+    color: #101828 !important;
+}
+
+/* الفواصل والحدود داخل المستند */
+html:not(.light-mode) #invoice-preview-template [class*="border-gray-"],
+html:not(.light-mode) #invoice-preview-template [class*="border-slate-"],
+html:not(.light-mode) #archive-print-template [class*="border-gray-"],
+html:not(.light-mode) #archive-print-template [class*="border-slate-"] {
+    border-color: #d7dde7 !important;
+}
+
+/* جداول المستند: رأس فاتح ونص داكن */
+html:not(.light-mode) #invoice-preview-template thead,
+html:not(.light-mode) #archive-print-template thead {
+    background: #f1f5f9 !important;
+}
+
+html:not(.light-mode) #invoice-preview-template thead th,
+html:not(.light-mode) #archive-print-template thead th {
+    color: #334155 !important;
+}
+
+html:not(.light-mode) #invoice-preview-template tbody tr,
+html:not(.light-mode) #archive-print-template tbody tr {
+    border-color: #e2e8f0 !important;
+}
+
+html:not(.light-mode) #invoice-preview-template tbody tr:hover,
+html:not(.light-mode) #archive-print-template tbody tr:hover {
+    background: #f8fafc !important;
+}
+
+/* شريط أدوات المعاينة (طباعة/تعديل) — رمادي داكن بدل الأزرق */
+html:not(.light-mode) #invoice-preview-template .no-print {
+    background: #f1f5f9 !important;
+    border-color: #dde3ec !important;
+}
+
+html:not(.light-mode) #invoice-preview-template .no-print button {
+    background: linear-gradient(180deg, #2b3240 0%, #171c26 100%) !important;
+    border: 1px solid #3a4354 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25) !important;
+}
+
+html:not(.light-mode) #invoice-preview-template .no-print button:hover {
+    background: linear-gradient(180deg, #3a4354 0%, #232936 100%) !important;
+}
+
+/* الحقول داخل المستند تبقى فاتحة */
+html:not(.light-mode) #invoice-preview-template input,
+html:not(.light-mode) #archive-print-template input {
+    background: #ffffff !important;
+    border-color: #d7dde7 !important;
+    color: #101828 !important;
+}
+
+/* ختم عرض السعر */
+html:not(.light-mode) #invoice-preview-template .quotation-stamp {
+    color: rgba(15, 23, 42, 0.10) !important;
+}
+
+/* صندوق البيانات البنكية أسفل الفاتورة — أسود بدل الكحلي ليطابق الهوية */
+html:not(.light-mode) #invoice-preview-template .bg-slate-900,
+html:not(.light-mode) #archive-print-template .bg-slate-900 {
+    background: linear-gradient(180deg, #14141a 0%, #0a0a0d 100%) !important;
+    color: #f4f4f5 !important;
+}
+
+/* ============================================================
+   17 · الطباعة تبقى بيضاء
+   ============================================================ */
 @media print {
     html:not(.light-mode) body {
         background: #fff !important;
@@ -658,6 +827,10 @@ html:not(.light-mode) [class*="progress"] > div {
     }
 
     html:not(.light-mode) body::before {
+        display: none !important;
+    }
+
+    html:not(.light-mode) .glow-orb {
         display: none !important;
     }
 }
