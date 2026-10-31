@@ -863,6 +863,14 @@
     <link rel="stylesheet" href="css/bank-card.css?v=1">
     <script defer src="js/icons.js?v=2"></script>
     <script defer src="js/link-platforms.js?v=1"></script>
+    <!-- أدوات العمل: العروض والعقود · قوالب العروض · الاشتراكات · تتبّع الوقت -->
+    <link rel="stylesheet" href="css/studio.css?v=1">
+    <script defer src="js/studio/data.js?v=1"></script>
+    <script defer src="js/studio/core.js?v=1"></script>
+    <script defer src="js/studio/proposals.js?v=1"></script>
+    <script defer src="js/studio/templates.js?v=1"></script>
+    <script defer src="js/studio/subs.js?v=1"></script>
+    <script defer src="js/studio/time.js?v=1"></script>
 
     <!-- Firebase SDK & Backend Shim -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -1001,6 +1009,29 @@
                     <span
                         class="material-symbols-rounded text-2xl group-hover:text-primary transition-colors">folder_open</span>
                     <span class="font-bold text-sm group-hover:translate-x-[-4px] transition-transform">المشاريع</span>
+                </button>
+                <p class="st-nav-label admin-only">أدوات العمل</p>
+                <button onclick="switchPage('proposals'); toggleSidebar()" id="nav-proposals"
+                    class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 group hover:bg-white/5 border border-transparent hover:border-white/5 admin-only">
+                    <span class="material-symbols-rounded text-2xl group-hover:text-primary transition-colors">request_quote</span>
+                    <span class="font-bold text-sm group-hover:translate-x-[-4px] transition-transform">العروض والعقود</span>
+                    <span id="proposals-nav-badge" class="st-nav-badge"></span>
+                </button>
+                <button onclick="switchPage('templates'); toggleSidebar()" id="nav-templates"
+                    class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 group hover:bg-white/5 border border-transparent hover:border-white/5 admin-only">
+                    <span class="material-symbols-rounded text-2xl group-hover:text-primary transition-colors">library_books</span>
+                    <span class="font-bold text-sm group-hover:translate-x-[-4px] transition-transform">قوالب العروض</span>
+                </button>
+                <button onclick="switchPage('time'); toggleSidebar()" id="nav-time"
+                    class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 group hover:bg-white/5 border border-transparent hover:border-white/5 admin-only">
+                    <span class="material-symbols-rounded text-2xl group-hover:text-primary transition-colors">timer</span>
+                    <span class="font-bold text-sm group-hover:translate-x-[-4px] transition-transform">تتبّع الوقت</span>
+                </button>
+                <button onclick="switchPage('subs'); toggleSidebar()" id="nav-subs"
+                    class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 group hover:bg-white/5 border border-transparent hover:border-white/5 admin-only">
+                    <span class="material-symbols-rounded text-2xl group-hover:text-primary transition-colors">credit_card</span>
+                    <span class="font-bold text-sm group-hover:translate-x-[-4px] transition-transform">الاشتراكات والأدوات</span>
+                    <span id="subs-nav-badge" class="st-nav-badge"></span>
                 </button>
                 <button onclick="switchPage('requests'); toggleSidebar()" id="nav-requests"
                     class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 group hover:bg-white/5 border border-transparent hover:border-white/5 relative admin-only">
@@ -1733,6 +1764,12 @@
                 <div id="messages-list" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
                 <div id="redemptions-list" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
             </div>
+
+            <!-- ═══ أدوات العمل (js/studio/*): كل صفحة تُرسم من JavaScript عند فتحها ═══ -->
+            <div id="proposals-page" class="hidden studio-page max-w-[1300px] mx-auto animate-fadeIn pb-20"></div>
+            <div id="templates-page" class="hidden studio-page max-w-[1300px] mx-auto animate-fadeIn pb-20"></div>
+            <div id="time-page" class="hidden studio-page max-w-[1300px] mx-auto animate-fadeIn pb-20"></div>
+            <div id="subs-page" class="hidden studio-page max-w-[1300px] mx-auto animate-fadeIn pb-20"></div>
 
             <!-- ═══ إدارة الموقع: معرض الأعمال + بيانات التواصل ═══ -->
             <div id="site-page" class="hidden space-y-8 max-w-[1400px] mx-auto animate-fadeIn pb-20">
@@ -3579,7 +3616,7 @@
                 pageId = 'client-home';
             }
             // Hide all pages first
-            ['dashboard', 'invoices', 'clients', 'projects', 'client-home', 'rewards', 'updates', 'client-profile', 'finance', 'requests', 'site'].forEach(p => {
+            ['dashboard', 'invoices', 'clients', 'projects', 'client-home', 'rewards', 'updates', 'client-profile', 'finance', 'requests', 'site', 'proposals', 'templates', 'subs', 'time'].forEach(p => {
                 let el = document.getElementById(p + '-page');
                 if (el) el.classList.add('hidden');
 
@@ -3605,6 +3642,7 @@
             if (pageId === 'finance') updateFinancePage();
             if (pageId === 'requests') loadRequests();
             if (pageId === 'site') loadSitePage();
+            if (window.Studio) Studio.onPage(pageId);
 
             let activeBtn = document.getElementById('nav-' + navId);
             if (activeBtn) {
@@ -3615,6 +3653,7 @@
         }
 
         function loadAllData() {
+            if (window.Studio) Studio.boot();
             google.script.run.withSuccessHandler((settings) => {
                 if (settings && settings.invoice_footer) {
                     DEFAULT_BANK_INFO = settings.invoice_footer;

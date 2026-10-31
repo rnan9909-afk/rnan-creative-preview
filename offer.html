@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>عرض سعر | رنان لخدمات التصميم</title>
+    <meta name="description" content="عرض سعر من رنان لخدمات التصميم — راجع النطاق والمراحل والتكلفة، ووافق عليه أو اطلب تعديلًا.">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#030620">
+    <meta property="og:title" content="عرض سعر — رنان لخدمات التصميم">
+    <meta property="og:description" content="راجع العرض ووافق عليه أو اطلب تعديلًا.">
+    <link rel="icon" type="image/svg+xml" href="images/ranan-logo.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Readex+Pro:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/site.css?v=5">
+    <style>
+        .of-main { position: relative; z-index: 2; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 28px 18px 120px; }
+        .of-wrap { width: 100%; max-width: 820px; display: flex; flex-direction: column; gap: 18px; }
+        .of-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+        .of-top img { height: 40px; }
+        .of-card { position: relative; padding: 26px; border-radius: 26px; background: linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .015)); border: 1px solid var(--line-2); }
+        .of-hero { overflow: hidden; }
+        .of-hero::before { content: ""; position: absolute; inset: -40% -10% auto auto; width: 420px; height: 420px; border-radius: 50%; background: radial-gradient(closest-side, rgba(var(--mint-rgb), .18), transparent); pointer-events: none; }
+        .of-hero h1 { position: relative; margin: 14px 0 6px; font-family: 'Readex Pro', var(--font); font-size: clamp(25px, 5vw, 36px); line-height: 1.35; }
+        .of-hero .to { position: relative; margin: 0; color: var(--text-2); font-size: 15px; }
+        .of-hero .to b { color: var(--text); }
+        .of-meta { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 22px; }
+        .of-meta div { padding: 12px 14px; border-radius: 16px; background: rgba(255, 255, 255, .035); border: 1px solid var(--line); }
+        .of-meta small { display: block; color: var(--text-3); font-size: 12px; }
+        .of-meta b { display: block; margin-top: 2px; font-size: 14.5px; font-weight: 700; }
+        .of-intro { margin: 18px 0 0; position: relative; color: var(--text-2); font-size: 15px; line-height: 2; white-space: pre-line; }
+        .of-h { display: flex; align-items: center; gap: 10px; margin: 0 0 16px; font-size: 18px; font-weight: 700; }
+        .of-h .icon { width: 22px; height: 22px; color: var(--mint); }
+        .of-phases { display: flex; flex-direction: column; gap: 12px; }
+        .of-phase { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; align-items: start; }
+        .of-phase > i { font-style: normal; width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; font-weight: 700; background: rgba(var(--mint-rgb), .12); color: var(--mint-3); border: 1px solid rgba(var(--mint-rgb), .25); }
+        .of-phase b { display: flex; justify-content: space-between; gap: 10px; font-size: 15px; }
+        .of-phase b small { color: var(--text-3); font-weight: 500; font-size: 12.5px; white-space: nowrap; }
+        .of-track { position: relative; height: 8px; margin-top: 8px; border-radius: 999px; background: rgba(255, 255, 255, .05); }
+        .of-track span { position: absolute; top: 0; bottom: 0; border-radius: inherit; background: var(--grad); }
+        .of-ms { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--line-2); }
+        .of-ms span { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; font-size: 12.5px; color: var(--text-2); background: rgba(255, 255, 255, .03); border: 1px solid var(--line); }
+        .of-ms span::before { content: ""; width: 7px; height: 7px; border-radius: 2px; background: var(--mint); transform: rotate(45deg); }
+        .of-table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+        .of-table th { padding: 0 8px 10px; text-align: start; color: var(--text-3); font-weight: 600; font-size: 12.5px; border-bottom: 1px solid var(--line-2); }
+        .of-table td { padding: 14px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+        .of-table td.n, .of-table th.n { text-align: left; white-space: nowrap; }
+        .of-table tr:last-child td { border-bottom: 0; }
+        .of-totals { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--line-2); font-size: 14.5px; }
+        .of-totals div { display: flex; justify-content: space-between; color: var(--text-2); }
+        .of-totals div b { color: var(--text); }
+        .of-totals .grand { padding-top: 12px; border-top: 1px solid var(--line-2); font-size: 17px; color: var(--text); font-weight: 700; }
+        .of-totals .grand b { font-size: 26px; color: var(--mint-3); font-family: 'Readex Pro', var(--font); }
+        .of-pay { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px; }
+        .of-pay div { padding: 16px; border-radius: 18px; background: rgba(var(--mint-rgb), .06); border: 1px solid rgba(var(--mint-rgb), .22); }
+        .of-pay div + div { background: rgba(255, 255, 255, .03); border-color: var(--line-2); }
+        .of-pay small { display: block; color: var(--text-2); font-size: 12.5px; }
+        .of-pay b { display: block; margin-top: 4px; font-size: 20px; font-weight: 700; }
+        .of-pay em { font-style: normal; color: var(--text-3); font-size: 12px; }
+        .of-terms { margin: 0; padding: 0; list-style: none; counter-reset: t; display: flex; flex-direction: column; gap: 10px; }
+        .of-terms li { counter-increment: t; display: grid; grid-template-columns: 26px 1fr; gap: 8px; color: var(--text-2); font-size: 14px; line-height: 1.9; }
+        .of-terms li::before { content: counter(t); width: 24px; height: 24px; border-radius: 8px; display: grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--mint-3); background: rgba(var(--mint-rgb), .1); margin-top: 3px; }
+        .of-banner { display: flex; gap: 12px; align-items: flex-start; padding: 16px 18px; border-radius: 20px; font-size: 14.5px; line-height: 1.9; }
+        .of-banner .icon { width: 24px; height: 24px; flex-shrink: 0; margin-top: 2px; }
+        .of-banner.ok { background: rgba(var(--mint-rgb), .08); border: 1px solid rgba(var(--mint-rgb), .3); color: var(--mint-3); }
+        .of-banner.wait { background: rgba(251, 191, 36, .08); border: 1px solid rgba(251, 191, 36, .3); color: #fde68a; }
+        .of-banner.off { background: rgba(255, 255, 255, .04); border: 1px solid var(--line-2); color: var(--text-2); }
+        .of-banner b { color: var(--text); }
+        .of-decide { position: fixed; z-index: 40; left: 0; right: 0; bottom: 0; padding: 14px 18px calc(14px + env(safe-area-inset-bottom)); background: rgba(3, 6, 32, .9); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid var(--line-2); }
+        .of-decide .in { max-width: 820px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
+        .of-decide .sum { flex: 1; min-width: 0; }
+        .of-decide .sum small { display: block; color: var(--text-3); font-size: 12px; }
+        .of-decide .sum b { font-size: 18px; font-family: 'Readex Pro', var(--font); }
+        .of-decide .btn { height: 50px; padding: 0 20px; font-size: 15px; }
+        .of-tools { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+        .of-tools .btn { height: 44px; font-size: 14px; padding: 0 16px; }
+        .of-foot { margin-top: 26px; text-align: center; color: var(--text-3); font-size: 12.5px; }
+        .of-empty { padding: 40px 26px; text-align: center; color: var(--text-2); }
+        .of-check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--text-2); line-height: 1.8; cursor: pointer; }
+        .of-check input { width: 20px; height: 20px; margin-top: 3px; accent-color: var(--mint); flex-shrink: 0; }
+        .of-sign { font-family: 'Readex Pro', var(--font); font-size: 18px !important; }
+        @media (max-width: 680px) {
+            .of-card { padding: 20px; border-radius: 22px; }
+            .of-meta { grid-template-columns: 1fr 1fr; }
+            .of-pay { grid-template-columns: 1fr; }
+            .of-table thead { display: none; }
+            .of-table tr { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+            .of-table td { padding: 0; border: 0; }
+            .of-table td.q, .of-table td.p { display: none; }
+            .of-table td.d small { display: block !important; }
+            .of-decide .sum { display: none; }
+            .of-decide .btn { flex: 1; padding: 0 12px; }
+        }
+        @media print {
+            body { background: #fff !important; color: #111 !important; }
+            .bg-layer, .noise, .of-decide, .of-tools, .of-top .portal-badge, .toast { display: none !important; }
+            .of-main { padding: 0; }
+            .of-card { background: #fff !important; border-color: #ddd !important; break-inside: avoid; }
+            .of-card *, .of-meta b, .of-totals div b, .of-phase b { color: #111 !important; }
+            .of-top img { filter: invert(1) hue-rotate(180deg); }
+        }
+    </style>
+</head>
+
+<body>
+    <script src="js/icons.js?v=2"></script>
+    <div class="bg-layer" aria-hidden="true"></div>
+    <div class="noise" aria-hidden="true"></div>
+
+    <main class="of-main">
+        <div class="of-wrap">
+            <header class="of-top">
+                <a href="index.html" aria-label="رنان — الموقع"><img src="images/ranan-logo.svg" alt="رنان لخدمات التصميم"></a>
+                <span class="portal-badge"><svg class="icon"><use href="#i-shield"/></svg><span>عرض رسمي من رنان</span></span>
+            </header>
+            <div id="offer-view"><div class="of-card of-empty">جاري تحميل العرض...</div></div>
+            <p class="of-foot">© <span class="en" id="year">2026</span> رنان لخدمات التصميم</p>
+        </div>
+    </main>
+
+    <div class="modal" id="decide-modal" role="dialog" aria-modal="true">
+        <div class="modal-box">
+            <button type="button" class="btn btn-ghost modal-close" style="width:40px;height:40px;padding:0" onclick="OfferPage.close()" aria-label="إغلاق"><svg class="icon"><use href="#i-x"/></svg></button>
+            <div id="decide-body"></div>
+        </div>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
+
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script defer src="js/firebase-init.js?v=2"></script>
+    <script defer src="js/rnan-core.js?v=2"></script>
+    <script defer src="js/offer.js?v=1"></script>
+</body>
+
+</html>
