@@ -856,13 +856,15 @@
 
     <!-- ONYX Theme — سمة سوداء فاخرة · يجب أن تبقى آخر ملف أنماط (الطبقة النهائية) -->
     <link rel="stylesheet" href="css/onyx-theme.css?v=1">
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/invoice.css?v=2">
 
     <!-- Firebase SDK & Backend Shim -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="js/firebase-init.js"></script>
     <script src="js/rnan-core.js?v=1"></script>
-    <script src="js/backend-shim.js?v=3"></script>
+    <script src="js/backend-shim.js?v=5"></script>
 
     <script>
         // Apply theme immediately to prevent flashing
@@ -1867,10 +1869,16 @@
                         <h1 class="text-2xl sm:text-3xl font-black mb-1 text-white">إدارة الفواتير</h1>
                         <p class="text-muted text-sm">نظام الفوترة والمتابعة المالية.</p>
                     </div>
+                    <div class="flex gap-2 w-full sm:w-auto">
+                    <button onclick="openRecurringModal()"
+                        class="flex-1 sm:flex-none bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 border border-white/10 transition-colors admin-only">
+                        <span class="material-symbols-rounded text-sm">event_repeat</span> الفواتير المتكررة
+                    </button>
                     <button onclick="openInvoiceModal('new')"
-                        class="w-full sm:w-auto btn-glow bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg admin-only">
+                        class="flex-1 sm:flex-none btn-glow bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg admin-only">
                         <span class="material-symbols-rounded text-sm">add</span> فاتورة جديدة
                     </button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -2253,6 +2261,10 @@
                                 <option value="مدفوعة">مدفوعة</option>
                             </select>
                         </div>
+                        <label id="edit-recurring-wrap" class="col-span-1 md:col-span-3 flex items-center gap-3 p-3 rounded-lg border border-emerald-200 bg-emerald-50 cursor-pointer self-end">
+                            <input type="checkbox" id="edit-recurring" class="w-5 h-5 accent-emerald-600">
+                            <span class="text-sm font-bold text-slate-700">كرّرها تلقائيًا آخر كل شهر</span>
+                        </label>
                     </div>
 
                     <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 mb-8 shadow-sm overflow-x-auto">
@@ -2322,8 +2334,7 @@
                 </div>
 
                 <div id="invoice-preview-template" class="hidden p-0 bg-white text-slate-800 relative">
-                    <div
-                        class="no-print bg-slate-100 border-b border-slate-200 p-4 flex flex-wrap justify-center gap-4 mb-8">
+                    <div class="no-print inv-toolbar">
                         <button onclick="printInvoicePreview()"
                             class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-bold transition-colors shadow-md flex items-center gap-2"><span
                                 class="material-symbols-rounded">print</span> طباعة / حفظ PDF</button>
@@ -2331,80 +2342,42 @@
                             class="bg-slate-700 hover:bg-slate-600 text-gray-200 px-6 py-2 rounded-lg font-bold transition-colors flex items-center gap-2 admin-only"><span
                                 class="material-symbols-rounded">edit</span> تعديل</button>
                     </div>
-                    <div class="px-8 sm:px-16 pb-16 pt-4 overflow-x-auto">
+                    <div class="inv-sheet">
                         <div class="quotation-stamp">فاتورة عرض سعر</div>
-                        <div
-                            class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b-2 border-gray-100 pb-8 mb-10 gap-6">
-                            <div class="text-right flex items-center gap-6">
-                                <div>
-                                    <h2 class="font-bold text-xl sm:text-2xl text-black mb-1">رنان لخدمات التصميم</h2>
-                                    <p class="text-sm text-gray-500 font-medium">المملكة العربية السعودية</p>
-                                </div>
-                                <img src="images/ranan-logo-dark.svg" alt="Rannan Logo"
-                                    class="h-16 sm:h-24 w-auto object-contain">
+                        <header class="inv-head">
+                            <img src="images/invoice-wave.svg" alt="" class="inv-wave">
+                            <img src="images/ranan-logo.svg" alt="رنان لخدمات التصميم" class="inv-logo">
+                            <div class="inv-title">
+                                <span class="inv-doc-ar"><span class="ar-invoice">فاتورة</span><span class="ar-quote">عرض سعر</span></span>
+                                <h1 id="preview-doc-title">INVOICE</h1>
                             </div>
-                            <div class="text-left" dir="ltr">
-                                <h2 class="font-bold text-xl sm:text-2xl text-black mb-1">Rannan Design Services</h2>
-                                <p class="text-sm text-gray-500 font-medium">Kingdom of Saudi Arabia</p>
+                        </header>
+                        <div class="inv-body">
+                            <div class="inv-meta">
+                                <div class="inv-to"><small><span class="ar-invoice">فاتورة إلى</span><span class="ar-quote">مقدَّم إلى</span></small><b id="prev-client-name">-</b></div>
+                                <div><small><span class="ar-invoice">رقم الفاتورة</span><span class="ar-quote">رقم العرض</span></small><b class="en-num" id="prev-id">-</b></div>
+                                <div><small>تاريخ الإصدار</small><b class="en-num" id="prev-date">-</b></div>
+                                <div><small>الحالة</small><b id="prev-status" class="inv-status">-</b></div>
                             </div>
-                        </div>
-                        <div class="text-center mb-10">
-                            <h1 class="text-4xl sm:text-5xl font-black uppercase tracking-[0.2em] text-slate-900 mb-2"
-                                id="preview-doc-title">INVOICE</h1>
-                            <p class="text-slate-400 text-sm font-bold tracking-wider">فاتورة مبسطة</p>
-                        </div>
-                        <div class="flex flex-col sm:flex-row justify-between mb-12 gap-8">
-                            <div class="w-full sm:w-1/3">
-                                <p class="text-xs font-bold text-slate-400 uppercase mb-2">فاتورة إلى</p>
-                                <div class="text-lg font-bold text-slate-800 mb-1" id="prev-client-name">-</div>
-                            </div>
-                            <div class="w-full sm:w-1/3 text-left">
-                                <div class="flex justify-between mb-2 border-b border-gray-100 pb-1">
-                                    <span class="text-xs font-bold text-slate-400 uppercase">رقم الفاتورة</span>
-                                    <span class="font-bold text-slate-800 en-num" id="prev-id">-</span>
-                                </div>
-                                <div class="flex justify-between border-b border-gray-100 pb-1">
-                                    <span class="text-xs font-bold text-slate-400 uppercase">التاريخ</span>
-                                    <span class="font-bold text-slate-800 en-num" id="prev-date">-</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-12 overflow-x-auto">
-                            <table class="w-full text-right print-table min-w-[500px]">
+                            <table class="inv-table">
                                 <thead>
-                                    <tr>
-                                        <th class="w-1/2 text-right bg-slate-50">الوصف<br><span
-                                                class="text-[8px]">Description</span></th>
-                                        <th class="text-center bg-slate-50">الكمية<br><span
-                                                class="text-[8px]">Qty</span></th>
-                                        <th class="text-center bg-slate-50">السعر<br><span
-                                                class="text-[8px]">Price</span></th>
-                                        <th class="text-center bg-slate-50">المجموع<br><span
-                                                class="text-[8px]">Total</span></th>
-                                    </tr>
+                                    <tr><th>#</th><th class="desc">البيان</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr>
                                 </thead>
                                 <tbody id="prev-items-container"></tbody>
                             </table>
-                        </div>
-                        <div class="flex flex-col sm:flex-row justify-between items-start gap-8">
-                            <div class="w-full sm:w-5/12 bg-slate-50 p-6 rounded-lg">
-                                <div class="flex justify-between py-2 border-b border-slate-200"><span
-                                        class="font-bold text-slate-600">المجموع الفرعي</span><span
-                                        class="en-num font-bold" id="prev-subtotal">0.00</span></div>
-                                <div class="flex justify-between py-4 text-2xl font-black text-slate-900 mt-2"><span
-                                        class="uppercase">المجموع الكلي</span><span class="en-num"
-                                        id="prev-total">0.00</span></div>
-                            </div>
-                            <div class="w-full sm:w-6/12 text-right">
-                                <h4 class="font-bold text-slate-800 mb-2 border-b border-gray-200 pb-2 inline-block">
-                                    ملاحظات</h4>
-                                <p class="text-sm text-slate-600 mb-8 whitespace-pre-line leading-relaxed"
-                                    id="prev-notes">-</p>
-                                <div class="bg-slate-900 text-white p-6 rounded-lg text-sm leading-loose">
-                                    <div id="prev-footer-details" class="whitespace-pre-line en-num font-medium"></div>
+                            <div class="inv-bottom">
+                                <div>
+                                    <div class="inv-box"><h4>ملاحظات</h4><p id="prev-notes">-</p></div>
+                                    <div class="inv-box inv-pay"><h4>بيانات الدفع</h4><div id="prev-footer-details"></div></div>
+                                </div>
+                                <div class="inv-totals">
+                                    <div class="row"><span>المجموع الفرعي</span><b id="prev-subtotal">0.00</b></div>
+                                    <div class="row discount" id="prev-discount-row" style="display:none"><span>الخصم</span><b id="prev-discount">0.00</b></div>
+                                    <div class="grand"><span>الإجمالي المستحق</span><b id="prev-total">0.00</b></div>
                                 </div>
                             </div>
                         </div>
+                        <footer class="inv-foot"><b>شكرًا لثقتكم</b><span>رنان لخدمات التصميم · المملكة العربية السعودية</span></footer>
                     </div>
                 </div>
             </div>
@@ -2607,6 +2580,61 @@
                     class="flex-1 btn-glow bg-primary text-white py-3 rounded-xl font-bold">حفظ</button>
                 <button onclick="document.getElementById('quickClientModal').classList.remove('open')"
                     class="flex-1 bg-white/10 hover:bg-white/20 text-white py-3 rounded-xl font-bold transition-colors">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- الفواتير المتكررة -->
+    <div id="recurringModal"
+        class="modal fixed inset-0 z-[70] bg-black/90 backdrop-blur-md items-center justify-center p-4 no-print">
+        <div class="glass-modal rounded-3xl shadow-2xl w-full max-w-3xl border border-border-glass text-right max-h-[92vh] flex flex-col overflow-hidden">
+            <div class="p-6 border-b border-white/10 flex justify-between items-start gap-4">
+                <div>
+                    <h3 class="font-bold text-xl text-white flex items-center gap-2"><span class="material-symbols-rounded text-primary">event_repeat</span> الفواتير المتكررة</h3>
+                    <p class="text-xs text-muted mt-1 leading-relaxed">تُصدر تلقائيًا بتاريخ آخر يوم من كل شهر، عند فتح لوحة الإدارة في ذلك اليوم أو بعده.</p>
+                </div>
+                <button onclick="document.getElementById('recurringModal').classList.remove('open')"
+                    class="w-9 h-9 shrink-0 flex items-center justify-center rounded-lg hover:bg-white/10 text-white transition-colors">
+                    <span class="material-symbols-rounded">close</span>
+                </button>
+            </div>
+            <div id="rec-list-view" class="p-6 overflow-y-auto custom-scrollbar">
+                <button onclick="openRecurringForm()"
+                    class="w-full btn-glow bg-gradient-to-r from-primary to-blue-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 mb-5">
+                    <span class="material-symbols-rounded">add</span> إضافة فاتورة متكررة
+                </button>
+                <div id="rec-list" class="space-y-3"></div>
+            </div>
+            <div id="rec-form-view" class="hidden p-6 overflow-y-auto custom-scrollbar">
+                <input type="hidden" id="rec-id">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+                    <label class="block sm:col-span-3"><span class="block text-xs font-bold text-slate-300 mb-1.5">العميل *</span>
+                        <select id="rec-client" class="form-input-modern bg-slate-800"></select></label>
+                    <label class="block"><span class="block text-xs font-bold text-slate-300 mb-1.5">أول شهر *</span>
+                        <input id="rec-start" type="month" class="form-input-modern en-num"></label>
+                    <label class="block"><span class="block text-xs font-bold text-slate-300 mb-1.5">آخر شهر <span class="text-muted">(اختياري)</span></span>
+                        <input id="rec-end" type="month" class="form-input-modern en-num"></label>
+                    <label class="flex items-center gap-3 self-end pb-3 cursor-pointer"><input id="rec-active" type="checkbox" class="w-5 h-5 accent-emerald-400" checked>
+                        <span class="text-sm font-bold text-white">فعّالة</span></label>
+                </div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-slate-300">بنود الفاتورة</span>
+                    <button onclick="addRecItemRow()" class="text-xs font-bold text-primary flex items-center gap-1"><span class="material-symbols-rounded text-base">add</span> بند</button>
+                </div>
+                <div id="rec-items" class="space-y-2 mb-3"></div>
+                <div class="flex items-center justify-between bg-white/5 rounded-xl p-3 border border-white/5 mb-5">
+                    <span class="text-sm text-muted font-bold">قيمة الفاتورة الشهرية</span>
+                    <span class="text-lg font-black text-white" id="rec-total">0.00</span>
+                </div>
+                <label class="block mb-6"><span class="block text-xs font-bold text-slate-300 mb-1.5">ملاحظات تظهر في كل فاتورة</span>
+                    <textarea id="rec-notes" rows="2" class="form-input-modern"></textarea></label>
+                <div class="flex gap-3">
+                    <button onclick="saveRecurringForm(this)"
+                        class="flex-1 btn-glow bg-gradient-to-r from-primary to-blue-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                        <span class="material-symbols-rounded">save</span> حفظ</button>
+                    <button onclick="showRecurringList()"
+                        class="px-6 bg-white/10 hover:bg-white/20 text-white py-3 rounded-xl font-bold transition-colors">رجوع</button>
+                </div>
             </div>
         </div>
     </div>
@@ -3381,17 +3409,8 @@
             let val = document.getElementById('proj-value').value || 0;
             let name = document.getElementById('proj-name').value || "مشروع جديد";
 
-            let tbody = document.getElementById('prev-items-container');
-            tbody.innerHTML = `
-        <tr>
-            <td class="text-right bg-white pr-4 font-bold text-slate-700 border-b border-gray-50">${name}</td>
-            <td class="text-center en-num bg-white border-b border-gray-50">1</td>
-            <td class="text-center en-num bg-white border-b border-gray-50">${formatCurrency(val)}</td>
-            <td class="text-center en-num bg-white py-3 border-b border-gray-50">${formatCurrency(val)}</td>
-        </tr>`;
-
-            document.getElementById('prev-subtotal').innerHTML = formatCurrency(val);
-            document.getElementById('prev-total').innerHTML = formatCurrency(val);
+            fillInvoiceItems([{ desc: name, qty: 1, price: val }], val);
+            setInvoiceStatus('عرض');
             document.getElementById('prev-notes').innerText = "عرض سعر مبدئي";
             document.getElementById('prev-footer-details').innerText = DEFAULT_BANK_INFO;
 
@@ -3485,6 +3504,7 @@
                             checkNotifications();
                             filterArchive();
                             loadRequests();
+                            runRecurringInvoices();
                         }
                     }).getProjectsData();
 
@@ -4683,6 +4703,8 @@ ${client.phone.toString().trim().replace(/\D/g, '')}
             document.getElementById('invoice-preview-template').classList.add('hidden');
             document.getElementById('invoice-preview-template').classList.remove('quotation-mode');
             document.getElementById('edit-items-container').innerHTML = '';
+            document.getElementById('edit-recurring').checked = false;
+            document.getElementById('edit-recurring-wrap').classList.toggle('hidden', mode !== 'new');
 
             if (mode == 'new') {
                 currentInvoiceId = "تلقائي";
@@ -4831,10 +4853,232 @@ ${client.phone.toString().trim().replace(/\D/g, '')}
                 footerText: footer
             };
 
+            let makeRecurring = currentInvoiceId === "تلقائي" && document.getElementById('edit-recurring').checked;
+
             google.script.run.withSuccessHandler((res) => {
                 printInvoiceDirectly({ ...data, number: res.id, client: data.clientSelect, date: data.issueDate, amount: data.totalAmount });
+                if (makeRecurring) {
+                    // هذه فاتورة الشهر الحالي؛ التكرار يبدأ من الشهر التالي
+                    let issued = data.issueDate ? new Date(data.issueDate + 'T12:00:00') : new Date();
+                    google.script.run.withSuccessHandler(() => showAdminToast('🔁 ستُصدر هذه الفاتورة تلقائيًا آخر كل شهر — من «الفواتير المتكررة» تعدّلها أو توقفها'))
+                        .saveRecurring({ client: data.clientSelect, items: data.items, notes: data.notes, footerText: data.footerText, active: true, lastInvoice: res.id,
+                            startPeriod: RecurringPeriods.next(RecurringPeriods.ym(issued)) });
+                }
                 loadAllData();
             }).saveInvoiceToSheet(data);
+        }
+
+        // ═══ الفاتورة بالهوية الجديدة ═══
+        // البنود الموجبة في الجدول، والسالبة (الخصم) في صندوق المجاميع
+        function fillInvoiceItems(items, amount) {
+            let subtotal = 0, discount = 0, n = 0;
+            document.getElementById('prev-items-container').innerHTML = (items || []).map(i => {
+                let qty = parseFloat(i.qty) || 0, price = parseFloat(i.price) || 0, line = qty * price;
+                if (line < 0) { discount += -line; return ''; }
+                subtotal += line;
+                n++;
+                return `<tr><td class="idx en-num">${n}</td><td class="desc">${RNAN.esc(i.desc)}</td><td class="en-num">${qty}</td><td>${formatCurrency(price)}</td><td>${formatCurrency(line)}</td></tr>`;
+            }).join('');
+            let total = (amount === undefined || amount === null || amount === '') ? subtotal - discount : parseFloat(amount) || 0;
+            if (subtotal - total > discount + 0.009) discount = subtotal - total;
+            document.getElementById('prev-subtotal').innerHTML = formatCurrency(subtotal);
+            document.getElementById('prev-discount').innerHTML = formatCurrency(discount);
+            document.getElementById('prev-discount-row').style.display = discount > 0.009 ? '' : 'none';
+            document.getElementById('prev-total').innerHTML = formatCurrency(total);
+        }
+
+        function setInvoiceStatus(status) {
+            let el = document.getElementById('prev-status');
+            let isVoid = status === 'ملغاة' || status === 'ملغي';
+            el.className = 'inv-status' + (status === 'مدفوعة' ? ' paid' : isVoid ? ' void' : '');
+            el.innerText = status === 'مدفوعة' ? 'مدفوعة' : isVoid ? 'ملغاة' : status === 'عرض' ? 'عرض مبدئي' : 'بانتظار السداد';
+        }
+
+        // ═══ الفواتير المتكررة (آخر كل شهر) ═══
+        let recurringData = [];
+        let recurringLastRun = 0;
+
+        function showAdminToast(msg) {
+            let t = document.getElementById('admin-toast');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'admin-toast';
+                t.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-[120] px-5 py-3 rounded-2xl bg-[#0d1564] border border-[#47E0AC]/40 text-white text-sm font-bold shadow-2xl transition-opacity no-print';
+                document.body.appendChild(t);
+            }
+            t.innerText = msg;
+            t.style.opacity = '1';
+            clearTimeout(showAdminToast._t);
+            showAdminToast._t = setTimeout(() => { t.style.opacity = '0'; }, 6000);
+        }
+
+        // يعمل عند فتح اللوحة (وكل 10 دقائق مع تحديث البيانات): يُصدر ما حان موعده فقط
+        function runRecurringInvoices(force) {
+            if (!force && Date.now() - recurringLastRun < 10 * 60 * 1000) return;
+            recurringLastRun = Date.now();
+            google.script.run.withSuccessHandler((issued) => {
+                if (!issued || !issued.length) return;
+                showAdminToast(`🔁 أُصدرت ${issued.length} فاتورة شهرية تلقائيًا: ` + [...new Set(issued.map(i => i.client))].join('، '));
+                loadAllData();
+            }).withFailureHandler(err => console.error('Recurring invoices:', err)).issueDueRecurring();
+        }
+
+        function openRecurringModal() {
+            document.getElementById('recurringModal').classList.add('open');
+            showRecurringList();
+        }
+
+        function showRecurringList() {
+            document.getElementById('rec-form-view').classList.add('hidden');
+            document.getElementById('rec-list-view').classList.remove('hidden');
+            document.getElementById('rec-list').innerHTML = '<p class="text-center text-muted py-8 text-sm">جاري التحميل...</p>';
+            google.script.run.withSuccessHandler((list) => {
+                recurringData = list;
+                renderRecurringList();
+            }).getRecurringData();
+        }
+
+        function recurringAmount(r) {
+            return (r.items || []).reduce((s, i) => s + (parseFloat(i.qty) || 0) * (parseFloat(i.price) || 0), 0);
+        }
+
+        function renderRecurringList() {
+            const E = RNAN.esc, RP = RecurringPeriods;
+            let box = document.getElementById('rec-list');
+            if (!recurringData.length) {
+                box.innerHTML = `<div class="flex flex-col items-center justify-center py-12 text-muted text-center"><span class="material-symbols-rounded text-5xl mb-3 opacity-30">event_repeat</span><p class="text-sm">لا توجد فواتير متكررة بعد.<br>أضف اشتراكًا شهريًا لعميل وستُصدر فاتورته آخر كل شهر.</p></div>`;
+                return;
+            }
+            box.innerHTML = recurringData.map(r => {
+                let next = RP.nextDue(r);
+                let ended = r.endPeriod && next > r.endPeriod;
+                let when = !r.active ? 'متوقفة — لن تُصدر فواتير' : ended ? 'انتهت المدة المحددة' : 'الإصدار القادم: ' + RNAN.fmtDate(RP.lastDay(next));
+                let thisMonthDone = next > RP.ym(new Date());
+                return `
+                <div class="glass-panel rounded-2xl p-5 border border-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <h4 class="font-bold text-white">${E(r.client)}</h4>
+                            <p class="text-xs text-muted mt-1 truncate">${E((r.items || []).filter(i => (parseFloat(i.price) || 0) > 0).map(i => i.desc).join('، '))}</p>
+                        </div>
+                        <span class="rec-pill ${r.active && !ended ? 'rec-on' : 'rec-off'}">${r.active && !ended ? 'فعّالة' : 'متوقفة'}</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-x-5 gap-y-1 mt-3 text-xs text-muted">
+                        <span class="text-base font-black text-white">${formatCurrency(recurringAmount(r))}</span>
+                        <span>${when}</span>
+                        <span>صدر منها: <b class="en-num text-white">${parseInt(r.issuedCount) || 0}</b></span>
+                        ${r.lastInvoice ? `<span>آخر فاتورة: <b class="en-num text-white">${E(r.lastInvoice)}</b></span>` : ''}
+                    </div>
+                    <div class="flex flex-wrap gap-2 mt-4">
+                        <button onclick="openRecurringForm('${r.id}')" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/10">تعديل</button>
+                        <button onclick="toggleRecurring('${r.id}')" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/10">${r.active ? 'إيقاف' : 'تفعيل'}</button>
+                        ${r.active && !ended && !thisMonthDone ? `<button onclick="issueRecurringNow('${r.id}', this)" class="px-4 py-2 rounded-xl client-link-btn text-xs font-bold border">إصدار فاتورة هذا الشهر الآن</button>` : ''}
+                        ${r.active && thisMonthDone ? `<span class="px-3 py-2 text-xs font-bold text-accent-green flex items-center gap-1"><span class="material-symbols-rounded text-base">check_circle</span> صدرت فاتورة هذا الشهر</span>` : ''}
+                        <button onclick="deleteRecurringItem('${r.id}')" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-red-500/15 text-muted hover:text-red-400 text-xs font-bold border border-white/10 mr-auto">حذف</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function addRecItemRow(item) {
+            item = item || { desc: '', qty: 1, price: '' };
+            let row = document.createElement('div');
+            row.className = 'rec-item flex gap-2';
+            row.innerHTML = `
+                <input class="rec-desc form-input-modern flex-1" placeholder="مثال: إدارة حسابات التواصل — شهريًا" value="${RNAN.esc(item.desc)}">
+                <input class="rec-qty form-input-modern en-num !w-20" type="number" min="0" step="any" value="${RNAN.esc(item.qty)}" oninput="recalcRecTotal()">
+                <input class="rec-price form-input-modern en-num !w-32" type="number" step="any" placeholder="السعر" value="${RNAN.esc(item.price)}" oninput="recalcRecTotal()">
+                <button onclick="this.parentElement.remove(); recalcRecTotal()" class="w-11 shrink-0 rounded-xl bg-white/5 hover:bg-red-500/15 text-muted hover:text-red-400 border border-white/10 flex items-center justify-center"><span class="material-symbols-rounded text-lg">close</span></button>`;
+            document.getElementById('rec-items').appendChild(row);
+            recalcRecTotal();
+        }
+
+        function readRecItems() {
+            return [...document.querySelectorAll('#rec-items .rec-item')].map(r => ({
+                desc: r.querySelector('.rec-desc').value.trim(),
+                qty: parseFloat(r.querySelector('.rec-qty').value) || 0,
+                price: parseFloat(r.querySelector('.rec-price').value) || 0
+            })).filter(i => i.desc && i.qty);
+        }
+
+        function recalcRecTotal() {
+            document.getElementById('rec-total').innerHTML = formatCurrency(recurringAmount({ items: readRecItems() }));
+        }
+
+        function openRecurringForm(id) {
+            let r = recurringData.find(x => x.id === id) || {};
+            let sel = document.getElementById('rec-client');
+            sel.innerHTML = '<option value="">اختر العميل</option>' + clientsData.map(c => `<option value="${RNAN.esc(c.company || c.name)}">${RNAN.esc(c.company || c.name)}</option>`).join('');
+            sel.value = r.client || '';
+            document.getElementById('rec-id').value = id || '';
+            document.getElementById('rec-start').value = r.startPeriod || RecurringPeriods.ym(new Date());
+            document.getElementById('rec-end').value = r.endPeriod || '';
+            document.getElementById('rec-active').checked = r.active !== false;
+            document.getElementById('rec-notes').value = r.notes || '';
+            document.getElementById('rec-items').innerHTML = '';
+            (r.items && r.items.length ? r.items : [null]).forEach(i => addRecItemRow(i));
+            document.getElementById('rec-list-view').classList.add('hidden');
+            document.getElementById('rec-form-view').classList.remove('hidden');
+        }
+
+        function saveRecurringForm(btn) {
+            let id = document.getElementById('rec-id').value;
+            let existing = recurringData.find(x => x.id === id) || {};
+            let data = {
+                id: id || null,
+                client: document.getElementById('rec-client').value,
+                startPeriod: document.getElementById('rec-start').value,
+                endPeriod: document.getElementById('rec-end').value || null,
+                active: document.getElementById('rec-active').checked,
+                notes: document.getElementById('rec-notes').value.trim(),
+                footerText: existing.footerText || '',
+                items: readRecItems()
+            };
+            if (!data.client) return alert('اختر العميل');
+            if (!data.startPeriod) return alert('حدّد أول شهر للإصدار');
+            if (data.endPeriod && data.endPeriod < data.startPeriod) return alert('آخر شهر يجب أن يكون بعد أول شهر');
+            if (!data.items.length || recurringAmount(data) <= 0) return alert('أضف بندًا واحدًا على الأقل بقيمة أكبر من صفر');
+            let original = btn.innerHTML;
+            btn.innerHTML = '<span class="material-symbols-rounded animate-spin">sync</span> جاري الحفظ...';
+            btn.disabled = true;
+            google.script.run.withSuccessHandler(() => {
+                btn.innerHTML = original;
+                btn.disabled = false;
+                showRecurringList();
+                runRecurringInvoices(true);
+            }).withFailureHandler(err => {
+                btn.innerHTML = original;
+                btn.disabled = false;
+                alert('تعذّر الحفظ: ' + err.message);
+            }).saveRecurring(data);
+        }
+
+        function toggleRecurring(id) {
+            let r = recurringData.find(x => x.id === id);
+            if (!r) return;
+            google.script.run.withSuccessHandler(() => { showRecurringList(); runRecurringInvoices(true); })
+                .saveRecurring(Object.assign({}, r, { active: !r.active }));
+        }
+
+        function deleteRecurringItem(id) {
+            if (!confirm('حذف هذه الفاتورة المتكررة؟ لن تُصدر فواتير جديدة منها، والفواتير السابقة تبقى كما هي.')) return;
+            google.script.run.withSuccessHandler(() => showRecurringList()).deleteRecurring(id);
+        }
+
+        function issueRecurringNow(id, btn) {
+            let month = RecurringPeriods.label(RecurringPeriods.ym(new Date()));
+            if (!confirm(`إصدار فاتورة ${month} الآن بدل انتظار آخر الشهر؟`)) return;
+            btn.disabled = true;
+            google.script.run.withSuccessHandler((issued) => {
+                btn.disabled = false;
+                if (!issued.length) return alert('فاتورة هذا الشهر صدرت مسبقًا.');
+                showAdminToast(`أُصدرت ${issued.length} فاتورة: ` + issued.map(i => i.number).join('، '));
+                showRecurringList();
+                loadAllData();
+            }).withFailureHandler(err => {
+                btn.disabled = false;
+                alert('تعذّر الإصدار: ' + err.message);
+            }).issueDueRecurring({ onlyId: id, forcePeriod: RecurringPeriods.ym(new Date()) });
         }
 
         // «حفظ كـ PDF» يقترح عنوان الصفحة اسمًا للملف، فنضبطه مؤقتًا ثم نعيده بعد الطباعة
@@ -4874,24 +5118,8 @@ ${client.phone.toString().trim().replace(/\D/g, '')}
 
             document.getElementById('prev-footer-details').innerText = footerText;
 
-            let tbody = document.getElementById('prev-items-container'); tbody.innerHTML = '';
-            let total = 0;
-            if (inv.items) inv.items.forEach((i, idx) => {
-                let taxable = i.qty * i.price;
-                let vat = 0;
-                let lineTotal = taxable + vat;
-                total += lineTotal;
-
-                tbody.innerHTML += `
-            <tr>
-                <td class="text-right bg-white pr-4 font-bold text-slate-700 border-b border-gray-50">${i.desc}</td>
-                <td class="text-center en-num bg-white border-b border-gray-50">${i.qty}</td>
-                <td class="text-center en-num bg-white border-b border-gray-50">${formatCurrency(i.price)}</td>
-                <td class="text-center en-num bg-white py-3 border-b border-gray-50">${formatCurrency(lineTotal)}</td>
-            </tr>`;
-            });
-            document.getElementById('prev-subtotal').innerHTML = formatCurrency(total);
-            document.getElementById('prev-total').innerHTML = formatCurrency(total);
+            fillInvoiceItems(inv.items, inv.amount);
+            setInvoiceStatus(inv.status);
         }
 
         function closeMainModal() { document.getElementById('mainModal').classList.remove('open'); }

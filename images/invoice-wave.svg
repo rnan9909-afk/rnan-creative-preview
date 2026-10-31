@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 170" width="440" height="170">
+  <title>Ranan — invoice header wave</title>
+  <defs>
+    <radialGradient id="g"><stop offset="0" stop-color="#47E0AC" stop-opacity=".32"/><stop offset="1" stop-color="#47E0AC" stop-opacity="0"/></radialGradient>
+    <linearGradient id="m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#46E3A5"/><stop offset="1" stop-color="#43D9C4"/></linearGradient>
+    <clipPath id="c"><rect width="440" height="170"/></clipPath>
+  </defs>
+  <g clip-path="url(#c)">
+    <circle cx="78" cy="64" r="150" fill="url(#g)"/>
+    <circle cx="78" cy="64" r="34" fill="none" stroke="#FFFFFF" stroke-opacity="0.120" stroke-width="1.1"/><circle cx="78" cy="64" r="58" fill="none" stroke="#47E0AC" stroke-opacity=".45" stroke-width="1.4"/><circle cx="78" cy="64" r="88" fill="none" stroke="#FFFFFF" stroke-opacity="0.098" stroke-width="1.1"/><circle cx="78" cy="64" r="124" fill="none" stroke="#FFFFFF" stroke-opacity="0.088" stroke-width="1.1"/><circle cx="78" cy="64" r="166" fill="none" stroke="#FFFFFF" stroke-opacity="0.077" stroke-width="1.1"/><circle cx="78" cy="64" r="214" fill="none" stroke="#FFFFFF" stroke-opacity="0.066" stroke-width="1.1"/><circle cx="78" cy="64" r="268" fill="none" stroke="#FFFFFF" stroke-opacity="0.055" stroke-width="1.1"/><circle cx="78" cy="64" r="328" fill="none" stroke="#FFFFFF" stroke-opacity="0.044" stroke-width="1.1"/><circle cx="78" cy="64" r="394" fill="none" stroke="#FFFFFF" stroke-opacity="0.040" stroke-width="1.1"/>
+    <g transform="translate(78,64) scale(1.25) translate(-401.5,-568.5)"><path d="M 385.00,598.00 L 385.00,633.00 Q 385.00,639.00 386.50,642.50 L 386.50,642.50 Q 388.00,646.00 392.05,650.42 L 427.95,689.58 Q 432.00,694.00 438.00,694.00 L 472.00,694.00 Z M 385.0,568.5 a 16.5,16.5 0 1,0 33.0,0 a 16.5,16.5 0 1,0 -33.0,0 Z" fill="url(#m)" fill-rule="evenodd"/></g>
+  </g>
+</svg>

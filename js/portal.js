@@ -167,28 +167,41 @@
         if (!inv) return;
         state.printName = inv.number + ' - ' + (inv.client || state.client.company || state.client.name || '');
         const items = Array.isArray(inv.items) ? inv.items : (typeof inv.items === 'string' ? RNAN.safeJSON(inv.items, []) : []);
-        const subtotal = items.reduce((s, it) => s + (parseFloat(it.qty) || 0) * (parseFloat(it.price) || 0), 0);
         const total = parseFloat(inv.amount) || 0;
-        const discount = subtotal - total;
+        const pos = items.filter(it => (parseFloat(it.qty) || 0) * (parseFloat(it.price) || 0) >= 0);
+        const sub = pos.reduce((s, it) => s + (parseFloat(it.qty) || 0) * (parseFloat(it.price) || 0), 0);
+        const disc = Math.max(0, sub - total);
+        const paid = isPaid(inv), voided = isVoid(inv);
         $('#invoice-paper').innerHTML = `
-            <div class="paper-head">
-                <img src="images/ranan-logo-dark.svg" alt="رنان">
-                <div><h4>INVOICE</h4><small>#${E(inv.number)}</small></div>
+            <div class="pv-head">
+                <img class="pv-wave" src="images/invoice-wave.svg" alt="">
+                <img class="pv-logo" src="images/ranan-logo.svg" alt="رنان">
+                <div class="pv-title"><b>فاتورة</b><span>INVOICE</span></div>
             </div>
-            <div class="paper-meta">
-                <div><span>العميل</span><b>${E(inv.client)}</b></div>
-                <div><span>التاريخ</span><b>${RNAN.fmtDate(inv.date)}</b></div>
-                <div><span>الحالة</span><b>${E(inv.status || '')}</b></div>
-                <div><span>صادرة من</span><b>${E(state.settings.agency_name || 'رنان لخدمات التصميم')}</b></div>
+            <div class="pv-body">
+                <div class="pv-meta">
+                    <div class="to"><span>فاتورة إلى</span><b>${E(inv.client)}</b></div>
+                    <div><span>رقم الفاتورة</span><b class="en">${E(inv.number)}</b></div>
+                    <div><span>تاريخ الإصدار</span><b>${RNAN.fmtDate(inv.date)}</b></div>
+                    <div><span>الحالة</span><b class="pv-status${paid ? ' paid' : voided ? ' void' : ''}">${paid ? 'مدفوعة' : voided ? 'ملغاة' : 'بانتظار السداد'}</b></div>
+                </div>
+                <table>
+                    <thead><tr><th>#</th><th class="desc">البيان</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead>
+                    <tbody>${pos.map((it, n) => `<tr><td class="num">${n + 1}</td><td class="desc">${E(it.desc)}</td><td class="num">${E(it.qty)}</td><td class="num">${sar(it.price)}</td><td class="num">${sar((parseFloat(it.qty) || 0) * (parseFloat(it.price) || 0))}</td></tr>`).join('')}</tbody>
+                </table>
+                <div class="pv-bottom">
+                    <div>
+                        ${inv.notes ? `<div class="pv-box"><h5>ملاحظات</h5>${E(inv.notes)}</div>` : ''}
+                        ${inv.footerText || state.settings.invoice_footer ? `<div class="pv-box pay"><h5>بيانات الدفع</h5>${E(inv.footerText || state.settings.invoice_footer)}</div>` : ''}
+                    </div>
+                    <div class="pv-totals">
+                        <div class="row"><span>المجموع الفرعي</span><b class="num">${sar(sub)} ريال</b></div>
+                        ${disc > 0.009 ? `<div class="row discount"><span>الخصم</span><b class="num">- ${sar(disc)} ريال</b></div>` : ''}
+                        <div class="grand"><span>الإجمالي المستحق</span><b class="num">${sar(total)} SAR</b></div>
+                    </div>
+                </div>
             </div>
-            <table>
-                <thead><tr><th>البيان</th><th class="num">الكمية</th><th class="num">السعر</th><th class="num">الإجمالي</th></tr></thead>
-                <tbody>${items.map(it => `<tr><td>${E(it.desc)}</td><td class="num">${E(it.qty)}</td><td class="num">${sar(it.price)}</td><td class="num">${sar((parseFloat(it.qty) || 0) * (parseFloat(it.price) || 0))}</td></tr>`).join('')}</tbody>
-            </table>
-            ${discount > 0.009 ? `<div style="display:flex;justify-content:space-between;padding:0 18px 10px;color:#5a6290"><span>خصم</span><span class="num">- ${sar(discount)} ريال</span></div>` : ''}
-            <div class="paper-total"><span>الإجمالي</span><span class="en">${sar(total)} SAR</span></div>
-            ${inv.notes ? `<div class="paper-foot"><b>ملاحظات:</b> ${E(inv.notes)}</div>` : ''}
-            ${inv.footerText || state.settings.invoice_footer ? `<div class="paper-foot">${E(inv.footerText || state.settings.invoice_footer)}</div>` : ''}`;
+            <div class="pv-foot"><b>شكرًا لثقتكم</b><span>${E(state.settings.agency_name || 'رنان لخدمات التصميم')}</span></div>`;
         openModal('#invoice-modal');
     }
 

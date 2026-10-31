@@ -832,21 +832,46 @@ textarea.input { height: auto; min-height: 130px; padding: 14px 18px; resize: ve
 .modal-box h3 { margin: 0 0 8px; font-size: 22px; }
 .modal-box > p { margin: 0 0 20px; color: var(--text-2); }
 
-/* الفاتورة داخل صفحة العميل: ورق أبيض مقروء وقابل للطباعة */
-.paper { background: #fff; color: #0b1340; border-radius: 18px; padding: 32px; font-size: 14px; line-height: 1.7; }
-.paper-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding-bottom: 20px; border-bottom: 2px solid #eef0f8; }
-.paper-head img { height: 54px; }
-.paper-head h4 { margin: 0; font-size: 26px; color: #101965; direction: ltr; text-align: left; }
-.paper-head small { display: block; color: #5a6290; text-align: left; direction: ltr; }
-.paper-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
-.paper-meta span { display: block; color: #6b7299; font-size: 12px; }
-.paper-meta b { color: #0b1340; }
-.paper table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-.paper th { text-align: start; font-size: 12px; color: #6b7299; font-weight: 600; padding: 10px 8px; background: #f5f6fb; }
-.paper td { padding: 12px 8px; border-bottom: 1px solid #eef0f8; }
-.paper .num { text-align: end; white-space: nowrap; direction: ltr; }
-.paper-total { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; border-radius: 14px; background: #101965; color: #fff; font-weight: 700; font-size: 18px; }
-.paper-foot { margin-top: 18px; padding: 14px 16px; border-radius: 12px; background: #f5f6fb; color: #3c4470; font-size: 13px; white-space: pre-line; }
+/* الفاتورة داخل صفحة العميل — بنفس تصميم فاتورة لوحة الإدارة (الهوية الجديدة) */
+.paper { background: #fff; color: #1b2259; border-radius: 18px; overflow: hidden; font-size: 14px; line-height: 1.7; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.pv-head { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 118px; padding: 22px 26px; background: linear-gradient(120deg, #101965, #0a1250 55%, #02083A); color: #fff; }
+.pv-wave { position: absolute; left: 0; top: 0; height: 100%; width: auto; }
+.pv-logo { position: relative; height: 62px; width: auto; }
+.pv-title { position: relative; margin-left: 118px; text-align: left; }
+.pv-title b { display: block; font-family: 'Readex Pro', var(--font); font-size: 26px; line-height: 1.2; color: #fff; }
+.pv-title span { display: block; direction: ltr; font-size: 11px; letter-spacing: .3em; color: #47E0AC; font-weight: 600; }
+.pv-body { padding: 22px 24px 0; }
+.pv-meta { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+.pv-meta > div { padding: 10px 12px; border-radius: 12px; background: #f4f6fc; border: 1px solid #e6e9f5; }
+.pv-meta .to { background: #fff; border: 1.5px solid #101965; }
+.pv-meta span { display: block; font-size: 11px; color: #6b7299; font-weight: 600; }
+.pv-meta b { display: block; font-size: 14px; color: #101965; word-break: break-word; }
+.pv-meta .to b { font-family: 'Readex Pro', var(--font); font-size: 16px; }
+.pv-status { display: inline-block !important; padding: 1px 10px; border-radius: 999px; font-size: 12px !important; background: rgba(251, 191, 36, .16); color: #92400e !important; }
+.pv-status.paid { background: rgba(71, 224, 172, .2); color: #0f6b50 !important; }
+.pv-status.void { background: #eceef5; color: #6b7299 !important; }
+.paper table { width: 100%; border-collapse: separate; border-spacing: 0; margin-bottom: 18px; }
+.paper th { padding: 10px 8px; background: #101965; color: #fff; font-size: 12px; font-weight: 600; text-align: center; }
+.paper th:first-child { border-radius: 0 10px 10px 0; }
+.paper th:last-child { border-radius: 10px 0 0 10px; }
+.paper td { padding: 11px 8px; border-bottom: 1px solid #e6e9f5; text-align: center; color: #1b2259; }
+.paper th.desc, .paper td.desc { text-align: start; }
+.paper td.desc { font-weight: 600; }
+.paper .num { white-space: nowrap; direction: ltr; unicode-bidi: isolate; }
+.pv-bottom { display: grid; grid-template-columns: 1.1fr 1fr; gap: 14px; align-items: start; }
+.pv-box { padding: 12px 14px; border-radius: 12px; border: 1px solid #e6e9f5; margin-bottom: 10px; font-size: 13px; color: #3c4470; white-space: pre-line; }
+.pv-box h5 { margin: 0 0 2px; font-size: 12px; color: #101965; display: flex; align-items: center; gap: 6px; white-space: normal; }
+.pv-box h5::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #47E0AC; }
+.pv-box.pay { background: #f4f6fc; }
+.pv-totals { border-radius: 14px; overflow: hidden; border: 1px solid #e6e9f5; }
+.pv-totals .row { display: flex; justify-content: space-between; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #e6e9f5; font-size: 13px; }
+.pv-totals .row span { color: #6b7299; font-weight: 600; }
+.pv-totals .row.discount b { color: #0f6b50; }
+.pv-totals .grand { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 14px; background: linear-gradient(120deg, #101965, #02083A); color: #fff; }
+.pv-totals .grand span { font-family: 'Readex Pro', var(--font); font-size: 13px; opacity: .85; }
+.pv-totals .grand b { font-size: 20px; }
+.pv-foot { display: flex; justify-content: space-between; gap: 10px; margin: 18px 24px 0; padding: 12px 0 18px; border-top: 2px solid #47E0AC; font-size: 12px; color: #6b7299; }
+.pv-foot b { color: #101965; font-family: 'Readex Pro', var(--font); }
 .paper-actions { display: flex; gap: 10px; margin-top: 18px; }
 .paper-actions .btn { flex: 1; height: 48px; }
 
@@ -870,8 +895,16 @@ textarea.input { height: auto; min-height: 130px; padding: 14px 18px; resize: ve
     .inv .amount { grid-column: 2; }
     .inv .pill { grid-column: 2; justify-self: start; }
     .proj { padding: 20px; }
-    .paper { padding: 20px; }
-    .paper-meta { grid-template-columns: 1fr; }
+    .pv-head { padding: 18px; min-height: 96px; }
+    .pv-logo { height: 44px; }
+    .pv-title b { font-size: 20px; }
+    .pv-title { margin-left: 82px; }
+    .pv-body { padding: 16px 12px 0; }
+    .pv-meta { grid-template-columns: 1fr 1fr; }
+    .pv-meta .to { grid-column: span 2; }
+    .pv-bottom { grid-template-columns: 1fr; }
+    .pv-foot { margin: 14px 12px 0; flex-direction: column; }
+    .paper th, .paper td { padding: 9px 5px; font-size: 12px; }
     .modal-box { padding: 24px 18px; }
     .new-req { padding: 24px; }
     .new-req .btn { width: 100%; }

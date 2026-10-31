@@ -1,0 +1,391 @@
+/* ============================================================
+   فاتورة رنان — بالهوية الجديدة (كحلي + نعناعي + «الموجة»)
+   ------------------------------------------------------------
+   · كل القواعد تحت #mainModal #invoice-preview-template لتتغلّب على طبقات
+     السمة الداكنة (onyx/b2b) التي تلوّن العناوين والجداول.
+   · print-color-adjust: exact يطبع الشريط الكحلي حتى لو كان خيار
+     «رسومات الخلفية» مطفأً في نافذة الطباعة.
+   ============================================================ */
+
+#mainModal #invoice-preview-template {
+    --inv-navy: #101965;
+    --inv-midnight: #02083A;
+    --inv-mint: #47E0AC;
+    --inv-teal: #43D9C4;
+    --inv-ink: #1b2259;
+    --inv-muted: #6b7299;
+    --inv-line: #e6e9f5;
+    --inv-cloud: #f4f6fc;
+    background: #fff !important;
+    color: var(--inv-ink) !important;
+    font-family: 'IBM Plex Sans Arabic', 'Cairo', sans-serif;
+}
+
+#mainModal #invoice-preview-template .inv-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    padding: 14px;
+    background: var(--inv-cloud);
+    border-bottom: 1px solid var(--inv-line);
+}
+
+#mainModal #invoice-preview-template .inv-sheet {
+    position: relative;
+    padding: 0 0 28px;
+    background: #fff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* ── الترويسة الكحلية ── */
+#mainModal #invoice-preview-template .inv-head {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    min-height: 150px;
+    padding: 30px 44px;
+    background: linear-gradient(120deg, var(--inv-navy) 0%, #0a1250 55%, var(--inv-midnight) 100%) !important;
+    color: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+#mainModal #invoice-preview-template .inv-wave {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: auto;
+    pointer-events: none;
+}
+
+#mainModal #invoice-preview-template .inv-logo {
+    position: relative;
+    height: 86px;
+    width: auto;
+    filter: none !important;
+}
+
+#mainModal #invoice-preview-template .inv-title {
+    position: relative;
+    margin-left: 150px; /* يبتعد عن نقطة «الموجة» وخطّها */
+    text-align: left;
+    direction: ltr;
+}
+
+/* رمز الريال صورة سوداء تُقلب للأبيض في الوضع الداكن؛ على ورق الفاتورة يبقى داكنًا */
+#mainModal #invoice-preview-template .riyal-logo {
+    filter: brightness(0) !important;
+}
+
+#mainModal #invoice-preview-template .inv-title .inv-doc-ar {
+    display: block;
+    font-family: 'Readex Pro', 'IBM Plex Sans Arabic', sans-serif;
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #fff !important;
+    direction: rtl;
+    text-align: left;
+}
+
+#mainModal #invoice-preview-template .inv-title h1 {
+    margin: 2px 0 0;
+    font-family: 'Readex Pro', 'IBM Plex Sans Arabic', sans-serif;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    letter-spacing: .32em;
+    color: var(--inv-mint) !important;
+    text-transform: uppercase;
+    background: none !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+#mainModal #invoice-preview-template .ar-quote { display: none; }
+#mainModal #invoice-preview-template.quotation-mode .ar-quote { display: inline; }
+#mainModal #invoice-preview-template.quotation-mode .ar-invoice { display: none; }
+
+/* ── بيانات الفاتورة ── */
+#mainModal #invoice-preview-template .inv-body {
+    padding: 32px 44px 0;
+}
+
+#mainModal #invoice-preview-template .inv-meta {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 30px;
+}
+
+#mainModal #invoice-preview-template .inv-meta > div {
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: var(--inv-cloud) !important;
+    border: 1px solid var(--inv-line);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+#mainModal #invoice-preview-template .inv-meta small {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--inv-muted) !important;
+    margin-bottom: 4px;
+}
+
+#mainModal #invoice-preview-template .inv-meta b {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--inv-navy) !important;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+#mainModal #invoice-preview-template .inv-meta .inv-to {
+    background: #fff !important;
+    border: 1.5px solid var(--inv-navy);
+}
+
+#mainModal #invoice-preview-template .inv-meta .inv-to b {
+    font-family: 'Readex Pro', 'IBM Plex Sans Arabic', sans-serif;
+    font-size: 19px;
+}
+
+#mainModal #invoice-preview-template .inv-status {
+    display: inline-block !important;
+    padding: 2px 12px;
+    border-radius: 999px;
+    font-size: 13px !important;
+    background: rgba(251, 191, 36, .16) !important;
+    color: #92400e !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+#mainModal #invoice-preview-template .inv-status.paid {
+    background: rgba(71, 224, 172, .2) !important;
+    color: #0f6b50 !important;
+}
+
+#mainModal #invoice-preview-template .inv-status.void {
+    background: #eceef5 !important;
+    color: #6b7299 !important;
+}
+
+/* ── جدول البنود ── */
+#mainModal #invoice-preview-template .inv-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 26px;
+    font-size: 14px;
+}
+
+#mainModal #invoice-preview-template .inv-table th {
+    padding: 12px 14px !important;
+    background: var(--inv-navy) !important;
+    color: #fff !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-align: center;
+    border: 0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+#mainModal #invoice-preview-template .inv-table th:first-child { border-radius: 0 12px 12px 0; width: 44px; }
+#mainModal #invoice-preview-template .inv-table th:last-child { border-radius: 12px 0 0 12px; }
+#mainModal #invoice-preview-template .inv-table th.desc { text-align: right; }
+
+#mainModal #invoice-preview-template .inv-table td {
+    padding: 14px !important;
+    border-bottom: 1px solid var(--inv-line) !important;
+    color: var(--inv-ink) !important;
+    background: #fff !important;
+    text-align: center;
+    vertical-align: middle;
+}
+
+#mainModal #invoice-preview-template .inv-table td.desc { text-align: right; font-weight: 600; }
+#mainModal #invoice-preview-template .inv-table td.idx { color: var(--inv-muted) !important; font-weight: 600; }
+#mainModal #invoice-preview-template .inv-table tr:nth-child(even) td { background: #fafbfe !important; }
+
+#mainModal #invoice-preview-template .inv-table .en-num,
+#mainModal #invoice-preview-template .inv-totals .en-num {
+    justify-content: center;
+}
+
+/* ── الملاحظات والمجاميع ── */
+#mainModal #invoice-preview-template .inv-bottom {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 22px;
+    align-items: start;
+}
+
+#mainModal #invoice-preview-template .inv-box {
+    padding: 18px 20px;
+    border-radius: 16px;
+    border: 1px solid var(--inv-line);
+    background: #fff !important;
+    margin-bottom: 14px;
+}
+
+#mainModal #invoice-preview-template .inv-box h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: var(--inv-navy) !important;
+}
+
+#mainModal #invoice-preview-template .inv-box h4::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--inv-mint);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+#mainModal #invoice-preview-template .inv-box p,
+#mainModal #invoice-preview-template .inv-box div {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.9;
+    color: #3c4470 !important;
+    white-space: pre-line;
+}
+
+#mainModal #invoice-preview-template .inv-pay {
+    background: var(--inv-cloud) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+#mainModal #invoice-preview-template .inv-totals {
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid var(--inv-line);
+}
+
+#mainModal #invoice-preview-template .inv-totals .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 20px;
+    font-size: 14px;
+    color: var(--inv-ink) !important;
+    border-bottom: 1px solid var(--inv-line);
+    background: #fff !important;
+}
+
+#mainModal #invoice-preview-template .inv-totals .row span { color: var(--inv-muted) !important; font-weight: 600; }
+#mainModal #invoice-preview-template .inv-totals .row.discount b { color: #0f6b50 !important; }
+
+#mainModal #invoice-preview-template .inv-totals .grand {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: linear-gradient(120deg, var(--inv-navy), var(--inv-midnight)) !important;
+    color: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+#mainModal #invoice-preview-template .inv-totals .grand span {
+    font-family: 'Readex Pro', 'IBM Plex Sans Arabic', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: rgba(255, 255, 255, .85) !important;
+}
+
+#mainModal #invoice-preview-template .inv-totals .grand b {
+    font-size: 26px;
+    font-weight: 800;
+    color: #fff !important;
+}
+
+#mainModal #invoice-preview-template .inv-totals .grand .riyal-logo {
+    filter: brightness(0) invert(1) !important;
+}
+
+/* ── التذييل ── */
+#mainModal #invoice-preview-template .inv-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 28px 44px 0;
+    padding-top: 16px;
+    border-top: 2px solid transparent;
+    border-image: linear-gradient(90deg, var(--inv-teal), var(--inv-mint) 60%, transparent) 1;
+    font-size: 12px;
+    color: var(--inv-muted) !important;
+}
+
+#mainModal #invoice-preview-template .inv-foot b {
+    font-family: 'Readex Pro', 'IBM Plex Sans Arabic', sans-serif;
+    color: var(--inv-navy) !important;
+    font-size: 14px;
+}
+
+/* ختم عرض السعر القديم لم يعد مستخدمًا — العنوان يتبدّل في الترويسة */
+#mainModal #invoice-preview-template .quotation-stamp { display: none !important; }
+
+/* ── الجوال ── */
+@media (max-width: 640px) {
+    #mainModal #invoice-preview-template .inv-head { padding: 22px; min-height: 120px; }
+    #mainModal #invoice-preview-template .inv-logo { height: 58px; }
+    #mainModal #invoice-preview-template .inv-title { margin-left: 100px; }
+    #mainModal #invoice-preview-template .inv-title .inv-doc-ar { font-size: 24px; }
+    #mainModal #invoice-preview-template .inv-body { padding: 22px 18px 0; }
+    #mainModal #invoice-preview-template .inv-meta,
+    #mainModal #invoice-preview-template .inv-bottom { grid-template-columns: 1fr 1fr; }
+    #mainModal #invoice-preview-template .inv-meta .inv-to { grid-column: span 2; }
+    #mainModal #invoice-preview-template .inv-bottom > * { grid-column: span 2; }
+    #mainModal #invoice-preview-template .inv-foot { margin: 22px 18px 0; flex-direction: column; align-items: flex-start; }
+}
+
+/* ── الطباعة: A4 كاملة بلا هوامش بيضاء حول الترويسة ── */
+@media print {
+    #mainModal #invoice-preview-template .inv-toolbar { display: none !important; }
+    #mainModal #invoice-preview-template .inv-meta { grid-template-columns: 1.3fr 1fr 1fr 1fr !important; }
+    #mainModal #invoice-preview-template .inv-bottom { grid-template-columns: 1.15fr 1fr !important; }
+    #mainModal #invoice-preview-template .inv-meta .inv-to,
+    #mainModal #invoice-preview-template .inv-bottom > * { grid-column: auto !important; }
+    #mainModal #invoice-preview-template .inv-head { border-radius: 14px; }
+    #mainModal #invoice-preview-template .inv-body { padding: 26px 8px 0; }
+    #mainModal #invoice-preview-template .inv-foot { margin: 24px 8px 0; flex-direction: row !important; }
+    #mainModal #invoice-preview-template .inv-totals .grand .riyal-logo { filter: brightness(0) invert(1) !important; }
+    #mainModal #invoice-preview-template .inv-table tr { break-inside: avoid; }
+}
+
+/* ============================================================
+   الفواتير المتكررة
+   ============================================================ */
+.rec-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid;
+    white-space: nowrap;
+}
+.rec-on { background: rgba(71, 224, 172, .12); color: #47E0AC; border-color: rgba(71, 224, 172, .35); }
+.rec-off { background: rgba(255, 255, 255, .05); color: #929cd0; border-color: rgba(255, 255, 255, .12); }
+html.light-mode .rec-on { color: #0f6b50; }

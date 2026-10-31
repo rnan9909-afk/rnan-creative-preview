@@ -3,6 +3,24 @@
  * Translates calls to Firebase Realtime Database
  */
 
+// ── فترات الفواتير المتكررة (YYYY-MM) — تُصدر في آخر يوم من كل شهر ──
+window.RecurringPeriods = {
+    ym: d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'),
+    next: p => { let [y, m] = p.split('-').map(Number); return m === 12 ? (y + 1) + '-01' : y + '-' + String(m + 1).padStart(2, '0'); },
+    lastDay: p => { let [y, m] = p.split('-').map(Number); return p + '-' + String(new Date(y, m, 0).getDate()).padStart(2, '0'); },
+    // آخر شهر حان موعده: الشهر الحالي إن كان اليوم آخر أيامه، وإلا الشهر السابق
+    lastDue: today => {
+        let t = today || new Date();
+        if (t.getDate() === new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate()) return window.RecurringPeriods.ym(t);
+        return window.RecurringPeriods.ym(new Date(t.getFullYear(), t.getMonth() - 1, 1));
+    },
+    nextDue: r => {
+        let n = r.lastIssued ? window.RecurringPeriods.next(r.lastIssued) : r.startPeriod;
+        return (r.startPeriod && n < r.startPeriod) ? r.startPeriod : n;
+    },
+    label: p => { let [y, m] = p.split('-').map(Number); return new Date(y, m - 1, 1).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', { month: 'long', year: 'numeric' }); }
+};
+
 const backendFunctions = {
     // الدخول للإدارة فقط — العميل لا يملك حسابًا، بل رابطًا خاصًا ثابتًا (client.html?k=...)
     checkLogin: async function(input) {
@@ -153,7 +171,7 @@ const backendFunctions = {
 
     saveInvoiceToSheet: async function(data) {
         let isUpdate = data.invoiceNumber && data.invoiceNumber !== "تلقائي";
-        let invoiceId = isUpdate ? data.invoiceNumber : 'INV-2026-' + Math.floor(Math.random() * 10000); // Simplistic ID generator for demo
+        let invoiceId = isUpdate ? data.invoiceNumber : 'INV-' + new Date().getFullYear() + '-' + Math.floor(Math.random() * 10000); // Simplistic ID generator for demo
         
         let invData = {
             number: invoiceId,
@@ -165,6 +183,7 @@ const backendFunctions = {
             notes: data.notes || '',
             footerText: data.footerText || ''
         };
+        if (data.recurringId) invData.recurringId = data.recurringId;
         
         // Find existing to update status/loyalty points
         if (isUpdate) {
@@ -500,6 +519,94 @@ const backendFunctions = {
 
     deleteClientFromSheet: async function(rowIndex) {
         return this.deleteClient(rowIndex);
+    },
+
+
+    // ── الفواتير المتكررة ───────────────────────────────────
+    getRecurringData: async function() {
+        let snap = await window.db.ref('recurring').once('value');
+        let list = [];
+        if (snap.exists()) snap.forEach(child => {
+            let v = child.val();
+            v.id = child.key;
+            v.items = v.items ? (Array.isArray(v.items) ? v.items : Object.values(v.items)) : [];
+            list.push(v);
+        });
+        return list.reverse();
+    },
+
+    saveRecurring: async function(data) {
+        let id = data.id || window.db.ref('recurring').push().key;
+        let rec = {
+            client: data.client,
+            items: data.items || [],
+            notes: data.notes || '',
+            footerText: data.footerText || '',
+            startPeriod: data.startPeriod,
+            endPeriod: data.endPeriod || null,
+            active: data.active !== false,
+            updatedAt: new Date().toISOString()
+        };
+        if (!data.id) {
+            rec.createdAt = rec.updatedAt;
+            rec.issuedCount = 0;
+            if (data.lastInvoice) rec.lastInvoice = data.lastInvoice;
+        }
+        await window.db.ref('recurring/' + id).update(rec);
+        return { id: id };
+    },
+
+    deleteRecurring: async function(id) {
+        await window.db.ref('recurring/' + id).remove();
+        return "تم حذف الفاتورة المتكررة (الفواتير الصادرة منها باقية)";
+    },
+
+    // يُصدر كل فاتورة حان موعدها ولم تصدر بعد. آمن للتشغيل المتكرر ومن أكثر من جهاز:
+    // كل شهر «يُحجز» بمعاملة ذرّية على lastIssued قبل إنشاء فاتورته، فلا تتكرر.
+    issueDueRecurring: async function(opts) {
+        opts = opts || {};
+        const RP = window.RecurringPeriods;
+        let stop = opts.forcePeriod || RP.lastDue(opts.today ? new Date(opts.today) : new Date());
+        let snap = await window.db.ref('recurring').once('value');
+        if (!snap.exists()) return [];
+        let footer = (await window.db.ref('settings/invoice_footer').once('value')).val() || '';
+        let list = [];
+        snap.forEach(child => { list.push({ id: child.key, r: child.val() }); });
+        let issued = [];
+        for (const { id, r } of list) {
+            if (!r.active || !r.client || !r.startPeriod) continue;
+            if (opts.onlyId && opts.onlyId !== id) continue;
+            let items = Array.isArray(r.items) ? r.items : Object.values(r.items || {});
+            let amount = items.reduce((s, i) => s + (parseFloat(i.qty) || 0) * (parseFloat(i.price) || 0), 0);
+            for (let p = RP.nextDue(r), guard = 0; p <= stop && guard < 24; p = RP.next(p), guard++) {
+                if (r.endPeriod && p > r.endPeriod) break;
+                let previous = r.lastIssued || null;
+                let claim = await window.db.ref('recurring/' + id + '/lastIssued').transaction(cur => (cur && cur >= p) ? undefined : p);
+                if (!claim.committed) continue;
+                try {
+                    let res = await backendFunctions.saveInvoiceToSheet({
+                        invoiceNumber: 'تلقائي',
+                        clientSelect: r.client,
+                        issueDate: RP.lastDay(p),
+                        status: 'قيد الانتظار',
+                        totalAmount: amount,
+                        items: items,
+                        footerText: r.footerText || footer,
+                        recurringId: id,
+                        notes: [r.notes, 'فاتورة شهرية — ' + RP.label(p)].filter(Boolean).join('\n')
+                    });
+                    r.issuedCount = (parseInt(r.issuedCount) || 0) + 1;
+                    r.lastIssued = p;
+                    await window.db.ref('recurring/' + id).update({ lastInvoice: res.id, issuedCount: r.issuedCount });
+                    issued.push({ id: id, client: r.client, number: res.id, period: p, amount: amount });
+                } catch (e) {
+                    // فشل الإنشاء: أعد الشهر حتى تُعاد المحاولة في التشغيل القادم
+                    await window.db.ref('recurring/' + id + '/lastIssued').set(previous);
+                    throw e;
+                }
+            }
+        }
+        return issued;
     },
 
     // ── طلبات الموقع ─────────────────────────────────────────
