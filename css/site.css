@@ -623,7 +623,7 @@ textarea.input { height: auto; min-height: 130px; padding: 14px 18px; resize: ve
     .b-portal { grid-template-columns: 1fr 220px; }
 }
 @media (max-width: 1024px) {
-    .nav-links, .nav-cta .btn-ghost { display: none; }
+    .nav-links, .nav-cta .btn-ghost, .cursor { display: none; }
     .nav-toggle { display: inline-flex; }
     .services-grid, .work-grid { grid-template-columns: repeat(2, 1fr); }
     .bento { grid-template-columns: 1fr 1fr; }
@@ -641,7 +641,7 @@ textarea.input { height: auto; min-height: 130px; padding: 14px 18px; resize: ve
     .section { padding: 84px 0; }
     .section-head { margin-bottom: 44px; }
     .hero { padding: 140px 0 20px; }
-    .cursor { display: none; }
+
     .showcase { height: 300px; margin-top: 56px; }
     .shot { width: 62%; }
     .shot-c { left: 19%; }
