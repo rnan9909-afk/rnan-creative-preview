@@ -113,6 +113,7 @@
             chips.push(left < 0 ? `<span class="st-chip hot">انتهى ${S.fmtDate(p.validUntil)}</span>` : `<span class="st-chip ${left <= 3 ? 'warn' : ''}">صالح ${left === 0 ? 'حتى اليوم' : S.days(left, true)}</span>`);
         }
         if (p.revision > 1) chips.push(`<span class="st-chip">نسخة <span class="st-num">${p.revision}</span></span>`);
+        if (p.agreement) chips.push(`<button class="st-chip ok" onclick="Studio.P.agreement('${p.id}')">${ic('contract')} اتفاقية رسمية جاهزة</button>`);
 
         let note = '';
         if (r && r.decision === 'changes' && s === 'changes') note = `<div class="st-note"><b>ملاحظة ${E(r.name)}:</b>\n${E(r.note || '—')}</div>`;
@@ -146,11 +147,13 @@
             <div class="st-actions">
                 ${primary}
                 ${s !== 'draft' && s !== 'lost' ? `<button class="st-btn sm icon ghost" title="نسخ رابط العرض" onclick="Studio.P.copy('${p.id}', this)">${ic('link')}</button>` : ''}
+                ${s !== 'lost' ? `<button class="st-btn sm icon ghost" title="الاتفاقية الرسمية (PDF)" onclick="Studio.P.agreement('${p.id}')">${ic('contract')}</button>` : ''}
                 <span class="grow"></span>
                 <div class="st-more"><button class="st-btn sm ghost" onclick="Studio.toggleMore(this)">المزيد ${ic('expand_more')}</button>
                     <div class="st-menu">
                         <button onclick="Studio.P.edit('${p.id}')">${ic('edit')} تعديل</button>
                         <button onclick="Studio.P.preview('${p.id}')">${ic('visibility')} معاينة كما يراها العميل</button>
+                        <button onclick="Studio.P.agreement('${p.id}')">${ic('contract')} الاتفاقية الرسمية (PDF)</button>
                         <button onclick="Studio.P.duplicate('${p.id}')">${ic('content_copy')} تكرار</button>
                         ${s !== 'lost' && !p.projectKey ? `<button onclick="Studio.P.archive('${p.id}')">${ic('archive')} أرشفة (لم تتم)</button>` : ''}
                         <button class="danger" onclick="Studio.P.remove('${p.id}')">${ic('delete')} حذف</button>
@@ -368,7 +371,7 @@
                 token: (old && old.token) || RNAN.newToken(), status: old ? old.status : 'draft', revision: (old && old.revision) || 1,
                 createdAt: (old && old.createdAt) || now, updatedAt: now
             };
-            if (old) ['sentAt', 'projectKey', 'projectCode', 'convertedAt', 'replySeen'].forEach(k => { if (old[k]) rec[k] = old[k]; });
+            if (old) ['sentAt', 'projectKey', 'projectCode', 'convertedAt', 'replySeen', 'invoiceId', 'agreement'].forEach(k => { if (old[k]) rec[k] = old[k]; });
             rec.total = S.calc(rec).total;
             const hadReply = !!offerOf(rec).reply;
             if (send) {
@@ -442,7 +445,7 @@
     function duplicate(id) {
         const p = byId(id);
         const seed = JSON.parse(JSON.stringify(p));
-        ['id', 'token', 'number', 'status', 'sentAt', 'projectKey', 'projectCode', 'convertedAt', 'replySeen', 'revision', 'createdAt', 'updatedAt'].forEach(k => delete seed[k]);
+        ['id', 'token', 'number', 'status', 'sentAt', 'projectKey', 'projectCode', 'convertedAt', 'replySeen', 'invoiceId', 'agreement', 'revision', 'createdAt', 'updatedAt'].forEach(k => delete seed[k]);
         seed.title = p.title + ' (نسخة)';
         seed.validUntil = S.addDays(S.today(), 14);
         edit(null, seed);
@@ -517,9 +520,144 @@
         }, 'جاري الإنشاء...');
     }
 
+    // ── الاتفاقية الرسمية: صيغة الطرف الأول والثاني تُطبع PDF عند طلب العميل ──
+    // بيانات رنان (الطرف الأول) تُحفظ مرة في settings/agreement، وبيانات العميل على العرض نفسه،
+    // وتُنشر نسخة منهما في offer/<token>/agreement لتقرأها agreement.html.
+    const agreementUrl = p => RNAN.pageUrl('agreement.html', { k: p.token });
+    const P1_FIELDS = [
+        ['name', 'الاسم النظامي *', ''], ['cr', 'السجل التجاري / وثيقة العمل الحر', 'اختياري'], ['vat', 'الرقم الضريبي', 'اختياري'],
+        ['rep', 'اسم من يوقّع عن رنان', ''], ['repTitle', 'صفته', 'مثال: المالك'], ['city', 'المدينة / العنوان', ''],
+        ['phone', 'الجوال', ''], ['email', 'البريد الإلكتروني', '']
+    ];
+    const LTR = /^(cr|vat|idNo|phone|email)$/;
+    let ag = null;
+
+    // الحساب البنكي: settings/bank، وإلا يُقرأ من نص تذييل الفواتير
+    function bankOf(saved) {
+        if (saved && saved.iban) return { bank: saved.bank || '', holder: saved.holder || '', iban: String(saved.iban).replace(/\s+/g, '').toUpperCase() };
+        const out = {};
+        String(typeof DEFAULT_BANK_INFO !== 'undefined' ? DEFAULT_BANK_INFO : '').split('\n').map(l => l.trim()).filter(Boolean).forEach(line => {
+            let m;
+            if ((m = line.match(/^البنك\s*:\s*(.+)$/))) out.bank = m[1];
+            else if ((m = line.match(/(?:الآيبان|الايبان|IBAN)[^:]*:\s*(.+)$/i))) out.iban = m[1].replace(/\s+/g, '').toUpperCase();
+            else if (!/:/.test(line) && !out.holder) out.holder = line;
+        });
+        return out.iban ? out : null;
+    }
+
+    async function agreement(id) {
+        const p = byId(id);
+        if (!p) return;
+        const [saved, site, bankSaved] = await Promise.all([S.get('settings/agreement'), S.site(), S.get('settings/bank')]);
+        const c = S.clients().find(x => String(x.rowIndex) === String(p.clientKey));
+        const isOrg = !!(c && c.company && c.name && c.company !== c.name);
+        const a = p.agreement || {}, r = offerOf(p).reply;
+        ag = {
+            id, bank: bankOf(bankSaved),
+            p1: Object.assign({ name: 'رنان لخدمات التصميم', city: site.city || '', phone: site.phone || site.whatsapp || '', email: site.email || '' }, saved || {}),
+            p2: Object.assign({ type: isOrg ? 'org' : 'person', name: isOrg ? c.company : (p.clientName || ''), rep: isOrg ? c.name : '', phone: p.clientPhone || (c && c.phone) || '' }, a.party2 || {})
+        };
+        const org = ag.p2.type === 'org';
+        const inp = (key, val, ph) => `<input class="form-input-modern" data-ag="${key}" value="${E(val || '')}" placeholder="${E(ph || '')}"${LTR.test(key.split('.')[1]) ? ' dir="ltr"' : ''}>`;
+        const date = a.date || (r && r.decision === 'approved' ? S.ymd(r.at) : S.today());
+
+        S.modal(`${S.mHead('contract', 'الاتفاقية الرسمية', `${p.number} · «${p.title}» — بصيغة الطرف الأول والثاني، تُطبع أو تُحفظ PDF`)}
+            <div class="st-m-body">
+                <div class="st-block">
+                    <div class="st-block-h"><b>${ic('person')} الطرف الثاني — العميل</b></div>
+                    <div class="st-seg">
+                        <button type="button" class="${org ? '' : 'on'}" onclick="Studio.P.agType('person', this)">${ic('person')} فرد</button>
+                        <button type="button" class="${org ? 'on' : ''}" onclick="Studio.P.agType('org', this)">${ic('apartment')} منشأة / جهة</button>
+                    </div>
+                    <div class="st-form">
+                        <label class="st-f full"><span id="st-ag-l-name">${org ? 'اسم المنشأة *' : 'الاسم الكامل *'}</span>${inp('p2.name', ag.p2.name)}</label>
+                        <label class="st-f"><span id="st-ag-l-id">${org ? 'رقم السجل التجاري' : 'رقم الهوية / الإقامة'}</span>${inp('p2.idNo', ag.p2.idNo, 'فارغ = يُكتب باليد')}</label>
+                        <label class="st-f"><span>المدينة / العنوان</span>${inp('p2.address', ag.p2.address, 'مثال: الرياض، حي النرجس')}</label>
+                        <label class="st-f st-ag-org" style="${org ? '' : 'display:none'}"><span>اسم ممثّل المنشأة</span>${inp('p2.rep', ag.p2.rep)}</label>
+                        <label class="st-f st-ag-org" style="${org ? '' : 'display:none'}"><span>صفته</span>${inp('p2.repTitle', ag.p2.repTitle, 'مثال: المدير العام')}</label>
+                        <label class="st-f"><span>الجوال</span>${inp('p2.phone', ag.p2.phone, '05xxxxxxxx')}</label>
+                        <label class="st-f"><span>البريد الإلكتروني <em>(اختياري)</em></span>${inp('p2.email', ag.p2.email)}</label>
+                    </div>
+                </div>
+                <details class="st-explain" id="st-ag-p1" ${saved ? '' : 'open'}>
+                    <summary>${ic('expand_more', 'chev')} الطرف الأول — بيانات رنان <span class="st-muted" style="font-weight:500;font-size:12px">(تُحفظ لكل الاتفاقيات)</span></summary>
+                    <div class="st-form" style="padding:0 18px 18px">
+                        ${P1_FIELDS.map(([k, l, ph]) => `<label class="st-f"><span>${l}</span>${inp('p1.' + k, ag.p1[k], ph)}</label>`).join('')}
+                        ${ag.bank ? `<label class="st-check full"><input type="checkbox" id="st-ag-bank" ${saved && saved.showBank === false ? '' : 'checked'}> إظهار الحساب البنكي في بند الدفع: <span dir="ltr">${E(ag.bank.iban)}</span></label>` : ''}
+                    </div>
+                </details>
+                <div class="st-form">
+                    <label class="st-f"><span>تاريخ الاتفاقية</span><input type="date" id="st-ag-date" class="form-input-modern" value="${E(date)}"></label>
+                    <label class="st-f full"><span>أحكام إضافية <em>(اختياري — سطر لكل بند)</em></span><textarea id="st-ag-extra" class="form-input-modern text-sm" rows="3" placeholder="مثال: يلتزم الطرف الأول بتسليم دليل استخدام الهوية بصيغة PDF.">${E(a.extra || '')}</textarea></label>
+                </div>
+                <p class="st-muted text-xs" style="margin:0;line-height:1.9">البنود الأساسية — النطاق والمدة والدفعات والالتزامات والملكية الفكرية والسرية والإنهاء — تُبنى تلقائيًا من العرض وشروطه، ومبلغه يُكتب بالأرقام والحروف. الحقل الفارغ يظهر في الاتفاقية خطًا منقّطًا للتعبئة باليد.</p>
+            </div>
+            <div class="st-m-foot">
+                <button class="st-btn primary" onclick="Studio.P.agSave('print', this)">${ic('print')} فتح وطباعة PDF</button>
+                <button class="st-btn ghost" onclick="Studio.P.agSave('send', this)">${ic('send')} إرسالها للعميل</button>
+                <button class="st-btn ghost icon" title="نسخ رابط الاتفاقية" onclick="Studio.P.agSave('copy', this)">${ic('link')}</button>
+                <span class="grow" style="flex:1"></span>
+                <button class="st-btn ghost" onclick="Studio.closeModal()">إلغاء</button>
+            </div>`);
+    }
+
+    function agType(t, btn) {
+        ag.p2.type = t;
+        btn.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === btn));
+        document.getElementById('st-ag-l-name').textContent = t === 'org' ? 'اسم المنشأة *' : 'الاسم الكامل *';
+        document.getElementById('st-ag-l-id').textContent = t === 'org' ? 'رقم السجل التجاري' : 'رقم الهوية / الإقامة';
+        document.querySelectorAll('#studioModal .st-ag-org').forEach(el => { el.style.display = t === 'org' ? '' : 'none'; });
+    }
+
+    async function agSave(mode, btn) {
+        const p = byId(ag.id);
+        const val = k => { const el = document.querySelector(`#studioModal [data-ag="${k}"]`); return el ? el.value.trim() : ''; };
+        const p2 = { type: ag.p2.type };
+        ['name', 'idNo', 'address', 'rep', 'repTitle', 'phone', 'email'].forEach(k => { const v = val('p2.' + k); if (v) p2[k] = v; });
+        if (p2.type !== 'org') { delete p2.rep; delete p2.repTitle; }
+        const p1 = {};
+        P1_FIELDS.forEach(([k]) => { const v = val('p1.' + k); if (v) p1[k] = v; });
+        if (!p2.name) { S.toast('اكتب اسم العميل (الطرف الثاني)'); document.querySelector('#studioModal [data-ag="p2.name"]').focus(); return; }
+        if (!p1.name) { document.getElementById('st-ag-p1').open = true; S.toast('اكتب الاسم النظامي للطرف الأول'); document.querySelector('#studioModal [data-ag="p1.name"]').focus(); return; }
+        const showBank = !!(document.getElementById('st-ag-bank') || {}).checked;
+        const date = document.getElementById('st-ag-date').value || S.today();
+        const extra = document.getElementById('st-ag-extra').value.trim();
+        // تُفتح النافذة قبل الحفظ كي لا يحجبها المتصفح بعد انتظار قاعدة البيانات
+        const win = mode === 'copy' ? null : window.open('', '_blank');
+        let done = false;
+        await S.busy(btn, async () => {
+            const now = new Date().toISOString();
+            const upd = { agreement: { party2: p2, date, extra, updatedAt: now }, updatedAt: now };
+            if (mode === 'send' && p.status === 'draft') { upd.status = 'sent'; upd.sentAt = now; }
+            await S.ref('settings/agreement').set(Object.assign({}, p1, { showBank }));
+            await S.ref('proposals/' + p.id).update(upd);
+            Object.assign(p, upd);
+            await publish(p);
+            await S.ref('offer/' + p.token + '/agreement').set({ party1: Object.assign({}, p1, showBank && ag.bank ? { bank: ag.bank } : {}), party2: p2, date, extra, updatedAt: now });
+            done = true;
+        }, 'جاري التجهيز...');
+        if (!done) { if (win) win.close(); return; }
+        S.closeModal();
+        render();
+        const url = agreementUrl(p);
+        const go = href => { if (win) win.location.href = href; else window.open(href, '_blank'); };
+        if (mode === 'print') {
+            go(url + '&print=1');
+            S.toast('فُتحت الاتفاقية — اختر «حفظ بتنسيق PDF» من نافذة الطباعة');
+        } else if (mode === 'send') {
+            const msg = `السلام عليكم ${p2.rep || p2.name} 👋\nتفضّل نسخة اتفاقية العمل الرسمية لـ«${p.title}» من رنان لخدمات التصميم، بصيغة الطرف الأول والثاني.\nتقدر تطبعها أو تحفظها PDF من هنا:\n${url}`;
+            const phone = RNAN.intlPhone(p2.phone || p.clientPhone || '');
+            go(phone.length >= 9 ? RNAN.waLink(phone, msg) : 'https://wa.me/?text=' + encodeURIComponent(msg));
+            S.toast('حُفظت الاتفاقية وفُتح واتساب لإرسالها ✓');
+        } else {
+            if (typeof copyText === 'function') copyText(url); else navigator.clipboard.writeText(url);
+            S.toast('حُفظت الاتفاقية ونُسخ رابطها ✓');
+        }
+    }
+
     S.register('proposals', { open, boot: async () => { await load(); badge(); } });
     S.P = {
-        edit, save, send, copy, preview, extend, archive, restore, remove, duplicate, convert, doConvert,
+        edit, save, send, copy, preview, extend, archive, restore, remove, duplicate, convert, doConvert, agreement, agType, agSave,
         tab: k => { tab = k; render(); }, kind: setKind, client: setClient, tpl: applyTemplate,
         // يُستدعى من صفحة القوالب لبدء عرض من قالب لعميل محدّد
         fromTemplate: (t, clientKey, startDate) => {

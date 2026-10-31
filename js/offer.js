@@ -100,6 +100,7 @@
 
             <div class="of-tools">
                 ${waHref ? `<a class="btn btn-ghost" href="${waHref}" target="_blank" rel="noopener">${svg('whatsapp')} عندي سؤال</a>` : ''}
+                ${o.agreement ? `<a class="btn btn-ghost" href="${RNAN.pageUrl('agreement.html', { k: token })}" target="_blank" rel="noopener">${svg('shield')} الاتفاقية الرسمية (PDF)</a>` : ''}
                 <button type="button" class="btn btn-ghost" onclick="window.print()">${svg('printer')} طباعة / PDF</button>
             </div>
             ${canDecide(o) ? `<div class="of-decide"><div class="in">
