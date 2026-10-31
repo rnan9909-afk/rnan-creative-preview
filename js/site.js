@@ -7,12 +7,15 @@
     const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
     const E = RNAN.esc;
     const params = new URLSearchParams(location.search);
+    const WORKS_STEP = 4; // أعمال تظهر أولًا، ويضيف «عرض المزيد» ضعفها كل مرة
 
     const state = {
         site: {},
         settings: {},
         works: RNAN.DEFAULT_PORTFOLIO.slice(),
         filter: 'all',
+        limit: 4,       // عدد الأعمال الظاهرة في المعرض
+        shown: 0,
         lbIndex: 0,
         client: null,   // عميل قادم من رابطه الخاص (?k=)
         referrer: null  // صاحب رمز الدعوة (?ref=)
@@ -152,23 +155,39 @@
     }
 
     function renderWorks() {
-        const list = visibleWorks();
+        const all = visibleWorks();
+        const list = all.slice(0, state.limit);
         const catTitle = id => (RNAN.PORTFOLIO_CATEGORIES.find(c => c.id === id) || {}).title || '';
-        // عناصر عريضة تملأ الصفوف بلا فراغات: 4 → [عريض+1][1+عريض]، 5 → [عريض+1][3]
+        // كل أربعة أعمال: [عريض + عادي] ثم [عادي + عريض]؛ آخر مجموعة ناقصة تملأ صفها بلا فراغ
         const n = list.length;
-        const wide = n < 3 ? [] : [[], [0, 3], [0]][n % 3];
+        const layout = i => {
+            if (n < 3) return '';
+            const size = Math.min(4, n - (i - i % 4));
+            if (size === 4) return i % 4 === 0 || i % 4 === 3 ? ' featured' : '';
+            if (size === 2) return i % 4 === 0 ? ' featured' : '';
+            if (size === 1) return ' lone';
+            return '';
+        };
         const grid = $('#work-grid');
         grid.classList.toggle('few', n > 0 && n < 3);
         grid.style.setProperty('--n', n);
+        // ما ظهر سابقًا لا يُعاد تحريكه عند «عرض المزيد»
         grid.innerHTML = list.map((w, i) => `
-            <button class="work reveal${wide.includes(i) ? ' featured' : ''}" data-index="${i}" data-delay="${i % 3}" aria-label="${E(w.title)}">
+            <button class="work reveal${i < state.shown ? ' in' : ''}${layout(i)}" data-index="${i}" data-delay="${i % 4}" aria-label="${E(w.title)}">
                 <img src="${E(w.thumb)}" alt="${E(w.title)}" loading="lazy" decoding="async">
                 <span class="work-info">
                     <span><small>${E(catTitle(w.category))}</small><strong>${E(w.title)}</strong></span>
                     <span class="work-arrow">${icon('arrow')}</span>
                 </span>
             </button>`).join('') || '<p style="grid-column:1/-1;text-align:center;color:var(--text-3)">لا توجد أعمال في هذا التصنيف بعد.</p>';
+        state.shown = n;
         observeReveal($('#work-grid'));
+
+        const rest = all.length - n;
+        $('#work-more').hidden = all.length <= WORKS_STEP;
+        $('#work-more-btn').innerHTML = rest > 0
+            ? `عرض المزيد <span class="count en">+${rest}</span> ${icon('chevron-down')}`
+            : `عرض أقل ${icon('chevron-down', 'flip')}`;
     }
 
     function initWork() {
@@ -176,8 +195,21 @@
             const b = e.target.closest('.filter-btn');
             if (!b) return;
             state.filter = b.dataset.filter;
+            state.limit = WORKS_STEP;
+            state.shown = 0;
             renderFilters();
             renderWorks();
+        });
+        $('#work-more-btn').addEventListener('click', () => {
+            if (state.limit < visibleWorks().length) {
+                state.limit += WORKS_STEP * 2;
+                renderWorks();
+            } else {
+                state.limit = WORKS_STEP;
+                state.shown = WORKS_STEP;
+                renderWorks();
+                document.getElementById('work').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         });
         $('#work-grid').addEventListener('click', e => {
             const w = e.target.closest('.work');
@@ -570,6 +602,8 @@
                 if (list.length) {
                     state.works = list.sort((a, b) => (a.order || 0) - (b.order || 0));
                     state.filter = 'all';
+                    state.limit = WORKS_STEP;
+                    state.shown = 0;
                     renderFilters();
                     renderWorks();
                     // صور الواجهة الرئيسية من أحدث الأعمال
