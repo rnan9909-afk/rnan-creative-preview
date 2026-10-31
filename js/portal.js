@@ -154,9 +154,18 @@
         }).join('');
     }
 
+    // «حفظ كـ PDF» يقترح عنوان الصفحة اسمًا للملف: رقم الفاتورة - اسم الجهة
+    function printInvoice() {
+        const original = document.title;
+        document.title = String(state.printName || 'فاتورة').replace(/[\\/:*?"<>|\r\n]+/g, '-').replace(/\s+/g, ' ').trim();
+        window.addEventListener('afterprint', () => { document.title = original; }, { once: true });
+        window.print();
+    }
+
     function openInvoice(id) {
         const inv = state.invoices.find(i => i.id === id);
         if (!inv) return;
+        state.printName = inv.number + ' - ' + (inv.client || state.client.company || state.client.name || '');
         const items = Array.isArray(inv.items) ? inv.items : (typeof inv.items === 'string' ? RNAN.safeJSON(inv.items, []) : []);
         const subtotal = items.reduce((s, it) => s + (parseFloat(it.qty) || 0) * (parseFloat(it.price) || 0), 0);
         const total = parseFloat(inv.amount) || 0;
@@ -345,6 +354,7 @@
         $('#rate-save').addEventListener('click', saveRating);
         $('#mark-read').addEventListener('click', markAllRead);
         $('#copy-coupon').addEventListener('click', () => copy($('#coupon-code').textContent));
+        $('#print-invoice').addEventListener('click', printInvoice);
     }
 
     async function init() {

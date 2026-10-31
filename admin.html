@@ -2324,9 +2324,9 @@
                 <div id="invoice-preview-template" class="hidden p-0 bg-white text-slate-800 relative">
                     <div
                         class="no-print bg-slate-100 border-b border-slate-200 p-4 flex flex-wrap justify-center gap-4 mb-8">
-                        <button onclick="window.print()"
+                        <button onclick="printInvoicePreview()"
                             class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-bold transition-colors shadow-md flex items-center gap-2"><span
-                                class="material-symbols-rounded">print</span> طباعة</button>
+                                class="material-symbols-rounded">print</span> طباعة / حفظ PDF</button>
                         <button onclick="backToEdit()"
                             class="bg-slate-700 hover:bg-slate-600 text-gray-200 px-6 py-2 rounded-lg font-bold transition-colors flex items-center gap-2 admin-only"><span
                                 class="material-symbols-rounded">edit</span> تعديل</button>
@@ -4835,6 +4835,22 @@ ${client.phone.toString().trim().replace(/\D/g, '')}
                 printInvoiceDirectly({ ...data, number: res.id, client: data.clientSelect, date: data.issueDate, amount: data.totalAmount });
                 loadAllData();
             }).saveInvoiceToSheet(data);
+        }
+
+        // «حفظ كـ PDF» يقترح عنوان الصفحة اسمًا للملف، فنضبطه مؤقتًا ثم نعيده بعد الطباعة
+        function printWithFileName(name) {
+            let original = document.title;
+            document.title = String(name).replace(/[\\/:*?"<>|\r\n]+/g, '-').replace(/\s+/g, ' ').trim();
+            window.addEventListener('afterprint', () => { document.title = original; }, { once: true });
+            window.print();
+        }
+
+        // اسم الملف: رقم الفاتورة - اسم الجهة (وعرض السعر يُسبق بكلمة «عرض سعر»)
+        function printInvoicePreview() {
+            let number = document.getElementById('prev-id').innerText.trim();
+            let client = document.getElementById('prev-client-name').innerText.trim();
+            let isQuote = document.getElementById('preview-doc-title').innerText.trim() === 'QUOTATION';
+            printWithFileName((isQuote ? 'عرض سعر ' : '') + number + ' - ' + client);
         }
 
         function printInvoiceDirectly(inv) {
