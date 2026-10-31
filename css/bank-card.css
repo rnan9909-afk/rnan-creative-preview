@@ -1,0 +1,131 @@
+/* ============================================================
+   بطاقة الحساب البنكي بهوية رنان — مشتركة بين صفحة bank.html
+   ومعاينة نافذة «الحساب البنكي» في لوحة الإدارة.
+   ============================================================ */
+
+.bank-card {
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    aspect-ratio: 1.586;
+    margin: 0 auto;
+    padding: 22px 24px;
+    border-radius: 22px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    direction: rtl;
+    color: #fff;
+    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    background:
+        radial-gradient(320px 220px at 100% 0%, rgba(71, 224, 172, .2), transparent 70%),
+        linear-gradient(135deg, #1a2484 0%, #0a1250 55%, #02083A 100%);
+    border: 1px solid rgba(71, 224, 172, .28);
+    box-shadow: 0 30px 60px -24px rgba(0, 0, 0, .75), inset 0 1px 0 rgba(255, 255, 255, .12);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    text-align: right;
+}
+
+.bank-card .bc-wave {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.bank-card > *:not(.bc-wave) { position: relative; z-index: 1; }
+
+.bank-card .bc-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.bank-card .bc-logo { height: 42px; width: auto; filter: none !important; }
+
+.bank-card .bc-bank { text-align: left; }
+
+.bank-card small {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, .62) !important;
+}
+
+.bank-card b { color: #fff !important; }
+.bank-card .bc-bank b { display: block; font-size: 15px; font-weight: 700; line-height: 1.4; }
+
+/* الشريحة */
+.bank-card .bc-chip {
+    width: 46px;
+    height: 34px;
+    margin-top: 12px;
+    border-radius: 8px;
+    position: relative;
+    background: linear-gradient(135deg, #e3fbf2 0%, #7df0c9 45%, #2fc7b5 100%);
+    box-shadow: inset 0 0 0 1px rgba(2, 8, 58, .22);
+}
+
+.bank-card .bc-chip::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 34%;
+    right: 34%;
+    border-inline: 1px solid rgba(2, 8, 58, .3);
+}
+
+.bank-card .bc-chip::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: rgba(2, 8, 58, .3);
+}
+
+.bank-card .bc-iban {
+    margin-top: auto;
+    direction: ltr;
+    text-align: right;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: clamp(13px, 4.1vw, 20px);
+    font-weight: 600;
+    letter-spacing: .05em;
+    white-space: nowrap;
+    color: #fff;
+}
+
+.bank-card .bc-accline {
+    margin-top: 2px;
+    direction: ltr;
+    text-align: right;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 12px;
+    color: rgba(255, 255, 255, .7);
+}
+
+.bank-card .bc-holder {
+    margin-top: 12px;
+    padding-left: 34%; /* يترك الزاوية اليسرى لعنصر «الموجة» */
+}
+
+.bank-card .bc-holder b {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+@media (max-width: 420px) {
+    .bank-card { padding: 18px; border-radius: 18px; }
+    .bank-card .bc-logo { height: 34px; }
+    .bank-card .bc-chip { width: 38px; height: 28px; margin-top: 8px; }
+    .bank-card .bc-holder b { font-size: 13px; }
+}

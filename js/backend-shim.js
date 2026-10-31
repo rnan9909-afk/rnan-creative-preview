@@ -459,13 +459,23 @@ const backendFunctions = {
     },
 
     updateBankSettings: async function(data) {
-        let footerText = `${data.bank_account_name}\nرقم الحساب: ${data.bank_account_number}\nرقم الآيبان (IBAN): ${data.bank_iban}`;
+        let bankLine = data.bank_name ? `البنك: ${data.bank_name}\n` : '';
+        let footerText = `${bankLine}${data.bank_account_name}\nرقم الحساب: ${data.bank_account_number}\nرقم الآيبان (IBAN): ${data.bank_iban}`;
         
         await window.db.ref('settings').update({
+            bank_name: data.bank_name || '',
             bank_account_name: data.bank_account_name,
             bank_account_number: data.bank_account_number,
             bank_iban: data.bank_iban,
-            invoice_footer: footerText
+            invoice_footer: footerText,
+            // نسخة عامة تقرؤها صفحة الحساب البنكي (bank.html) — بيانات تحويل فقط
+            bank: {
+                bank: data.bank_name || '',
+                holder: data.bank_account_name,
+                number: String(data.bank_account_number).replace(/\s+/g, ''),
+                iban: String(data.bank_iban).replace(/\s+/g, '').toUpperCase(),
+                updatedAt: new Date().toISOString()
+            }
         });
         
         let snap = await window.db.ref('invoices').once('value');

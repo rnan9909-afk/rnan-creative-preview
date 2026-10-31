@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>الحساب البنكي | رنان لخدمات التصميم</title>
+    <meta name="description" content="بيانات التحويل البنكي لرنان لخدمات التصميم — انسخ رقم الآيبان أو رقم الحساب بضغطة.">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#030620">
+    <meta property="og:title" content="الحساب البنكي — رنان لخدمات التصميم">
+    <meta property="og:description" content="انسخ رقم الآيبان أو رقم الحساب بضغطة واحدة.">
+    <link rel="icon" type="image/svg+xml" href="images/ranan-logo.svg">
+    <link rel="apple-touch-icon" href="images/ranan-logo.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Readex+Pro:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/site.css?v=5">
+    <link rel="stylesheet" href="css/bank-card.css?v=1">
+    <style>
+        .bank-main { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 20px 60px; }
+        .bank-head { width: 100%; max-width: 460px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 36px; }
+        .bank-head img { height: 38px; }
+        .bank-title { width: 100%; max-width: 460px; text-align: center; margin-bottom: 26px; }
+        .bank-title h1 { margin: 14px 0 6px; font-family: 'Readex Pro', var(--font); font-size: clamp(26px, 6vw, 34px); line-height: 1.35; }
+        .bank-title p { margin: 0; color: var(--text-2); font-size: 15px; }
+        .bank-card { animation: rise .7s var(--ease) both; }
+        @keyframes rise { from { opacity: 0; transform: translateY(18px) rotateX(8deg); } }
+        .copy-list { width: 100%; max-width: 460px; display: grid; gap: 10px; margin-top: 26px; }
+        .copy-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; width: 100%; padding: 14px 16px; border-radius: 18px; text-align: start;
+            background: rgba(255, 255, 255, .03); border: 1px solid var(--line-2); transition: border-color .2s, background .2s; }
+        .copy-row:hover { border-color: rgba(var(--mint-rgb), .45); background: rgba(255, 255, 255, .05); }
+        .copy-row small { display: block; color: var(--text-3); font-size: 12.5px; }
+        .copy-row b { display: block; font-size: 15.5px; font-weight: 600; overflow-wrap: anywhere; }
+        .copy-row b.mono { letter-spacing: .03em; }
+        .copy-row .copy-pill { flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; font-size: 13.5px; font-weight: 700;
+            background: var(--grad); color: #02083A; }
+        .copy-row .copy-pill .icon { width: 16px; height: 16px; }
+        .copy-row.done .copy-pill { background: rgba(var(--mint-rgb), .15); color: var(--mint-3); }
+        .bank-note { width: 100%; max-width: 460px; display: flex; gap: 10px; align-items: flex-start; margin-top: 16px; padding: 14px 16px; border-radius: 16px;
+            background: rgba(255, 255, 255, .025); border: 1px dashed var(--line-2); color: var(--text-2); font-size: 13.5px; line-height: 1.8; }
+        .bank-note .icon { width: 20px; height: 20px; color: var(--mint); margin-top: 2px; }
+        .bank-actions { width: 100%; max-width: 460px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+        .bank-actions .btn { height: 50px; font-size: 14.5px; padding: 0 16px; }
+        .bank-actions .btn:only-child { grid-column: span 2; }
+        .bank-foot { margin-top: auto; padding-top: 36px; color: var(--text-3); font-size: 12.5px; text-align: center; }
+        .bank-empty { width: 100%; max-width: 460px; padding: 28px; border-radius: 22px; text-align: center; color: var(--text-2); border: 1px dashed var(--line-2); }
+    </style>
+</head>
+
+<body>
+    <script src="js/icons.js?v=1"></script>
+    <div class="bg-layer" aria-hidden="true"></div>
+    <div class="noise" aria-hidden="true"></div>
+
+    <main class="bank-main">
+        <header class="bank-head">
+            <a href="index.html" aria-label="رنان — الموقع"><img src="images/ranan-logo.svg" alt="رنان لخدمات التصميم"></a>
+            <span class="portal-badge"><svg class="icon"><use href="#i-shield"/></svg><span>بيانات تحويل رسمية</span></span>
+        </header>
+
+        <div class="bank-title">
+            <span class="eyebrow">الحساب البنكي</span>
+            <h1>حوّل إلى حساب <span class="grad-text">رنان</span></h1>
+            <p>اضغط على أي سطر لنسخه، ثم ألصقه في تطبيق البنك.</p>
+        </div>
+
+        <div id="bank-view">
+            <div class="bank-card" aria-hidden="true" style="opacity:.6">
+                <img class="bc-wave" src="images/bank-card-wave.svg" alt="">
+                <div class="bc-top"><img class="bc-logo" src="images/ranan-logo.svg" alt=""><div class="bc-bank"><small>البنك</small><b>...</b></div></div>
+                <div class="bc-chip"></div>
+                <div class="bc-iban">SA•• •••• •••• •••• •••• ••••</div>
+            </div>
+        </div>
+
+        <p class="bank-foot">© <span class="en" id="year">2026</span> رنان لخدمات التصميم</p>
+    </main>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script defer src="js/firebase-init.js?v=2"></script>
+    <script defer src="js/rnan-core.js?v=2"></script>
+    <script defer src="js/bank.js?v=1"></script>
+</body>
+
+</html>
