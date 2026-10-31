@@ -4633,31 +4633,36 @@ ${link}
                 return alert("⚠️ لم يتم العثور على رقم جوال مسجل لهذا العميل!");
             }
 
-            // Clean Phone Number
-            let phone = client.phone.toString().trim().replace(/\D/g, '');
-            if (phone.startsWith('05')) phone = '966' + phone.substring(1);
-            else if (phone.startsWith('5')) phone = '966' + phone;
+            // لا كلمة مرور بعد اليوم: الرسالة تحمل رابط العميل الخاص الثابت
+            const link = client.token ? RNAN.portalUrl(client.token) : RNAN.pageUrl('index.html', {});
+            const name = client.name || client.company || '';
+            const amount = (parseFloat(data.amount) || 0).toLocaleString('en-US', { maximumFractionDigits: 2 });
+            const isPaid = data.status === 'مدفوعة';
+            const message = isPaid
+                ? `السلام عليكم ${name} 👋
 
-            const message = `نود تذكيركم بوجود فاتورة مستحقة خاصة بمشروعكم.
+شكرًا لكم، تم استلام سداد الفاتورة ✅
+🧾 رقم الفاتورة: ${data.number}
+💰 المبلغ: ${amount} ريال
 
-رقم الفاتورة: ${data.number}
+يمكنكم معاينة الفاتورة وتحميلها PDF ومتابعة نقاط الولاء من صفحتكم الخاصة (رابط ثابت بدون كلمة مرور):
+${link}
 
-قيمة الفاتورة: ${data.amount}
+رنان لخدمات التصميم`
+                : `السلام عليكم ${name} 👋
 
-يرجى التكرم بسداد الفاتورة ولمعاينة الفاتورة:
+نرسل لكم فاتورتكم لدى رنان لخدمات التصميم:
+🧾 رقم الفاتورة: ${data.number}
+💰 المبلغ: ${amount} ريال
+📅 التاريخ: ${data.date || '-'}
 
-https://rnandes-92ba4.web.app
+لمعاينة الفاتورة وتحميلها PDF، افتحوا صفحتكم الخاصة (رابط ثابت بدون كلمة مرور):
+${link}
 
-كلمة المرور:
-${client.phone.toString().trim().replace(/\D/g, '')}
-
-في حال تم السداد ، نرجو نرجوا اعلامنا بذلك ، مع خالص شكرنا وتقديرنا.
-
+بعد السداد نرجو إعلامنا، مع خالص الشكر والتقدير.
 رنان لخدمات التصميم`;
 
-            const encodedMessage = encodeURIComponent(message);
-            const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
-            window.open(whatsappUrl, '_blank');
+            window.open(RNAN.waLink(client.phone, message), '_blank');
         }
 
         function renderInvoicesList(inv) {
