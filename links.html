@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>روابط رنان | رنان لخدمات التصميم</title>
+    <meta name="description" content="كل حسابات رنان لخدمات التصميم في مكان واحد — واتساب، تيليجرام، بيهانس، تيك توك، سناب شات، إنستغرام وإكس.">
+    <meta name="theme-color" content="#030620">
+    <meta property="og:title" content="رنان لخدمات التصميم — كل روابطنا">
+    <meta property="og:description" content="تواصل معنا وتابع أعمالنا على كل المنصّات.">
+    <meta property="og:image" content="images/ranan-icon.svg">
+    <link rel="icon" type="image/svg+xml" href="images/ranan-logo.svg">
+    <link rel="apple-touch-icon" href="images/ranan-icon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Readex+Pro:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/site.css?v=5">
+    <style>
+        .lk-main { position: relative; z-index: 2; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; align-items: center; padding: 22px 18px 40px; }
+        .lk-wrap { width: 100%; max-width: 560px; display: flex; flex-direction: column; align-items: center; }
+        .lk-top { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .lk-round { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: var(--text);
+            background: rgba(255, 255, 255, .05); border: 1px solid var(--line-2); backdrop-filter: blur(10px); transition: border-color .2s, background .2s, transform .2s; }
+        .lk-round:hover { border-color: rgba(var(--mint-rgb), .5); background: rgba(var(--mint-rgb), .08); transform: translateY(-1px); }
+        .lk-round .icon { width: 19px; height: 19px; }
+
+        .lk-avatar { position: relative; width: 112px; height: 112px; border-radius: 50%; display: grid; place-items: center; margin-bottom: 18px;
+            background: radial-gradient(circle at 30% 25%, #0b1450, #050a2c 70%); border: 1px solid rgba(var(--mint-rgb), .35);
+            box-shadow: 0 0 0 7px rgba(var(--mint-rgb), .06), 0 18px 50px -14px rgba(var(--mint-rgb), .55); animation: rise .7s var(--ease) both; }
+        .lk-avatar::before { content: ""; position: absolute; inset: -14px; border-radius: 50%; border: 1px dashed rgba(var(--mint-rgb), .25); animation: spin 28s linear infinite; }
+        .lk-avatar img { width: 64%; height: 64%; object-fit: contain; }
+        .lk-verified { position: absolute; bottom: 4px; inset-inline-end: 2px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+            background: var(--grad); color: #02083A; border: 3px solid var(--bg); }
+        .lk-verified .icon { width: 14px; height: 14px; stroke-width: 3; }
+
+        .lk-title { margin: 0; text-align: center; font-family: 'Readex Pro', var(--font); font-weight: 700; font-size: clamp(22px, 5.6vw, 28px); line-height: 1.4; animation: rise .7s .05s var(--ease) both; }
+        .lk-bio { margin: 6px 0 0; max-width: 420px; text-align: center; color: var(--text-2); font-size: 14.5px; line-height: 1.8; white-space: pre-line; animation: rise .7s .1s var(--ease) both; }
+
+        .lk-social { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 20px 0 6px; animation: rise .7s .15s var(--ease) both; }
+        .lk-social a { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; color: var(--text-2);
+            background: rgba(255, 255, 255, .04); border: 1px solid var(--line-2); transition: color .2s, border-color .2s, transform .2s, background .2s; }
+        .lk-social a:hover { color: #02083A; background: var(--mint); border-color: var(--mint); transform: translateY(-3px); }
+        .lk-social .icon { width: 19px; height: 19px; }
+
+        .lk-list { width: 100%; display: grid; gap: 12px; margin-top: 22px; }
+        .lk-card { position: relative; display: flex; align-items: center; gap: 14px; min-height: 66px; padding: 10px 12px; border-radius: 20px; color: var(--text); overflow: hidden;
+            background: rgba(255, 255, 255, .035); border: 1px solid var(--line-2); backdrop-filter: blur(12px);
+            transition: transform .25s var(--ease), border-color .25s, background .25s, box-shadow .25s; animation: rise .6s var(--ease) both; }
+        .lk-card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .3s;
+            background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(var(--mint-rgb), .12), transparent 60%); }
+        .lk-card:hover { transform: translateY(-2px) scale(1.01); border-color: rgba(var(--mint-rgb), .45); background: rgba(255, 255, 255, .055); box-shadow: 0 14px 34px -18px rgba(var(--mint-rgb), .6); }
+        .lk-card:hover::after { opacity: 1; }
+        .lk-card:active { transform: scale(.985); }
+        .lk-chip { flex-shrink: 0; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25); }
+        .lk-chip .icon { width: 23px; height: 23px; }
+        .lk-chip .icon:not(.icon-fill) { stroke-width: 2; }
+        .lk-label { flex: 1; min-width: 0; text-align: center; font-weight: 600; font-size: 15.5px; line-height: 1.5; overflow-wrap: anywhere; }
+        .lk-label small { display: block; color: var(--text-3); font-weight: 500; font-size: 12px; }
+        .lk-go { flex-shrink: 0; width: 46px; display: grid; place-items: center; color: var(--text-3); transition: color .2s, transform .25s var(--ease); }
+        .lk-go .icon { width: 18px; height: 18px; }
+        .lk-card:hover .lk-go { color: var(--mint); transform: translateX(-4px); }
+        .lk-card.featured { background: linear-gradient(100deg, rgba(var(--mint-rgb), .16), rgba(var(--mint-rgb), .05)); border-color: rgba(var(--mint-rgb), .45); }
+        .lk-card.featured .lk-label { color: var(--mint-3); }
+
+        .lk-empty { width: 100%; padding: 26px; border-radius: 20px; text-align: center; color: var(--text-2); border: 1px dashed var(--line-2); }
+        .lk-foot { margin-top: auto; padding-top: 40px; display: flex; flex-direction: column; align-items: center; gap: 10px; color: var(--text-3); font-size: 12.5px; }
+        .lk-foot a.brand { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 999px; color: var(--text-2);
+            background: rgba(255, 255, 255, .04); border: 1px solid var(--line-2); transition: border-color .2s, color .2s; }
+        .lk-foot a.brand:hover { border-color: rgba(var(--mint-rgb), .5); color: var(--text); }
+        .lk-foot a.brand img { height: 20px; }
+        @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) { .lk-avatar::before, .lk-card, .lk-avatar, .lk-title, .lk-bio, .lk-social { animation: none; } }
+    </style>
+</head>
+
+<body>
+    <script src="js/icons.js?v=2"></script>
+    <div class="bg-layer" aria-hidden="true"></div>
+    <div class="noise" aria-hidden="true"></div>
+
+    <main class="lk-main">
+        <div class="lk-wrap">
+            <div class="lk-top">
+                <a class="lk-round" href="index.html" aria-label="موقع رنان"><svg class="icon"><use href="#i-home"/></svg></a>
+                <button type="button" class="lk-round" id="share-btn" aria-label="مشاركة الصفحة"><svg class="icon"><use href="#i-send"/></svg></button>
+            </div>
+
+            <div class="lk-avatar">
+                <img src="images/ranan-icon.svg" alt="رنان">
+                <span class="lk-verified" title="الحساب الرسمي"><svg class="icon"><use href="#i-check"/></svg></span>
+            </div>
+            <h1 class="lk-title" id="lk-title">رنان لخدمات التصميم</h1>
+            <p class="lk-bio" id="lk-bio"></p>
+            <nav class="lk-social" id="lk-social" aria-label="حساباتنا"></nav>
+            <div class="lk-list" id="lk-list"></div>
+        </div>
+
+        <footer class="lk-foot">
+            <a class="brand" href="index.html"><img src="images/ranan-logo.svg" alt="">اطلب تصميمك من رنان</a>
+            <span>© <span class="en" id="year">2026</span> رنان لخدمات التصميم</span>
+        </footer>
+    </main>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script defer src="js/firebase-init.js?v=2"></script>
+    <script defer src="js/rnan-core.js?v=2"></script>
+    <script defer src="js/link-platforms.js?v=1"></script>
+    <script defer src="js/links.js?v=1"></script>
+</body>
+
+</html>

@@ -532,6 +532,22 @@ const backendFunctions = {
     },
 
 
+    // ── صفحة الروابط العامة (links.html) ────────────────────
+    getLinksPage: async function() {
+        let snap = await window.db.ref('linksPage').once('value');
+        return snap.val();
+    },
+
+    saveLinksPage: async function(data) {
+        await window.db.ref('linksPage').set({
+            title: data.title || '',
+            bio: data.bio || '',
+            links: data.links || [],
+            updatedAt: new Date().toISOString()
+        });
+        return "تم حفظ صفحة الروابط";
+    },
+
     // ── الفواتير المتكررة ───────────────────────────────────
     getRecurringData: async function() {
         let snap = await window.db.ref('recurring').once('value');
