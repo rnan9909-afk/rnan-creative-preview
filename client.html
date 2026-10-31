@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>صفحتك الخاصة | رنان لخدمات التصميم</title>
+    <!-- الرابط يحمل مفتاح العميل: لا فهرسة، ولا تمريره لمواقع أخرى عبر Referer -->
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
+    <meta name="theme-color" content="#030620">
+    <link rel="icon" type="image/svg+xml" href="images/ranan-logo.svg">
+    <link rel="apple-touch-icon" href="images/ranan-logo.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Arabic:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/site.css?v=1">
+</head>
+
+<body>
+    <script src="js/icons.js?v=1"></script>
+    <div class="bg-layer" aria-hidden="true"></div>
+    <div class="noise" aria-hidden="true"></div>
+
+    <header class="portal-top">
+        <div class="container">
+            <a href="index.html"><img src="images/ranan-logo.svg" alt="رنان لخدمات التصميم"></a>
+            <span class="portal-badge"><svg class="icon"><use href="#i-shield"/></svg><span>صفحتك الخاصة</span></span>
+        </div>
+    </header>
+
+    <main class="portal-main">
+        <div class="container">
+            <div class="state-screen" id="state-loading">
+                <div><div class="loader"></div><p style="color:var(--text-2);margin:0">نجهّز صفحتك...</p></div>
+            </div>
+
+            <div class="state-screen" id="state-error" hidden>
+                <div>
+                    <div class="si"><svg class="icon"><use href="#i-link"/></svg></div>
+                    <h1 id="error-title">الرابط غير صالح</h1>
+                    <p id="error-text">ربما تغيّر رابطك أو نُسخ ناقصًا. تواصل معنا وسنرسل لك رابطك الصحيح.</p>
+                    <div class="hero-actions" style="margin-top:0">
+                        <a href="index.html#contact" class="btn btn-primary">تواصل معنا</a>
+                        <a href="index.html#track" class="btn btn-ghost">تتبّع برقم الطلب</a>
+                    </div>
+                </div>
+            </div>
+
+            <div id="portal" hidden>
+                <section class="p-hello">
+                    <div>
+                        <small id="member-since"></small>
+                        <h1>أهلًا، <b id="client-name"></b> 👋</h1>
+                    </div>
+                    <a href="#" class="btn btn-primary btn-sm" id="new-request-top"><svg class="icon"><use href="#i-plus"/></svg> طلب خدمة جديدة</a>
+                </section>
+
+                <section class="p-grid">
+                    <div class="member-card">
+                        <div class="mc-top">
+                            <span class="tier" id="tier-badge"><svg class="icon icon-fill"><use href="#i-star"/></svg><span></span></span>
+                            <img src="images/ranan-logo.svg" alt="" style="height:30px;opacity:.9">
+                        </div>
+                        <div class="mc-points">
+                            <small>رصيد نقاط الولاء</small>
+                            <b><span class="en" id="points">0</span><span class="unit">نقطة</span></b>
+                            <small>تعادل خصمًا حتى <b class="en" style="display:inline;font-size:inherit;color:var(--mint-3)" id="cashback">0</b> ريال</small>
+                        </div>
+                        <div class="mc-progress">
+                            <div class="mc-progress-top"><span id="tier-current"></span><span id="tier-next"></span></div>
+                            <div class="bar"><i id="tier-bar"></i></div>
+                            <p id="tier-msg"></p>
+                        </div>
+                    </div>
+                    <div class="p-stats">
+                        <div class="card p-stat"><span class="ps-icon"><svg class="icon"><use href="#i-rocket"/></svg></span><small>مشاريع جارية</small><b><span class="en" id="st-active">0</span></b></div>
+                        <div class="card p-stat"><span class="ps-icon"><svg class="icon"><use href="#i-check"/></svg></span><small>مشاريع منجزة</small><b><span class="en" id="st-done">0</span></b></div>
+                        <div class="card p-stat" id="st-due-card"><span class="ps-icon"><svg class="icon"><use href="#i-receipt"/></svg></span><small>مستحقات قائمة</small><b><span class="en" id="st-due">0</span> <small style="display:inline">ريال</small></b></div>
+                        <div class="card p-stat"><span class="ps-icon"><svg class="icon"><use href="#i-wallet"/></svg></span><small>إجمالي تعاملاتك</small><b><span class="en" id="st-spent">0</span> <small style="display:inline">ريال</small></b></div>
+                    </div>
+                </section>
+
+                <section class="p-section">
+                    <div class="p-section-head">
+                        <h2><svg class="icon"><use href="#i-folder"/></svg> مشاريعك</h2>
+                        <div class="tabs" role="tablist">
+                            <button class="active" data-ptab="active" role="tab">الجارية</button>
+                            <button data-ptab="done" role="tab">المنجزة</button>
+                        </div>
+                    </div>
+                    <div class="proj-list" id="projects"></div>
+                </section>
+
+                <section class="p-section">
+                    <div class="p-section-head">
+                        <h2><svg class="icon"><use href="#i-receipt"/></svg> فواتيرك <span class="count en" id="inv-count">0</span></h2>
+                    </div>
+                    <div class="inv-list" id="invoices"></div>
+                </section>
+
+                <section class="p-section">
+                    <div class="p-section-head">
+                        <h2><svg class="icon"><use href="#i-gift"/></svg> استبدل نقاطك</h2>
+                    </div>
+                    <div class="rewards-grid" id="rewards"></div>
+                    <div class="how-earn">
+                        <div><svg class="icon"><use href="#i-coins"/></svg><span><b>1 ريال = 1 نقطة</b> مع كل فاتورة تسدّدها</span></div>
+                        <div><svg class="icon"><use href="#i-star"/></svg><span><b>+10%</b> في الفضي، و<b>+25%</b> في الذهبي</span></div>
+                        <div><svg class="icon"><use href="#i-user-plus"/></svg><span><b id="ref-bonus-label">+100 نقطة</b> لكل صديق يبدأ مشروعه بدعوتك</span></div>
+                    </div>
+                    <div id="my-coupons"></div>
+                </section>
+
+                <section class="p-section p-two">
+                    <div class="card refer-card">
+                        <h3>ادعُ صديقًا واكسب نقاطًا</h3>
+                        <p>شارك رمزك مع من يحتاج تصميمًا. حين يبدأ صديقك مشروعه، تُضاف النقاط لرصيدك تلقائيًا.</p>
+                        <div class="refer-code"><b id="ref-code">—</b><button class="icon-btn" id="copy-ref" aria-label="نسخ رابط الدعوة"><svg class="icon"><use href="#i-copy"/></svg></button></div>
+                        <div class="refer-actions">
+                            <a class="btn btn-primary" id="share-ref" target="_blank" rel="noopener" href="#"><svg class="icon icon-fill"><use href="#i-whatsapp"/></svg> شارك عبر واتساب</a>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="p-section-head" style="margin-bottom:12px">
+                            <h2><svg class="icon"><use href="#i-bell"/></svg> آخر التحديثات</h2>
+                            <button class="tabs" style="padding:6px 14px;font-size:13px;color:var(--text-2)" id="mark-read" hidden>تعليم الكل كمقروء</button>
+                        </div>
+                        <div class="card updates" id="updates"></div>
+                    </div>
+                </section>
+
+                <section class="card new-req">
+                    <div>
+                        <h3>عندك فكرة جديدة؟</h3>
+                        <p>اطلب خدمتك وستُضاف مباشرة إلى صفحتك هنا.</p>
+                    </div>
+                    <a href="#" class="btn btn-primary" id="new-request-bottom">اطلب خدمة جديدة <svg class="icon icon-arrow"><use href="#i-arrow"/></svg></a>
+                </section>
+
+                <div class="save-hint"><svg class="icon"><use href="#i-bookmark"/></svg> هذا الرابط ثابت وخاص بك — احفظه في المفضلة أو على شاشتك الرئيسية، ولا تشاركه مع أحد.</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- الفاتورة -->
+    <div class="modal" id="invoice-modal" role="dialog" aria-modal="true" aria-label="الفاتورة">
+        <div class="modal-box wide" style="padding:20px">
+            <div class="paper print-area" id="invoice-paper"></div>
+            <div class="paper-actions">
+                <button class="btn btn-primary" onclick="window.print()"><svg class="icon"><use href="#i-printer"/></svg> طباعة / حفظ PDF</button>
+                <button class="btn btn-ghost" data-close>إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- تأكيد الاستبدال -->
+    <div class="modal" id="redeem-modal" role="dialog" aria-modal="true" aria-label="استبدال النقاط">
+        <div class="modal-box" style="text-align:center">
+            <div id="redeem-confirm">
+                <div class="success-icon" style="background:rgba(251,191,36,.1);color:var(--amber);box-shadow:0 0 0 10px rgba(251,191,36,.04)"><svg class="icon"><use href="#i-gift"/></svg></div>
+                <h3 id="redeem-title"></h3>
+                <p id="redeem-text"></p>
+                <div class="success-actions">
+                    <button class="btn btn-primary" id="redeem-go">تأكيد الاستبدال</button>
+                    <button class="btn btn-ghost" data-close>إلغاء</button>
+                </div>
+            </div>
+            <div id="redeem-done" hidden>
+                <div class="success-icon"><svg class="icon"><use href="#i-check"/></svg></div>
+                <h3>تم الاستبدال!</h3>
+                <p>هذا كود خصمك — اذكره في طلبك القادم وسنخصمه من فاتورتك.</p>
+                <div class="code-pill"><b id="coupon-code"></b><button class="icon-btn" id="copy-coupon" aria-label="نسخ الكود"><svg class="icon"><use href="#i-copy"/></svg></button></div>
+                <div class="success-actions"><button class="btn btn-ghost" data-close>تم</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- التقييم -->
+    <div class="modal" id="rate-modal" role="dialog" aria-modal="true" aria-label="تقييم المشروع">
+        <div class="modal-box">
+            <h3>كيف كانت تجربتك؟</h3>
+            <p id="rate-project"></p>
+            <div class="stars" id="rate-stars" style="margin-bottom:18px"></div>
+            <textarea class="input" id="rate-review" rows="4" placeholder="ملاحظاتك تساعدنا نتحسّن (اختياري)"></textarea>
+            <div class="success-actions" style="margin-top:20px">
+                <button class="btn btn-primary" id="rate-save">إرسال التقييم</button>
+                <button class="btn btn-ghost" data-close>إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script defer src="js/firebase-init.js"></script>
+    <script defer src="js/rnan-core.js?v=1"></script>
+    <script defer src="js/portal.js?v=1"></script>
+</body>
+
+</html>
