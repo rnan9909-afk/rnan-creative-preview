@@ -1,0 +1,475 @@
+/* ============================================================
+   لوحة الإدارة بلغة تصميم الموقع العام (css/site.css)
+   ------------------------------------------------------------
+   · خلفية #030620 بشبكة خافتة وتوهّج نعناعي علوي — مثل الموقع
+   · بطاقات زجاجية شفافة بحدود شعرية، وتوهّج يتبع المؤشر
+   · أزرار رئيسية حبّية بتدرّج النعناعي ونص كحلي، وثانوية شفافة
+   · خط IBM Plex Sans Arabic في كل الواجهة
+   ------------------------------------------------------------
+   الأولوية: طبقة onyx-theme.css تستخدم :not(#id *) فترتفع أولويتها
+   إلى مستوى المعرّفات. البادئة :not(#_r1):not(#_r2) تضيف وزن
+   معرّفين بلا أي أثر آخر، فتتغلّب هذه الطبقة دون فوضى !important إضافية.
+   الوضع الفاتح وورقة الفاتورة (#mainModal) خارج هذه الطبقة تمامًا.
+   ============================================================ */
+
+:root {
+    --rs-bg: #030620;
+    --rs-bg-2: #060b33;
+    --rs-mint: #47E0AC;
+    --rs-mint-3: #7df0c9;
+    --rs-mint-rgb: 71, 224, 172;
+    --rs-text: #f3f5ff;
+    --rs-text-2: #aab2d8;
+    --rs-text-3: #8891c2;
+    --rs-line: rgba(255, 255, 255, 0.08);
+    --rs-line-2: rgba(255, 255, 255, 0.14);
+    --rs-card: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012));
+    --rs-grad: linear-gradient(100deg, #7df0c9 0%, #47E0AC 45%, #43D9C4 100%);
+    --rs-ease: cubic-bezier(.2, .7, .2, 1);
+}
+
+/* ── 1. الخلفية والخط ───────────────────────────────────── */
+html:not(.light-mode):not(#_r1):not(#_r2) body {
+    background-color: var(--rs-bg) !important;
+    background-image:
+        radial-gradient(900px 520px at 50% -140px, rgba(var(--rs-mint-rgb), .14), transparent 70%),
+        radial-gradient(700px 600px at 100% 10%, rgba(16, 25, 101, .6), transparent 70%),
+        radial-gradient(800px 700px at 0% 60%, rgba(16, 25, 101, .35), transparent 70%) !important;
+    background-attachment: fixed !important;
+    color: var(--rs-text);
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) body,
+html:not(.light-mode):not(#_r1):not(#_r2) .font-display,
+html:not(.light-mode):not(#_r1):not(#_r2) button,
+html:not(.light-mode):not(#_r1):not(#_r2) input,
+html:not(.light-mode):not(#_r1):not(#_r2) select,
+html:not(.light-mode):not(#_r1):not(#_r2) textarea {
+    font-family: 'IBM Plex Sans Arabic', 'Cairo', system-ui, sans-serif;
+}
+
+/* الشبكة الخافتة أعلى الصفحة — نفس طبقة الموقع */
+html:not(.light-mode):not(#_r1):not(#_r2) body::before {
+    opacity: 1;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%);
+}
+
+/* حبيبات خفيفة بدل نقاط الهالفتون */
+html:not(.light-mode):not(#_r1):not(#_r2) body::after {
+    inset: 0;
+    width: auto;
+    max-width: none;
+    height: auto;
+    max-height: none;
+    opacity: .035;
+    mix-blend-mode: overlay;
+    background-size: 160px 160px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mask-image: none;
+    -webkit-mask-image: none;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) .glow-orb {
+    display: none !important;
+}
+
+/* ── 2. البطاقات ─────────────────────────────────────────── */
+html:not(.light-mode):not(#_r1):not(#_r2) .glass-panel:not(#sidebar):not(#mainModal *),
+html:not(.light-mode):not(#_r1):not(#_r2) .glass-card,
+html:not(.light-mode):not(#_r1):not(#_r2) .stat-card {
+    background: var(--rs-card) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid var(--rs-line) !important;
+    box-shadow: none !important;
+    transform: none !important;
+    transition: border-color .35s var(--rs-ease);
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) .glass-panel:not(#sidebar):not(#mainModal *):hover,
+html:not(.light-mode):not(#_r1):not(#_r2) .stat-card:hover {
+    border-color: rgba(var(--rs-mint-rgb), .28) !important;
+    box-shadow: none !important;
+}
+
+/* توهّج يتبع المؤشر (js/admin-ui.js يضبط --mx/--my) بدل الخط العلوي */
+html:not(.light-mode):not(#_r1):not(#_r2) .glass-panel:not(#sidebar):not(#mainModal *)::after {
+    inset: 0;
+    left: 0;
+    right: 0;
+    height: auto;
+    border-radius: inherit;
+    opacity: 0;
+    background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 0%), rgba(var(--rs-mint-rgb), .08), transparent 45%);
+    transition: opacity .35s;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) .glass-panel:not(#sidebar):not(#mainModal *):hover::after {
+    opacity: 1;
+}
+
+/* البقع الضوئية المزخرفة داخل البطاقات تصير أهدأ */
+html:not(.light-mode):not(#_r1):not(#_r2) .glass-panel > .absolute[class*="blur-"] {
+    opacity: .35;
+}
+
+/* النوافذ المنبثقة (عدا ورقة الفاتورة) */
+html:not(.light-mode):not(#_r1):not(#_r2) .glass-modal:not(#mainModal *) {
+    background: var(--rs-bg-2) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid var(--rs-line-2) !important;
+    box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .85) !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) .modal {
+    background: rgba(2, 4, 24, .86) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+}
+
+/* الأسطح الشفافة والحدود */
+html:not(.light-mode):not(#_r1):not(#_r2) .bg-white\/5:not(#mainModal *) {
+    background-color: rgba(255, 255, 255, .03) !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) .bg-white\/10:not(#mainModal *) {
+    background-color: rgba(255, 255, 255, .05) !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) .bg-black\/20:not(#mainModal *) {
+    background-color: rgba(0, 0, 0, .18) !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) .border-white\/5:not(#mainModal *),
+html:not(.light-mode):not(#_r1):not(#_r2) .border-white\/10:not(#mainModal *),
+html:not(.light-mode):not(#_r1):not(#_r2) .border-border-glass:not(#mainModal *) {
+    border-color: var(--rs-line) !important;
+}
+
+/* ── 3. القائمة الجانبية: زجاج شريط تنقّل الموقع ───────── */
+html:not(.light-mode):not(#_r1):not(#_r2) #sidebar {
+    background: rgba(6, 10, 42, .62) !important;
+    backdrop-filter: blur(18px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
+    border: 1px solid var(--rs-line) !important;
+    box-shadow: 0 10px 40px -20px rgba(0, 0, 0, .6) !important;
+}
+
+@media (min-width: 1024px) {
+    html:not(.light-mode):not(#_r1):not(#_r2) #sidebar {
+        margin: 16px 16px 16px 0;
+        height: calc(100vh - 32px);
+        border-radius: 28px !important;
+    }
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) #sidebar > div:first-child {
+    background-image: none !important;
+    border-bottom: 1px solid var(--rs-line) !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) #sidebar img {
+    filter: none !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) #sidebar .absolute.-inset-1 {
+    display: none;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) #sidebar nav > button,
+html:not(.light-mode):not(#_r1):not(#_r2) #sidebar nav > a {
+    color: var(--rs-text-2) !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: 999px !important;
+    box-shadow: none !important;
+    padding-top: .8rem;
+    padding-bottom: .8rem;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) #sidebar nav > button:hover,
+html:not(.light-mode):not(#_r1):not(#_r2) #sidebar nav > a:hover {
+    color: var(--rs-text) !important;
+    background: rgba(255, 255, 255, .04) !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) #sidebar nav > button .material-symbols-rounded {
+    color: var(--rs-text-3) !important;
+    filter: none !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) #sidebar nav > button.bg-primary {
+    color: var(--rs-text) !important;
+    background: rgba(var(--rs-mint-rgb), .08) !important;
+    border-color: rgba(var(--rs-mint-rgb), .22) !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) #sidebar nav > button.bg-primary .material-symbols-rounded {
+    color: var(--rs-mint) !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) #sidebar nav > button.bg-primary::before {
+    display: none;
+}
+
+/* بطاقة المستخدم أسفل القائمة */
+html:not(.light-mode):not(#_r1):not(#_r2) #sidebar .glass-panel {
+    background: rgba(255, 255, 255, .03) !important;
+    border: 1px solid var(--rs-line) !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) #sidebar .glass-panel::after {
+    display: none;
+}
+
+/* ── 4. الأزرار: نفس أزرار الموقع ───────────────────────── */
+/* الرئيسية: تدرّج نعناعي ونص كحلي */
+html:not(.light-mode):not(#_r1):not(#_r2) .btn-glow:not(.bg-white\/10):not(.bg-white\/5):not(#mainModal *):not(#archive-print-template *):not(#sidebar *),
+html:not(.light-mode):not(#_r1):not(#_r2) button[class*="bg-gradient-to-"][class*="from-primary"]:not(#mainModal *):not(#archive-print-template *):not(#sidebar *),
+html:not(.light-mode):not(#_r1):not(#_r2) button[class*="bg-gradient-to-"][class*="from-blue-"]:not(#mainModal *):not(#archive-print-template *):not(#sidebar *),
+html:not(.light-mode):not(#_r1):not(#_r2) button.bg-primary:not(#mainModal *):not(#archive-print-template *):not(#sidebar *) {
+    background: var(--rs-grad) !important;
+    background-color: transparent !important;
+    color: #02083A !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    text-shadow: none !important;
+    font-weight: 700;
+    box-shadow: 0 12px 34px -12px rgba(var(--rs-mint-rgb), .7), inset 0 1px 0 rgba(255, 255, 255, .45) !important;
+    transition: transform .25s var(--rs-ease), box-shadow .25s !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) .btn-glow:not(.bg-white\/10):not(.bg-white\/5):not(#mainModal *):not(#archive-print-template *):not(#sidebar *):hover,
+html:not(.light-mode):not(#_r1):not(#_r2) button[class*="bg-gradient-to-"][class*="from-primary"]:not(#mainModal *):not(#archive-print-template *):not(#sidebar *):hover,
+html:not(.light-mode):not(#_r1):not(#_r2) button[class*="bg-gradient-to-"][class*="from-blue-"]:not(#mainModal *):not(#archive-print-template *):not(#sidebar *):hover,
+html:not(.light-mode):not(#_r1):not(#_r2) button.bg-primary:not(#mainModal *):not(#archive-print-template *):not(#sidebar *):hover {
+    transform: translateY(-2px);
+    color: #02083A !important;
+    box-shadow: 0 18px 40px -12px rgba(var(--rs-mint-rgb), .85), inset 0 1px 0 rgba(255, 255, 255, .45) !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) .btn-glow:not(.bg-white\/10):not(.bg-white\/5):not(#mainModal *):not(#sidebar *) .material-symbols-rounded,
+html:not(.light-mode):not(#_r1):not(#_r2) button[class*="bg-gradient-to-"]:not(#mainModal *):not(#sidebar *) .material-symbols-rounded,
+html:not(.light-mode):not(#_r1):not(#_r2) button.bg-primary:not(#mainModal *):not(#sidebar *) .material-symbols-rounded {
+    color: #02083A !important;
+    filter: none !important;
+}
+
+/* الثانوية: شفافة بحد شعري */
+html:not(.light-mode):not(#_r1):not(#_r2) button.bg-white\/10:not(#mainModal *):not(#sidebar *),
+html:not(.light-mode):not(#_r1):not(#_r2) a.bg-white\/10:not(#mainModal *):not(#sidebar *),
+html:not(.light-mode):not(#_r1):not(#_r2) button.bg-white\/5:not(#mainModal *):not(#sidebar *),
+html:not(.light-mode):not(#_r1):not(#_r2) a.bg-white\/5:not(#mainModal *):not(#sidebar *),
+html:not(.light-mode):not(#_r1):not(#_r2) button.bg-slate-700:not(#mainModal *),
+html:not(.light-mode):not(#_r1):not(#_r2) button.bg-slate-800:not(#mainModal *) {
+    background: rgba(255, 255, 255, .04) !important;
+    border: 1px solid var(--rs-line-2) !important;
+    border-radius: 999px !important;
+    color: var(--rs-text) !important;
+    box-shadow: none !important;
+    transition: background .25s, border-color .25s, transform .25s var(--rs-ease) !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) button.bg-white\/10:not(#mainModal *):not(#sidebar *):hover,
+html:not(.light-mode):not(#_r1):not(#_r2) a.bg-white\/10:not(#mainModal *):not(#sidebar *):hover,
+html:not(.light-mode):not(#_r1):not(#_r2) button.bg-white\/5:not(#mainModal *):not(#sidebar *):hover,
+html:not(.light-mode):not(#_r1):not(#_r2) a.bg-white\/5:not(#mainModal *):not(#sidebar *):hover,
+html:not(.light-mode):not(#_r1):not(#_r2) button.bg-slate-700:not(#mainModal *):hover {
+    background: rgba(255, 255, 255, .08) !important;
+    border-color: rgba(255, 255, 255, .24) !important;
+}
+
+/* زر رابط العميل: حبّة نعناعية شفافة */
+html:not(.light-mode):not(#_r1):not(#_r2) .client-link-btn {
+    border-radius: 999px !important;
+}
+
+/* الأزرار الدائرية في أعلى الصفحة (الإشعارات والمظهر) */
+html:not(.light-mode):not(#_r1):not(#_r2) main > div > div > button.glass-panel,
+html:not(.light-mode):not(#_r1):not(#_r2) main > div > button.glass-panel,
+html:not(.light-mode):not(#_r1):not(#_r2) main button.glass-panel {
+    background: rgba(255, 255, 255, .04) !important;
+    border: 1px solid var(--rs-line-2) !important;
+}
+
+/* ── 5. الحقول ───────────────────────────────────────────── */
+html:not(.light-mode):not(#_r1):not(#_r2) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(#mainModal *):not(#login-overlay *),
+html:not(.light-mode):not(#_r1):not(#_r2) select:not(#mainModal *),
+html:not(.light-mode):not(#_r1):not(#_r2) textarea:not(#mainModal *),
+html:not(.light-mode):not(#_r1):not(#_r2) .form-input-modern:not(#mainModal *) {
+    background: rgba(255, 255, 255, .03) !important;
+    border: 1px solid var(--rs-line-2) !important;
+    border-radius: 16px !important;
+    color: var(--rs-text) !important;
+    box-shadow: none !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) input:not(#mainModal *):focus,
+html:not(.light-mode):not(#_r1):not(#_r2) select:not(#mainModal *):focus,
+html:not(.light-mode):not(#_r1):not(#_r2) textarea:not(#mainModal *):focus,
+html:not(.light-mode):not(#_r1):not(#_r2) .form-input-modern:not(#mainModal *):focus {
+    border-color: rgba(var(--rs-mint-rgb), .6) !important;
+    background: rgba(255, 255, 255, .045) !important;
+    box-shadow: 0 0 0 4px rgba(var(--rs-mint-rgb), .1) !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) select:not(#mainModal *) option {
+    background: var(--rs-bg-2);
+}
+
+/* البحث داخل شريط البطاقة يبقى بلا إطار */
+html:not(.light-mode):not(#_r1):not(#_r2) .glass-panel input.bg-transparent {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+/* ── 6. العناوين والنصوص ────────────────────────────────── */
+html:not(.light-mode):not(#_r1):not(#_r2) main h1:not(#mainModal *) {
+    font-weight: 700 !important;
+    line-height: 1.35;
+    letter-spacing: 0;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) h1:not(#mainModal *),
+html:not(.light-mode):not(#_r1):not(#_r2) h2:not(#mainModal *),
+html:not(.light-mode):not(#_r1):not(#_r2) h3:not(#mainModal *) {
+    letter-spacing: 0 !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) .text-muted:not(#mainModal *) {
+    color: var(--rs-text-3) !important;
+}
+
+/* عناوين الصفحات بنفس تباين أوزان الموقع */
+html:not(.light-mode):not(#_r1):not(#_r2) main [id$="-page"] > div:first-child h1,
+html:not(.light-mode):not(#_r1):not(#_r2) main [id$="-page"] > header h1,
+html:not(.light-mode):not(#_r1):not(#_r2) main [id$="-page"] > header h2 {
+    font-size: clamp(26px, 2.6vw, 38px) !important;
+}
+
+/* ── 7. الجداول ─────────────────────────────────────────── */
+html:not(.light-mode):not(#_r1):not(#_r2) table:not(#mainModal *):not(#archive-print-template *) thead {
+    background: transparent !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) table:not(#mainModal *):not(#archive-print-template *) thead th {
+    color: var(--rs-text-3) !important;
+    font-weight: 600;
+    letter-spacing: 0;
+    border-bottom: 1px solid var(--rs-line) !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) table:not(#mainModal *):not(#archive-print-template *) tbody tr:hover {
+    background: rgba(255, 255, 255, .025) !important;
+}
+
+/* ── 8. شاشة الدخول: مثل واجهة الموقع ───────────────────── */
+html:not(.light-mode):not(#_r1):not(#_r2) #login-overlay {
+    background:
+        radial-gradient(900px 520px at 50% -140px, rgba(var(--rs-mint-rgb), .18), transparent 70%),
+        radial-gradient(700px 600px at 100% 10%, rgba(16, 25, 101, .9), transparent 70%),
+        radial-gradient(800px 700px at 0% 70%, rgba(16, 25, 101, .55), transparent 70%),
+        var(--rs-bg) !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) #login-overlay::before {
+    inset: 0;
+    width: auto;
+    max-width: none;
+    height: auto;
+    max-height: none;
+    opacity: 1;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%);
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) #login-overlay > .glass-panel {
+    border-radius: 30px !important;
+    background: var(--rs-card), rgba(6, 11, 51, .6) !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) #login-overlay input:not([type="checkbox"]) {
+    background: rgba(255, 255, 255, .03) !important;
+    border: 1px solid var(--rs-line-2) !important;
+    border-radius: 16px !important;
+    color: var(--rs-text) !important;
+    height: 54px;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) #login-overlay input:not([type="checkbox"]):focus {
+    border-color: rgba(var(--rs-mint-rgb), .6) !important;
+    box-shadow: 0 0 0 4px rgba(var(--rs-mint-rgb), .1) !important;
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) #login-overlay .absolute.-inset-1 {
+    display: none;
+}
+
+/* ── 9. شريط التمرير وتفاصيل صغيرة ───────────────────────── */
+html:not(.light-mode):not(#_r1):not(#_r2) ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, .12);
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) ::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--rs-mint-rgb), .4);
+}
+
+html:not(.light-mode):not(#_r1):not(#_r2) ::selection {
+    background: rgba(var(--rs-mint-rgb), .3);
+}
+
+/* ── 10. إصلاحات موروثة من الطبقة القديمة ────────────────── */
+/* العناوين المتدرّجة (اسم العميل في ملفه): نص بتدرّج الهوية كما في الموقع، لا مستطيل خلفه */
+html:not(.light-mode):not(#_r1):not(#_r2) .bg-clip-text:not(#mainModal *) {
+    background: var(--rs-grad) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    color: transparent !important;
+    -webkit-text-fill-color: transparent;
+}
+
+/* شارات الحالة (قيد التنفيذ…): كانت تمتلئ نعناعيًا فيختفي نصها */
+html:not(.light-mode):not(#_r1):not(#_r2) span[class*="rounded"][class*="bg-primary/"]:not(#mainModal *) {
+    background: rgba(var(--rs-mint-rgb), .10) !important;
+    color: var(--rs-mint-3) !important;
+    border: 1px solid rgba(var(--rs-mint-rgb), .30) !important;
+}
+
+/* زر ثانوي يحمل btn-glow (مثل «تحديث النقاط») */
+html:not(.light-mode):not(#_r1):not(#_r2) .btn-glow.bg-white\/10:not(#mainModal *) .material-symbols-rounded {
+    color: var(--rs-text) !important;
+}
+
+/* القائمة الجانبية على الجوال: طبقة onyx تعطي كل .glass-panel «position: relative»
+   فتغلب «fixed»؛ فتبقى القائمة في التدفّق وتعصر المحتوى في عمود ضيق حتى وهي مغلقة. */
+@media (max-width: 1023.98px) {
+    html:not(.light-mode):not(#_r1):not(#_r2) #sidebar {
+        position: fixed !important;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        border-radius: 28px 0 0 28px !important;
+        background: rgba(6, 10, 42, .94) !important;
+    }
+}
+
+/* b2b-theme.css يضع «transform: none» على أي .glass-panel عند المرور فوقه؛ وعلى الجوال
+   تبقى حالة المرور على آخر عنصر لُمس، فتعلق القائمة مفتوحة بعد إغلاقها.
+   موضع القائمة يتبع صنفها فقط (translate-x-full = مغلقة). */
+html:not(.light-mode):not(#_r1):not(#_r2) #sidebar,
+html:not(.light-mode):not(#_r1):not(#_r2) #sidebar:hover {
+    transform: translateX(var(--tw-translate-x, 0)) !important;
+}
