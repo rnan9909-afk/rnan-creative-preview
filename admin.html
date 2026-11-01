@@ -3,11 +3,17 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>لوحة إدارة رنان</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/svg+xml" href="images/ranan-logo.svg">
-    <link rel="apple-touch-icon" href="images/ranan-logo.svg">
+    <link rel="apple-touch-icon" href="images/app/apple-touch-icon.png">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#02083A">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="رنان">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdn.tailwindcss.com"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap"
@@ -871,6 +877,8 @@
     <script defer src="js/studio/templates.js?v=1"></script>
     <script defer src="js/studio/subs.js?v=1"></script>
     <script defer src="js/studio/time.js?v=1"></script>
+    <link rel="stylesheet" href="css/pwa.css?v=1">
+    <script defer src="js/pwa.js?v=1"></script>
 
     <!-- Firebase SDK & Backend Shim -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -1062,6 +1070,11 @@
                     <span class="material-symbols-rounded text-2xl group-hover:text-primary transition-colors">open_in_new</span>
                     <span class="font-bold text-sm group-hover:translate-x-[-4px] transition-transform">زيارة الموقع</span>
                 </a>
+                <button type="button" onclick="toggleSidebar(); RnanApp.install()" data-rn-install
+                    class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 group hover:bg-white/5 border border-transparent hover:border-white/5 admin-only">
+                    <span class="material-symbols-rounded text-2xl group-hover:text-primary transition-colors">install_mobile</span>
+                    <span class="font-bold text-sm group-hover:translate-x-[-4px] transition-transform">تثبيت التطبيق على الجوال</span>
+                </button>
             </nav>
             <div class="p-6 border-t border-border-glass">
                 <div class="glass-panel p-4 rounded-xl flex items-center gap-3 mb-2">
@@ -1088,6 +1101,10 @@
                     <span class="font-bold text-white">رنان</span>
                 </div>
                 <div class="flex items-center gap-3">
+                    <button type="button" onclick="RnanApp.install()" data-rn-install class="rn-install-btn"
+                        title="تثبيت التطبيق" aria-label="تثبيت التطبيق على الجوال">
+                        <span class="material-symbols-rounded">install_mobile</span>
+                    </button>
                     <div class="relative">
                         <button onclick="toggleNotifications()"
                             class="w-10 h-10 glass-panel rounded-full flex items-center justify-center text-white relative">
