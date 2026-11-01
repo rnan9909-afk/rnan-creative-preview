@@ -51,6 +51,29 @@ html:not(.rn-installable) [data-rn-install] { display: none !important; }
     html.rn-app #admin-toast { bottom: calc(var(--rn-bar-h) + 22px + var(--rn-safe-b)) !important; }
     html.rn-app .rn-promo { bottom: calc(var(--rn-bar-h) + 18px + var(--rn-safe-b)); }
 }
+html.rn-app main { overscroll-behavior-y: contain; }
+
+/* ── السحب للتحديث: تنزل من تحت شريط الحالة مع الإصبع، وتدور أثناء جلب البيانات ── */
+.rn-ptr { position: fixed; z-index: 90; top: var(--rn-safe-t); left: 50%; height: 42px; padding-inline: 5px 16px; border-radius: 999px; display: flex; align-items: center; gap: 9px;
+    background: rgba(16, 25, 101, .94); border: 1px solid rgba(71, 224, 172, .24); color: #fff; font-size: 13px; font-weight: 700; white-space: nowrap; pointer-events: none;
+    box-shadow: 0 14px 32px -12px rgba(0, 0, 0, .75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    transform: translate(-50%, -58px); opacity: 0; transition: transform .4s cubic-bezier(.2, .9, .25, 1.15), opacity .3s; }
+.rn-ptr.drag { transition: none; }
+.rn-ptr-ic { position: relative; width: 32px; height: 32px; flex-shrink: 0; display: grid; place-items: center; }
+.rn-ptr-ic svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); fill: none; stroke-width: 3; }
+.rn-ptr-ic circle { stroke: rgba(255, 255, 255, .14); }
+.rn-ptr-ic .rn-ptr-arc { stroke: var(--rn-mint); stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset .3s; }
+.rn-ptr.drag .rn-ptr-arc { transition: none; }
+.rn-ptr-ic .material-symbols-rounded { font-size: 18px; color: var(--rn-mist); transition: transform .25s cubic-bezier(.2, .9, .25, 1.3), color .2s, opacity .2s; }
+.rn-ptr.armed .material-symbols-rounded { transform: rotate(180deg); color: var(--rn-mint); }
+.rn-ptr.busy svg { animation: rnSpin .8s linear infinite; }
+.rn-ptr.busy .material-symbols-rounded { opacity: 0; }
+.rn-ptr.done .rn-ptr-ic, .rn-ptr.fail .rn-ptr-ic { border-radius: 999px; background: linear-gradient(135deg, var(--rn-mint), var(--rn-teal)); }
+.rn-ptr.done .material-symbols-rounded, .rn-ptr.fail .material-symbols-rounded { color: var(--rn-night); font-weight: 700; }
+.rn-ptr.done svg, .rn-ptr.fail svg { opacity: 0; }
+.rn-ptr.fail { border-color: rgba(248, 113, 113, .35); }
+.rn-ptr.fail .rn-ptr-ic { background: #f87171; }
+@keyframes rnSpin { from { transform: rotate(-90deg); } to { transform: rotate(270deg); } }
 .rn-tabbar { position: fixed; z-index: 45; left: 0; right: 0; bottom: 0; grid-template-columns: repeat(5, 1fr); padding: 6px 6px calc(6px + var(--rn-safe-b));
     background: rgba(4, 9, 58, .86); border-top: 1px solid rgba(255, 255, 255, .07); backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
     box-shadow: 0 -12px 30px -18px rgba(0, 0, 0, .8); user-select: none; -webkit-user-select: none; }
@@ -143,6 +166,13 @@ html.light-mode .rn-tile.on { background: rgba(71, 224, 172, .12); border-color:
 html.light-mode .rn-tile .rn-badge { border-color: #F3F5FC; }
 html.light-mode .rn-guide h3, html.light-mode .rn-steps b { color: var(--rn-navy); }
 html.light-mode .rn-logout { background: #FEF2F2; color: #DC2626; border-color: #FECACA; }
+html.light-mode .rn-ptr { background: rgba(255, 255, 255, .96); color: var(--rn-navy); border-color: rgba(16, 25, 101, .1); box-shadow: 0 12px 30px -12px rgba(16, 25, 101, .4); }
+html.light-mode .rn-ptr-ic circle { stroke: rgba(16, 25, 101, .1); }
+html.light-mode .rn-ptr-ic .rn-ptr-arc { stroke: #0B8A64; }
+html.light-mode .rn-ptr-ic .material-symbols-rounded { color: #5A628F; }
+html.light-mode .rn-ptr.armed .material-symbols-rounded { color: #0B8A64; }
+html.light-mode .rn-ptr.done .material-symbols-rounded, html.light-mode .rn-ptr.fail .material-symbols-rounded { color: #fff; }
+html.light-mode .rn-ptr.done .rn-ptr-ic { background: #0B8A64; }
 
-@media print { .rn-tabbar, .rn-statusbar, .rn-sheet-wrap, .rn-promo { display: none !important; } }
-@media (prefers-reduced-motion: reduce) { .rn-sheet, .rn-promo, .rn-scrim, .rn-tab-ic { transition: none; } .rn-install-btn::after { animation: none; } }
+@media print { .rn-tabbar, .rn-statusbar, .rn-sheet-wrap, .rn-promo, .rn-ptr { display: none !important; } }
+@media (prefers-reduced-motion: reduce) { .rn-sheet, .rn-promo, .rn-scrim, .rn-tab-ic, .rn-ptr { transition: none; } .rn-install-btn::after { animation: none; } }

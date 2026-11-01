@@ -1,6 +1,6 @@
 // تطبيق رنان على الجوال: التثبيت (beforeinstallprompt أو شرح Safari)، وعند الفتح كتطبيق مثبّت
 // تتحوّل القائمة الجانبية إلى شريط سفلي بأهم أربع صفحات و«المزيد» للباقي. العناصر تُبنى من #sidebar نفسه
-// فأي زر يُضاف للقائمة يظهر هنا تلقائيًا. الأنماط في css/pwa.css.
+// فأي زر يُضاف للقائمة يظهر هنا تلقائيًا، وسحب الصفحة من أعلاها يحدّث البيانات. الأنماط في css/pwa.css.
 (function () {
     const html = document.documentElement;
     const mq = q => window.matchMedia && window.matchMedia(q).matches;
@@ -242,6 +242,7 @@
         const login = document.getElementById('login-overlay');
         if (login) new MutationObserver(() => schedule()).observe(login, { attributes: true, attributeFilter: ['class'] });
         renderTabs();
+        pullToRefresh();
     }
     let raf = 0;
     const schedule = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(syncTabs); };
@@ -301,6 +302,120 @@
             <p class="rn-ver">رنان لخدمات التصميم · تطبيق لوحة التحكم</p>`, 'المزيد', 'more');
     }
 
+    // ── السحب للتحديث: التطبيق المثبّت بلا زر تحديث، فسحب الصفحة من أعلاها يعيد جلب البيانات
+    //    دون إعادة تحميل الصفحة (إعادة التحميل تُخرج من اللوحة وتطلب كلمة المرور من جديد) ──
+    const PULL_AT = 72, PULL_MAX = 120, PULL_HIDE = -58;
+    let ptr = null, ptrBusy = false;
+    function pullToRefresh() {
+        const main = document.querySelector('main');
+        if (!main || main.dataset.rnPtr) return;
+        main.dataset.rnPtr = '1';
+        let y0 = null, x0 = 0, pull = 0, armed = false, active = false;
+        const blocked = t => {
+            const login = document.getElementById('login-overlay');
+            if (ptrBusy || !html.classList.contains('rn-app') || (wrap && !wrap.hidden) || (login && !login.classList.contains('hidden'))) return true;
+            for (let el = t; el && el !== main; el = el.parentElement) if (el.scrollTop > 0) return true;
+            return main.scrollTop > 0;
+        };
+        main.addEventListener('touchstart', e => {
+            y0 = null;
+            if (e.touches.length !== 1 || blocked(e.target)) return;
+            y0 = e.touches[0].clientY; x0 = e.touches[0].clientX;
+            pull = 0; armed = false; active = false;
+        }, { passive: true });
+        main.addEventListener('touchmove', e => {
+            if (y0 == null) return;
+            const dy = e.touches[0].clientY - y0, dx = Math.abs(e.touches[0].clientX - x0);
+            if (!active) {
+                if (Math.abs(dy) < 3 && dx < 3) return;
+                // للأعلى أو أفقيًا (جدول يُمرَّر جانبيًا): تمرير عادي
+                if (dy <= 0 || dx > dy || main.scrollTop > 0) { y0 = null; return; }
+                active = true;
+                setPtr('pull');
+            }
+            if (e.cancelable) e.preventDefault();
+            pull = Math.max(0, dy * 0.6);
+            if (pull > PULL_AT) pull = Math.min(PULL_MAX, PULL_AT + (pull - PULL_AT) * 0.4);
+            if (armed !== pull >= PULL_AT) {
+                armed = !armed;
+                setPtr(armed ? 'armed' : 'pull');
+                if (armed && navigator.vibrate) navigator.vibrate(10);
+            }
+            movePtr(pull, true);
+        }, { passive: false });
+        const end = () => {
+            if (y0 == null) return;
+            y0 = null;
+            if (!active) return;
+            active = false;
+            if (armed) reloadData(); else hidePtr();
+        };
+        main.addEventListener('touchend', end);
+        main.addEventListener('touchcancel', () => { armed = false; end(); });
+    }
+
+    function ptrEl() {
+        if (!ptr) {
+            ptr = document.createElement('div');
+            ptr.className = 'rn-ptr no-print';
+            ptr.setAttribute('role', 'status');
+            ptr.innerHTML = `<span class="rn-ptr-ic"><svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15"/><circle class="rn-ptr-arc" cx="18" cy="18" r="15" pathLength="100"/></svg>${ic('arrow_downward')}</span><span class="rn-ptr-tx"></span>`;
+            document.body.appendChild(ptr);
+        }
+        return ptr;
+    }
+    const PTR = {
+        pull: ['arrow_downward', 'اسحب للتحديث'],
+        armed: ['arrow_downward', 'أفلت للتحديث'],
+        busy: ['sync', 'جارٍ التحديث…'],
+        done: ['check', 'تم التحديث'],
+        fail: ['wifi_off', 'تعذّر التحديث، تحقّق من الاتصال']
+    };
+    function setPtr(state) {
+        const el = ptrEl();
+        el.className = 'rn-ptr no-print ' + state;
+        el.querySelector('.rn-ptr-ic .material-symbols-rounded').textContent = PTR[state][0];
+        el.querySelector('.rn-ptr-tx').textContent = PTR[state][1];
+        if (state === 'busy') el.querySelector('.rn-ptr-arc').style.strokeDashoffset = '72';
+        if (state === 'done' || state === 'fail') el.querySelector('.rn-ptr-arc').style.strokeDashoffset = '0';
+    }
+    function movePtr(y, dragging) {
+        const el = ptrEl();
+        el.classList.toggle('drag', !!dragging);
+        el.style.transform = `translate(-50%, ${Math.round(PULL_HIDE + y)}px)`;
+        el.style.opacity = String(Math.min(1, y / 36));
+        if (dragging) el.querySelector('.rn-ptr-arc').style.strokeDashoffset = String(100 - Math.min(1, y / PULL_AT) * 100);
+    }
+    function hidePtr() {
+        if (!ptr) return;
+        movePtr(0, false);
+    }
+
+    function reloadData() {
+        if (ptrBusy) return;
+        ptrBusy = true;
+        setPtr('busy');
+        movePtr(PULL_AT, false);
+        const t0 = Date.now();
+        let timer = 0, settled = false;
+        const finish = ok => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            setTimeout(() => {
+                setPtr(ok ? 'done' : 'fail');
+                setTimeout(() => { hidePtr(); ptrBusy = false; }, ok ? 750 : 1800);
+            }, Math.max(0, 700 - (Date.now() - t0)));
+        };
+        if (navigator.onLine === false || typeof window.loadAllData !== 'function') return finish(false);
+        timer = setTimeout(() => finish(false), 12000);
+        window.loadAllData(() => finish(true));
+        // الصفحات التي تجلب بياناتها عند فتحها (الطلبات، الموقع، أدوات الاستوديو) تُفتح من جديد
+        const cur = navItems().find(i => i.on);
+        if (cur && typeof window.switchPage === 'function') window.switchPage(cur.key);
+        if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration('./admin').then(r => r && r.update()).catch(() => { });
+    }
+
     // ── التشغيل ──
     function init() {
         refresh();
@@ -317,5 +432,5 @@
     });
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 
-    window.RnanApp = { install, openMore, isApp };
+    window.RnanApp = { install, openMore, isApp, reload: reloadData };
 })();

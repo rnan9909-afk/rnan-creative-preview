@@ -877,8 +877,8 @@
     <script defer src="js/studio/templates.js?v=1"></script>
     <script defer src="js/studio/subs.js?v=1"></script>
     <script defer src="js/studio/time.js?v=1"></script>
-    <link rel="stylesheet" href="css/pwa.css?v=1">
-    <script defer src="js/pwa.js?v=1"></script>
+    <link rel="stylesheet" href="css/pwa.css?v=2">
+    <script defer src="js/pwa.js?v=2"></script>
 
     <!-- Firebase SDK & Backend Shim -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -3669,7 +3669,7 @@
             }
         }
 
-        function loadAllData() {
+        function loadAllData(done) {
             if (window.Studio) Studio.boot();
             google.script.run.withSuccessHandler((settings) => {
                 if (settings && settings.invoice_footer) {
@@ -3716,6 +3716,7 @@
                             loadRequests();
                             runRecurringInvoices();
                         }
+                        if (typeof done === 'function') done(); // السحب للتحديث في تطبيق الجوال
                     }).getProjectsData();
 
                 }).getInvoicesData();
