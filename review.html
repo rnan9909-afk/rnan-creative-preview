@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>مراجعة التصميم | رنان لخدمات التصميم</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#101965">
+    <link rel="icon" type="image/svg+xml" href="images/ranan-logo.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Readex+Pro:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/review.css?v=1">
+</head>
+
+<body>
+    <script src="js/icons.js?v=2"></script>
+
+    <header class="rv-bar">
+        <div class="in">
+            <img src="images/ranan-logo.svg" alt="رنان" class="logo">
+            <span class="grow"></span>
+            <span class="rv-lock"><svg class="icon"><use href="#i-shield"/></svg> معاينة محمية</span>
+        </div>
+    </header>
+
+    <main class="rv" id="rv">
+        <div class="rv-loading"><span class="rv-spin"></span> جاري تحميل التصميم...</div>
+    </main>
+
+    <div class="rv-shield" id="rv-shield" hidden><div><svg class="icon"><use href="#i-shield"/></svg><b>المعاينة محمية</b><span>ارجع للصفحة لمتابعة مشاهدة التصميم</span></div></div>
+
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script defer src="js/firebase-init.js?v=2"></script>
+    <script defer src="js/rnan-core.js?v=2"></script>
+    <script defer src="js/review.js?v=1"></script>
+</body>
+
+</html>

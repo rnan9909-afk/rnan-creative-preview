@@ -526,6 +526,9 @@
             return `<div class="stage ${cls}"><span class="stage-dot">${inner}</span><div><b>${s.title}</b><span>${s.hint}</span></div></div>`;
         }).join('');
         const steps = (t.steps || []);
+        // مراجعة التصميم: ترفعه الإدارة من نافذة المشروع ويفتحه العميل من هنا
+        const rv = t.review && t.review.k && (!t.review.until || Date.parse(t.review.until) > Date.now()) ? t.review : null;
+        const review = rv ? `<a class="tr-review" href="${E(RNAN.pageUrl('review.html', { k: rv.k }))}"><span class="tr-review-ic">${icon('eye')}</span><span><b>التصميم جاهز لمراجعتك${rv.round > 1 ? ' — النسخة ' + rv.round : ''}</b><small>شاهده واكتب ملاحظاتك عليه مباشرة، أو اعتمده إن كان مناسبًا</small></span>${icon('arrow')}</a>` : '';
         const progress = stage >= 2 ? `
             <div class="tr-progress">
                 <div class="tr-progress-top"><span>نسبة الإنجاز</span><b class="en">${parseInt(t.progress) || 0}%</b></div>
@@ -544,6 +547,7 @@
                     <div><small class="mono">${E(t.code)}</small><h3>${E(t.title)}</h3></div>
                     <span class="status-badge ${stateCls}">${E(t.label)}</span>
                 </div>
+                ${review}
                 <div class="stages">${stages}</div>
                 ${progress}
                 <div class="tr-meta">${meta}</div>

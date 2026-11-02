@@ -39,13 +39,19 @@ html:not(.light-mode):not(#_r1):not(#_r2) body {
     color: var(--rs-text);
 }
 
-html:not(.light-mode):not(#_r1):not(#_r2) body,
-html:not(.light-mode):not(#_r1):not(#_r2) .font-display,
-html:not(.light-mode):not(#_r1):not(#_r2) button,
-html:not(.light-mode):not(#_r1):not(#_r2) input,
-html:not(.light-mode):not(#_r1):not(#_r2) select,
-html:not(.light-mode):not(#_r1):not(#_r2) textarea {
+/* الخط نفسه في الوضعين الداكن والفاتح (كان الفاتح يرجع إلى Cairo وأرقامه إلى Outfit) */
+html:not(#_r1):not(#_r2) body,
+html:not(#_r1):not(#_r2) .font-display,
+html:not(#_r1):not(#_r2) button,
+html:not(#_r1):not(#_r2) input,
+html:not(#_r1):not(#_r2) select,
+html:not(#_r1):not(#_r2) textarea {
     font-family: 'IBM Plex Sans Arabic', 'Cairo', system-ui, sans-serif;
+}
+html.light-mode:not(#_r1):not(#_r2) .en-num {
+    font-family: 'IBM Plex Sans Arabic', 'Outfit', sans-serif;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
 }
 
 /* الشبكة الخافتة أعلى الصفحة — نفس طبقة الموقع */

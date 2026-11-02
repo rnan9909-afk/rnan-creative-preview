@@ -280,7 +280,8 @@ const backendFunctions = {
                     rating: val.rating || 0,
                     review: val.review || '',
                     quotation: val.quotation || null,
-                    type: val.type || ''
+                    type: val.type || '',
+                    proof: val.proof || null
                 });
             });
         }
@@ -311,7 +312,8 @@ const backendFunctions = {
             projData.code = old.code || data.code || RNAN.newTrackCode();
             let trackSnap = await window.db.ref('track/' + projData.code + '/createdAt').once('value');
             await window.db.ref('projects/' + data.rowIndex).update(projData);
-            await window.db.ref('track/' + projData.code).set(RNAN.trackFromProject(projData, trackSnap.val()));
+            let reviewSnap = await window.db.ref('track/' + projData.code + '/review').once('value');
+            await window.db.ref('track/' + projData.code).set(Object.assign(RNAN.trackFromProject(projData, trackSnap.val()), reviewSnap.val() ? { review: reviewSnap.val() } : {}));
             if (old.status !== projData.status) {
                 if (projData.status === 'مكتمل') {
                     backendFunctions.logNotification(data.client, "project_done", "🎉 تم تسليم مشروع '" + data.name + "'. يسعدنا تقييمك للتجربة.");
@@ -339,6 +341,8 @@ const backendFunctions = {
 
     deleteProjectFromSheet: async function(rowIndex) {
         let snap = await window.db.ref('projects/' + rowIndex + '/code').once('value');
+        let proofSnap = await window.db.ref('projects/' + rowIndex + '/proof/token').once('value');
+        if (proofSnap.val()) await window.db.ref().update({ ['proofs/' + proofSnap.val()]: null, ['proofFiles/' + proofSnap.val()]: null });
         await window.db.ref('projects/' + rowIndex).remove();
         if (snap.val()) await window.db.ref('track/' + snap.val()).remove();
         return "تم حذف المشروع بنجاح";

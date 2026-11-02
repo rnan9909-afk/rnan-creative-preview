@@ -78,6 +78,11 @@
         return `<div class="pp-next"><button type="button" class="pp-check" data-act="step" title="تمّت هذه المهمة" aria-label="تمّت المهمة: ${esc(x.steps[x.next].text)}"><i></i></button>
             <span class="pp-next-t"><small>المهمة التالية · <span class="en-num">${x.done}/${x.total}</span></small><b>${esc(x.steps[x.next].text)}</b></span></div>`;
     }
+    // حالة مراجعة التصميم مع العميل (js/proofs.js)
+    function proofChip(p, preview) {
+        const s = !preview && window.ProofsUI ? ProofsUI.state(p) : null;
+        return s ? `<button type="button" class="pp-proof ${s.cls}${s.fresh ? ' fresh' : ''}${s.stale ? ' stale' : ''}" data-act="proof" title="مراجعة التصميم">${ic(s.ic)} ${esc(s.text)}</button>` : '';
+    }
     function card(x, preview) {
         const p = x.p, t = x.type;
         const val = parseFloat(p.value) || 0;
@@ -87,7 +92,7 @@
                 <button type="button" class="pp-title" data-act="open"><b>${esc(p.name || 'اسم المشروع')}</b><small>${esc(p.client || 'العميل')}${p.code ? ` · <span class="en-num" dir="ltr">${esc(p.code)}</span>` : ''}</small></button>
                 ${preview ? '' : `<button type="button" class="pp-ib" data-act="more" title="المزيد" aria-label="المزيد">${ic('more_horiz')}</button>`}
             </header>
-            <div class="pp-tags">${dueChip(x)}<span class="pp-kind">${esc(t.t)}</span></div>
+            <div class="pp-tags">${dueChip(x)}${proofChip(p, preview)}<span class="pp-kind">${esc(t.t)}</span></div>
             <div class="pp-prog"><span class="pp-bar"><i style="width:${x.pr}%"></i></span><b class="en-num">${x.pr}%</b></div>
             ${nextRow(x)}
             <footer class="pp-foot">
@@ -369,6 +374,7 @@
         m.innerHTML = `<div class="cl-scrim" data-x></div><div class="cl-menu" role="menu">
             ${sheet ? `<div class="cl-grab"></div><p class="cl-menu-t">${esc(p.name)}</p>` : ''}
             <button type="button" role="menuitem" data-do="open">${ic('edit_square')} فتح المشروع وتعديله</button>
+            <button type="button" role="menuitem" data-do="proof">${ic('preview')} ${window.ProofsUI && ProofsUI.forProject(p.rowIndex) ? 'مراجعة التصميم مع العميل' : 'رفع التصميم للعميل'}</button>
             ${x.phone ? `<button type="button" role="menuitem" data-do="wa">${ic('chat')} إرسال تحديث للعميل</button>` : ''}
             ${p.code ? `<button type="button" role="menuitem" data-do="track">${ic('qr_code_2')} نسخ رابط التتبع</button>` : ''}
             <button type="button" role="menuitem" data-do="hold">${x.hold ? ic('play_circle') + ' استئناف العمل' : ic('pause_circle') + ' إيقاف مؤقت'}</button>
@@ -408,6 +414,7 @@
         const p = P()[i];
         if (!p) return;
         if (act === 'open') return window.openProjectModal('edit', i);
+        if (act === 'proof') return window.openProjectModal('edit', i, { focus: 'proof' });
         if (act === 'wa') return window.open(waUrl(p, 'update'), '_blank', 'noopener');
         if (act === 'track') return copyTrack(i);
         if (act === 'step') return step(i);

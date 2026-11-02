@@ -69,7 +69,7 @@ html.pn-lock, html.pn-lock body { overflow: hidden; }
 .pn-sec h4 em { font-style: normal; font-size: 12px; font-weight: 600; color: var(--pj-mist); }
 .pn-sec h4 em.pn-count:not(:empty) { min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px; display: inline-grid; place-items: center; background: rgba(255, 255, 255, .07); }
 
-.pn-types { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.pn-types { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
 .pn-types button { min-width: 0; padding: 12px 8px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, .08); background: rgba(255, 255, 255, .03); color: #fff; font-family: inherit;
     display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background .2s, border-color .2s, transform .15s; }
 .pn-types button span { width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center; color: hsl(var(--hue) 75% 70%); background: hsl(var(--hue) 70% 60% / .13); transition: background .2s, color .2s; }
@@ -91,7 +91,7 @@ html.pn-lock, html.pn-lock body { overflow: hidden; }
 .pn-note { margin: 10px 0 0; padding: 9px 12px; border-radius: 12px; display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; line-height: 1.6; color: #fde68a; background: rgba(251, 191, 36, .09); }
 .pn-note[hidden] { display: none; }
 .pn-note .material-symbols-rounded { font-size: 18px; color: #fbbf24; }
-.pn-spans { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-bottom: 10px; }
+.pn-spans { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin-bottom: 10px; }
 .pn-spans button { height: 38px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .1); background: rgba(255, 255, 255, .05); color: #fff; font-family: inherit; font-size: 13px; font-weight: 700;
     cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background .2s, color .2s; }
 .pn-spans button.on { border-color: transparent; background: linear-gradient(135deg, var(--pj-mint), var(--pj-teal)); color: var(--pj-night); }
@@ -197,7 +197,7 @@ html:not(#_r1):not(#_r2):not(#_r3):not(#_r4):not(#_r5) .pn-steps input.pn-step {
     .pn-head p { font-size: 12px; }
     .pn-ic { width: 40px; height: 40px; border-radius: 13px; }
     .pn-main { padding: 14px 16px 8px; gap: 18px; }
-    .pn-types { gap: 6px; }
+    .pn-types { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
     .pn-types button { padding: 10px 4px 8px; gap: 6px; border-radius: 14px; }
     .pn-types button span { width: 36px; height: 36px; border-radius: 12px; }
     .pn-types button span .material-symbols-rounded { font-size: 20px; }

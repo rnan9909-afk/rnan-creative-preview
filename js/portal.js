@@ -83,6 +83,13 @@
     }
 
     // ═══ المشاريع ═══
+    // رابط مراجعة التصميم (ترفعه الإدارة من نافذة المشروع، ويبقى حتى انتهاء مدته)
+    function reviewLink(p) {
+        const r = p.proof;
+        if (!r || !r.token || (r.until && Date.parse(r.until) < Date.now())) return '';
+        return `<a class="btn btn-primary proj-review" href="${E(RNAN.pageUrl('review.html', { k: r.token }))}">${icon('eye')} مراجعة التصميم${r.round > 1 ? ' — النسخة ' + r.round : ''}</a>`;
+    }
+
     function renderProjects() {
         const list = state.projects
             .filter(p => state.tab === 'done' ? p.status === 'مكتمل' : p.status !== 'مكتمل')
@@ -126,6 +133,7 @@
                     ${p.startDate ? `<span>${icon('clock')} البدء ${RNAN.fmtDate(p.startDate)}</span>` : ''}
                     ${dl}
                 </div>
+                ${reviewLink(p)}
                 ${steps.length ? `<details ${done ? '' : 'open'}><summary>مراحل العمل (${steps.filter(s => s.done).length}/${steps.length}) ${icon('chevron-down')}</summary>
                     <ul class="substeps">${steps.map(s => `<li class="${s.done ? 'done' : ''}"><span class="ck">${s.done ? icon('check') : ''}</span>${E(s.text)}</li>`).join('')}</ul></details>` : ''}
                 ${rate}

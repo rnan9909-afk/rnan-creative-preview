@@ -862,7 +862,7 @@
 
     <!-- ONYX Theme — سمة سوداء فاخرة · يجب أن تبقى آخر ملف أنماط (الطبقة النهائية) -->
     <link rel="stylesheet" href="css/onyx-theme.css?v=1">
-    <link rel="stylesheet" href="css/admin-site.css?v=4">
+    <link rel="stylesheet" href="css/admin-site.css?v=5">
     <script defer src="js/admin-ui.js?v=1"></script>
     <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/invoice.css?v=2">
@@ -883,21 +883,24 @@
     <script defer src="js/invoices.js?v=3"></script>
     <link rel="stylesheet" href="css/pickers.css?v=1">
     <script defer src="js/pickers.js?v=1"></script>
-    <link rel="stylesheet" href="css/projects.css?v=2">
-    <script defer src="js/projects-ui.js?v=2"></script>
+    <link rel="stylesheet" href="css/projects.css?v=3">
+    <script defer src="js/projects-ui.js?v=3"></script>
     <link rel="stylesheet" href="css/charts.css?v=1">
     <script defer src="js/charts.js?v=1"></script>
     <link rel="stylesheet" href="css/clients.css?v=1">
     <script defer src="js/clients-ui.js?v=2"></script>
-    <link rel="stylesheet" href="css/projects-page.css?v=1">
-    <script defer src="js/projects-page.js?v=1"></script>
+    <link rel="stylesheet" href="css/projects-page.css?v=2">
+    <script defer src="js/projects-page.js?v=2"></script>
+    <link rel="stylesheet" href="css/project-edit.css?v=1">
+    <script defer src="js/proofs.js?v=1"></script>
+    <script defer src="js/project-edit.js?v=1"></script>
 
     <!-- Firebase SDK & Backend Shim -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="js/firebase-init.js"></script>
     <script src="js/rnan-core.js?v=1"></script>
-    <script src="js/backend-shim.js?v=8"></script>
+    <script src="js/backend-shim.js?v=9"></script>
 
     <script>
         // Apply theme immediately to prevent flashing
@@ -2319,166 +2322,108 @@
         </div>
     </div>
 
-    <div id="projectModal"
-        class="modal fixed inset-0 z-[60] bg-black/90 backdrop-blur-lg items-start justify-center p-0 sm:p-4 overflow-y-auto">
-        <div
-            class="glass-modal w-full max-w-5xl rounded-none sm:rounded-3xl border-0 sm:border border-border-glass shadow-2xl relative min-h-screen sm:min-h-[600px] text-white font-display my-0 sm:my-8">
+    <div id="projectModal" class="modal pe-modal fixed inset-0 z-[60] items-center justify-center">
+        <div class="pe-box" role="dialog" aria-modal="true" aria-label="تفاصيل المشروع">
             <input type="hidden" id="proj-row-index">
-            <div class="p-6 md:p-10 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
-                <div class="space-y-8 order-1">
-                    <div class="flex items-center gap-3 mb-6">
-                        <span class="w-1 h-8 bg-gradient-to-b from-primary to-secondary rounded-full"></span>
-                        <h3 class="text-xl font-bold text-white">تفاصيل المشروع</h3>
-                        <button id="proj-code-chip" onclick="copyTrackLink(this)" title="نسخ رابط التتبع"
-                            class="hidden px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-bold text-slate-200 hover:bg-white/10 transition-colors items-center gap-1">
-                            <span class="material-symbols-rounded text-sm">qr_code_2</span><span class="en-num tracking-wider" dir="ltr" id="proj-code-text"></span>
-                        </button>
-
-                        <div class="relative inline-block">
-                            <button id="whatsapp-btn" onclick="toggleWhatsAppMenu()"
-                                class="hidden bg-[#25D366] hover:bg-[#128C7E] text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg hover:scale-105 admin-only">
-                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                                    <path
-                                        d="M12.031 6.172c-3.181 0-5.767 2.586-5.767 5.767 0 1.267.405 2.436 1.096 3.39l-.715 2.614 2.678-.702c.813.435 1.743.682 2.729.682 3.181 0 5.767-2.586 5.767-5.767 0-3.181-2.586-5.767-5.788-5.767zm3.391 8.221c-.144.405-.837.734-1.17.778-.319.044-.638.077-1.129-.111-.53-.204-2.128-.868-2.903-1.644-.775-.775-1.282-1.743-1.428-1.989-.144-.246-.015-.378.107-.502.11-.11.246-.288.371-.432.126-.144.168-.246.252-.405.084-.168.042-.319-.021-.444s-.546-1.314-.748-1.801c-.198-.475-.399-.41-.546-.417-.14-.007-.302-.007-.464-.007s-.425.061-.647.288c-.221.226-.846.828-.846 2.019s.868 2.339.989 2.504c.121.166 1.708 2.607 4.137 3.655.578.249 1.03.397 1.382.51.581.185 1.111.159 1.529.097.466-.07 1.428-.584 1.631-1.149.204-.564.204-1.05.143-1.149-.061-.1-.221-.16-.444-.26zM12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 22c-5.523 0-10-4.477-10-10S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
-                                </svg>
-                                إرسال للواتساب
-                            </button>
-                            <div id="whatsapp-menu"
-                                class="hidden absolute top-full right-0 mt-2 w-48 bg-slate-800 border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden">
-                                <button onclick="selectWhatsAppMsg('received')"
-                                    class="w-full text-right px-4 py-3 hover:bg-white/5 text-sm text-white border-b border-white/5 font-bold flex items-center gap-2">
-                                    <span class="material-symbols-rounded text-green-400">check_circle</span> استلام طلب
-                                </button>
-                                <button onclick="selectWhatsAppMsg('rating')"
-                                    class="w-full text-right px-4 py-3 hover:bg-white/5 text-sm text-white border-b border-white/5 font-bold flex items-center gap-2">
-                                    <span class="material-symbols-rounded text-yellow-400">star</span> طلب تقييم
-                                </button>
-                                <button onclick="selectWhatsAppMsg('payment')"
-                                    class="w-full text-right px-4 py-3 hover:bg-white/5 text-sm text-white font-bold flex items-center gap-2">
-                                    <span class="material-symbols-rounded text-blue-400">payments</span> سداد فاتورة
-                                </button>
-                            </div>
-                        </div>
-
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-muted font-bold uppercase mb-2">اسم المشروع</label>
-                        <input id="proj-name" type="text" class="form-input-modern"
-                            placeholder="مثال: تصميم هوية بصرية...">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-muted font-bold uppercase mb-2">العميل</label>
-                        <div class="flex gap-3">
-                            <select id="proj-client" class="form-input-modern flex-1 bg-slate-800"
-                                onchange="checkClientPendingInvoices()"></select>
-                            <button onclick="openClientModal('new')"
-                                class="bg-white/10 hover:bg-white/20 text-white font-bold px-4 rounded-xl transition-colors border border-white/10 admin-only">+</button>
-                        </div>
-                    </div>
-                    <div class="bg-black/20 p-6 rounded-2xl border border-white/5">
-                        <div class="flex justify-between items-center mb-4">
-                            <label class="block text-[10px] text-white font-bold uppercase mb-0">قائمة المهام</label>
-                            <button onclick="addStepRow()"
-                                class="w-8 h-8 rounded-full bg-primary/20 text-primary hover:bg-primary hover:text-white flex items-center justify-center transition-all shadow-glow-primary admin-only"><span
-                                    class="material-symbols-rounded text-lg">add</span></button>
-                        </div>
-                        <div id="proj-steps-container"
-                            class="space-y-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar"></div>
+            <input type="hidden" id="proj-type">
+            <header class="pe-head">
+                <span class="pe-type-ic" id="pe-type-ic"><span class="material-symbols-rounded">category</span></span>
+                <div class="pe-head-t">
+                    <input id="proj-name" type="text" class="pe-name" placeholder="اسم المشروع" aria-label="اسم المشروع" autocomplete="off">
+                    <div class="pe-head-sub">
+                        <span id="pe-head-client">—</span>
+                        <button id="proj-code-chip" onclick="copyTrackLink(this)" title="نسخ رابط التتبع" class="pe-code hidden"><span class="material-symbols-rounded">qr_code_2</span><span class="en-num" dir="ltr" id="proj-code-text"></span></button>
                     </div>
                 </div>
-                <div class="space-y-8 order-2">
-                    <div class="flex items-center gap-3 mb-6">
-                        <span class="w-1 h-8 bg-gradient-to-b from-accent-green to-teal-500 rounded-full"></span>
-                        <h3 class="text-xl font-bold text-white">الحالة والمالية</h3>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-[10px] text-muted font-bold uppercase mb-2">الاستلام</label>
-                            <input id="proj-start-date" type="date" class="form-input-modern en-num text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] text-muted font-bold uppercase mb-2">التسليم</label>
-                            <input id="proj-deadline" type="date" class="form-input-modern en-num text-sm">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-[10px] text-muted font-bold uppercase mb-2">الحالة</label>
-                            <select id="proj-status" class="form-input-modern bg-slate-800"
-                                onchange="syncStatusToProgress()">
-                                <option value="قيد التنفيذ">قيد التنفيذ</option>
-                                <option value="مكتمل">مكتمل</option>
-                                <option value="معلق">معلق</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] text-muted font-bold uppercase mb-2">القيمة (SAR)</label>
-                            <input id="proj-value" type="number"
-                                class="form-input-modern en-num font-bold text-green-400" placeholder="0.00">
-                        </div>
-                    </div>
-                    <div class="bg-black/20 p-6 rounded-2xl border border-white/5">
-                        <div class="flex justify-between text-sm mb-4 font-bold">
-                            <span class="text-muted">نسبة الإنجاز</span>
-                            <span id="proj-progress-text" class="text-primary en-num">0%</span>
-                        </div>
-                        <input id="proj-progress" type="range" min="0" max="100" class="custom-range w-full"
-                            oninput="syncProgressToStatus(this.value)">
-                    </div>
-                    <div id="pending-invoice-alert"
-                        class="hidden glass-panel p-4 rounded-xl border border-yellow-500/30 flex flex-col md:flex-row justify-between items-center gap-3 bg-yellow-500/5">
-                        <div class="flex items-center gap-2">
-                            <span class="material-symbols-rounded text-yellow-400">warning</span>
-                            <span class="text-sm text-yellow-100 font-bold">يوجد فاتورة معلقة لهذا العميل (#<span
-                                    id="pending-inv-num" class="en-num"></span>)</span>
-                        </div>
-                        <button onclick="addToPendingInvoice()" id="btn-add-to-pending"
-                            class="w-full md:w-auto px-4 py-2 bg-yellow-500/20 text-yellow-200 rounded-lg text-xs font-bold border border-yellow-500/50 hover:bg-yellow-500 hover:text-black transition flex items-center justify-center gap-1 admin-only">
-                            <span class="material-symbols-rounded text-sm">add_circle</span> إضافة للفاتورة
-                        </button>
-                    </div>
-                    <div class="mt-6">
-                        <div class="flex justify-between items-center mb-2">
-                            <label class="text-[10px] text-accent-green font-bold uppercase">تفاصيل المشروع</label>
-                            <button onclick="openNotesViewer()"
-                                class="text-xs bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded-lg transition-colors flex items-center gap-1 border border-white/5">
-                                <span class="material-symbols-rounded text-sm">open_in_full</span> عرض مكبر
-                            </button>
-                        </div>
-                        <textarea id="proj-notes" class="form-input-modern h-32 resize-none leading-relaxed"
-                            placeholder="سجل هنا أي ملاحظات، أفكار، أو متطلبات خاصة بالمشروع..."></textarea>
-                    </div>
-                    <div class="glass-panel p-4 rounded-xl flex items-center justify-between gap-3 mt-4">
-                        <div class="flex items-center gap-4 min-w-0">
-                            <div
-                                class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
-                                <span class="material-symbols-rounded">request_quote</span>
-                            </div>
-                            <div class="min-w-0">
-                                <p class="font-bold text-sm text-white">عرض السعر</p>
-                                <p id="proj-quote-sub" class="text-xs text-muted">يُحفظ داخل المشروع وتفتحه متى شئت</p>
-                            </div>
-                        </div>
-                        <button type="button" id="proj-quote-btn" onclick="openProjectQuotation()" class="proj-quote-btn admin-only"></button>
+                <div class="pe-wa">
+                    <button id="whatsapp-btn" onclick="toggleWhatsAppMenu()" class="pe-wa-btn hidden admin-only" title="رسائل واتساب للعميل">
+                        <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.19 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35zM12.05 21.8h-.01a9.8 9.8 0 0 1-5-1.37l-.36-.21-3.72.98 1-3.63-.24-.37a9.83 9.83 0 0 1 15.24-12.13 9.76 9.76 0 0 1 2.88 6.95c0 5.42-4.41 9.83-9.79 9.83zm8.36-18.2A11.74 11.74 0 0 0 12.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.94L.06 24l6.3-1.65a11.87 11.87 0 0 0 5.68 1.45h.01c6.55 0 11.89-5.34 11.89-11.89 0-3.18-1.24-6.16-3.48-8.41z"/></svg>
+                        <span>رسائل العميل</span>
+                    </button>
+                    <div id="whatsapp-menu" class="hidden pe-wa-menu">
+                        <button onclick="selectWhatsAppMsg('received')"><span class="material-symbols-rounded">check_circle</span> تأكيد استلام الطلب</button>
+                        <button onclick="selectWhatsAppMsg('rating')"><span class="material-symbols-rounded">star</span> طلب تقييم بعد التسليم</button>
+                        <button onclick="selectWhatsAppMsg('payment')"><span class="material-symbols-rounded">payments</span> تذكير بسداد فاتورة</button>
                     </div>
                 </div>
+                <button type="button" class="pe-x" onclick="closeProjectModal()" aria-label="إغلاق"><span class="material-symbols-rounded">close</span></button>
+            </header>
+            <div class="pe-body">
+                <div class="pe-main">
+                    <section class="pe-sec" style="--o:1">
+                        <h4><span class="material-symbols-rounded">flag</span> الحالة</h4>
+                        <div class="pe-status" role="radiogroup" aria-label="حالة المشروع">
+                            <button type="button" data-st="قيد التنفيذ" role="radio"><span class="material-symbols-rounded">autorenew</span> قيد التنفيذ</button>
+                            <button type="button" data-st="معلق" role="radio"><span class="material-symbols-rounded">pause_circle</span> معلّق</button>
+                            <button type="button" data-st="مكتمل" role="radio"><span class="material-symbols-rounded">task_alt</span> مكتمل</button>
+                        </div>
+                        <select id="proj-status" class="pe-native" onchange="syncStatusToProgress()" aria-hidden="true" tabindex="-1">
+                            <option value="قيد التنفيذ">قيد التنفيذ</option>
+                            <option value="مكتمل">مكتمل</option>
+                            <option value="معلق">معلق</option>
+                        </select>
+                    </section>
+                    <section class="pe-sec" style="--o:2">
+                        <h4><span class="material-symbols-rounded">checklist</span> المهام <em class="en-num" id="pe-steps-count"></em>
+                            <button type="button" onclick="addStepRow()" class="pe-add admin-only"><span class="material-symbols-rounded">add</span> مهمة</button></h4>
+                        <div class="pe-prog"><span class="pe-bar"><i id="pe-bar"></i></span><b id="proj-progress-text" class="en-num">0%</b></div>
+                        <input id="proj-progress" type="range" min="0" max="100" class="pe-range" oninput="syncProgressToStatus(this.value)" aria-label="نسبة الإنجاز">
+                        <div id="proj-steps-container" class="pe-steps"></div>
+                    </section>
+                    <section class="pe-sec" id="pe-proof-sec" style="--o:3">
+                        <h4><span class="material-symbols-rounded">preview</span> التصميم ومراجعة العميل</h4>
+                        <div id="pe-proof"></div>
+                    </section>
+                    <section class="pe-sec" style="--o:8">
+                        <h4><span class="material-symbols-rounded">sticky_note_2</span> تفاصيل المشروع
+                            <button type="button" onclick="openNotesViewer()" class="pe-add"><span class="material-symbols-rounded">open_in_full</span> عرض مكبر</button></h4>
+                        <textarea id="proj-notes" class="form-input-modern pe-notes" placeholder="سجل هنا أي ملاحظات، أفكار، أو متطلبات خاصة بالمشروع..."></textarea>
+                    </section>
+                </div>
+                <aside class="pe-side">
+                    <section class="pe-sec" style="--o:4">
+                        <h4><span class="material-symbols-rounded">person</span> العميل</h4>
+                        <div class="pe-client">
+                            <select id="proj-client" class="form-input-modern" onchange="checkClientPendingInvoices()"></select>
+                            <button type="button" onclick="openClientModal('new')" class="pe-plus admin-only" aria-label="عميل جديد"><span class="material-symbols-rounded">person_add</span></button>
+                        </div>
+                    </section>
+                    <section class="pe-sec" style="--o:5">
+                        <h4><span class="material-symbols-rounded">category</span> نوع العمل</h4>
+                        <div class="pe-types" id="pe-types"></div>
+                    </section>
+                    <section class="pe-sec" style="--o:6">
+                        <h4><span class="material-symbols-rounded">event</span> المواعيد</h4>
+                        <div class="pe-dates">
+                            <label><span>الاستلام</span><input id="proj-start-date" type="date" class="form-input-modern en-num"></label>
+                            <label><span>التسليم</span><input id="proj-deadline" type="date" class="form-input-modern en-num"></label>
+                        </div>
+                        <div class="pe-spans" id="pe-spans"></div>
+                        <p class="pe-due" id="pe-due"></p>
+                    </section>
+                    <section class="pe-sec" style="--o:7">
+                        <h4><span class="material-symbols-rounded">payments</span> المالية</h4>
+                        <label class="pe-val"><span>القيمة (ر.س)</span><input id="proj-value" type="number" inputmode="decimal" lang="en" dir="ltr" class="form-input-modern en-num" placeholder="0.00"></label>
+                        <div id="pending-invoice-alert" class="hidden pe-alert">
+                            <span class="material-symbols-rounded">receipt_long</span>
+                            <span class="pe-alert-t">فاتورة معلّقة لهذا العميل <b class="en-num" dir="ltr" id="pending-inv-num"></b></span>
+                            <button onclick="addToPendingInvoice()" id="btn-add-to-pending" class="admin-only"><span class="material-symbols-rounded">add_circle</span> إضافة للفاتورة</button>
+                        </div>
+                        <div class="pe-quote">
+                            <span class="pe-quote-ic"><span class="material-symbols-rounded">request_quote</span></span>
+                            <div><b>عرض السعر</b><p id="proj-quote-sub">يُحفظ داخل المشروع وتفتحه متى شئت</p></div>
+                            <button type="button" id="proj-quote-btn" onclick="openProjectQuotation()" class="proj-quote-btn admin-only"></button>
+                        </div>
+                        <button onclick="issueInvoiceDirectly()" class="pe-inv admin-only"><span class="material-symbols-rounded">receipt_long</span> إصدار فاتورة بقيمة المشروع</button>
+                    </section>
+                </aside>
             </div>
-            <div
-                class="p-6 md:p-8 pt-0 flex flex-wrap items-center gap-4 border-t border-white/10 mt-4 pt-6 bg-black/20 rounded-b-3xl">
-                <button onclick="saveProject()"
-                    class="w-full sm:w-auto btn-glow bg-gradient-to-r from-primary to-blue-700 text-white px-10 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg hover:scale-[1.02] transition-transform admin-only">
-                    <span class="material-symbols-rounded">check</span> حفظ المشروع
-                </button>
-                <button onclick="issueInvoiceDirectly()"
-                    class="w-full sm:w-auto btn-glow bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-colors sm:mx-2 admin-only">
-                    <span class="material-symbols-rounded">receipt_long</span> إصدار فاتورة
-                </button>
-                <button onclick="deleteProject()"
-                    class="w-full sm:w-auto text-red-400 hover:text-red-300 px-6 py-2 font-bold transition-colors admin-only">حذف
-                    المشروع</button>
-                <button onclick="document.getElementById('projectModal').classList.remove('open')"
-                    class="w-full sm:w-auto text-muted hover:text-white px-6 py-2 font-bold transition-colors">إغلاق</button>
-            </div>
+            <footer class="pe-foot">
+                <button onclick="saveProject()" class="pe-save admin-only"><span class="material-symbols-rounded">check</span> حفظ المشروع</button>
+                <button type="button" onclick="closeProjectModal()" class="pe-close">إغلاق</button>
+                <span class="pe-grow"></span>
+                <button onclick="deleteProject()" class="pe-del admin-only"><span class="material-symbols-rounded">delete</span> حذف</button>
+            </footer>
         </div>
     </div>
 
@@ -3739,7 +3684,7 @@
         function saveClientDetails() {
             let rowIndex = document.getElementById('client-details-row').value;
             let text = document.getElementById('client-details-text').value;
-            let btn = event.target;
+            let btn = event.target.closest('button') || event.target;
 
             btn.innerHTML = 'جاري الحفظ...';
 
@@ -3787,7 +3732,7 @@
             let rowIndex = document.getElementById('rating-project-row').value;
             let rating = document.getElementById('rating-value').value;
             let review = document.getElementById('rating-review-text').value;
-            let btn = event.target;
+            let btn = event.target.closest('button') || event.target;
 
             btn.innerHTML = 'جاري الإرسال...';
 
@@ -4742,7 +4687,7 @@ ${link}
             if (!currentInvoiceId || currentInvoiceId === "تلقائي") return alert("هذه الفاتورة لم تحفظ بعد");
             if (!confirm("هل أنت متأكد من حذف هذه الفاتورة؟ لا يمكن التراجع.")) return;
 
-            let btn = event.target;
+            let btn = event.target.closest('button') || event.target;
             let originalText = btn.innerHTML;
             btn.innerHTML = 'جاري الحذف...';
 
@@ -5295,7 +5240,7 @@ ${link}
 
             if (!name || !client) return alert("الرجاء التأكد من اسم المشروع والعميل");
 
-            let btn = event.target;
+            let btn = event.target.closest('button') || event.target;
             let originalText = btn.innerHTML;
             btn.innerHTML = `<span class="material-symbols-rounded animate-spin">sync</span> جاري الإصدار...`;
 
@@ -5363,10 +5308,11 @@ ${link}
                 deadline: date, startDate: startDate,
                 status: stat, steps: steps,
                 notes: notes,
+                type: document.getElementById('proj-type').value,
                 quotation: projectQuotation
             };
 
-            let btn = event.target;
+            let btn = event.target.closest('button') || event.target;
             btn.innerHTML = `<span class="material-symbols-rounded animate-spin">sync</span> جاري الحفظ...`;
 
             google.script.run.withSuccessHandler(() => {
@@ -5380,9 +5326,15 @@ ${link}
             let rowIdx = document.getElementById('proj-row-index').value;
             if (!rowIdx) return alert("هذا مشروع جديد لم يتم حفظه بعد");
 
-            if (!confirm("هل أنت متأكد تماماً من حذف هذا المشروع؟ لا يمكن التراجع.")) return;
-
-            let btn = event.target;
+            let btn = event.target.closest('button') || event.target;
+            // تأكيد بضغطة ثانية بدل نافذة المتصفح
+            if (!btn.classList.contains('sure')) {
+                btn.classList.add('sure');
+                btn.innerHTML = '<span class="material-symbols-rounded">warning</span> اضغط مجددًا للحذف';
+                setTimeout(() => { if (btn.classList.contains('sure')) { btn.classList.remove('sure'); btn.innerHTML = '<span class="material-symbols-rounded">delete</span> حذف'; } }, 4000);
+                return;
+            }
+            btn.classList.remove('sure');
             btn.innerHTML = 'جاري الحذف...';
 
             google.script.run.withSuccessHandler(() => {
