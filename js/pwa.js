@@ -61,7 +61,7 @@
             + step(2, 'install_mobile', 'اختر «تثبيت التطبيق»', 'أو «إضافة إلى الشاشة الرئيسية» حسب المتصفح.')
             + step(3, 'check_circle', 'أكّد التثبيت', 'تظهر أيقونة رنان الزرقاء على شاشتك، افتح اللوحة منها.');
         return `<div class="rn-guide">
-            <img class="rn-guide-ic" src="images/app/icon-192.png" alt="">
+            <img class="rn-guide-ic" src="images/app/icon-192.png?v=2" alt="">
             <h3>ثبّت رنان على جوالك</h3>
             <p>تفتح لوحة التحكم بملء الشاشة وبقائمة سفلية، مثل أي تطبيق.</p>
             <ol class="rn-steps">${steps}</ol>
@@ -82,7 +82,7 @@
             promo = document.createElement('div');
             promo.className = 'rn-promo no-print';
             promo.setAttribute('role', 'dialog');
-            promo.innerHTML = `<img src="images/app/icon-192.png" alt="">
+            promo.innerHTML = `<img src="images/app/icon-192.png?v=2" alt="">
                 <div class="rn-promo-tx"><b>ثبّت رنان على جوالك</b><small>افتح اللوحة من الشاشة الرئيسية كتطبيق، بقائمة سفلية سريعة.</small></div>
                 <div class="rn-promo-act"><button type="button" class="rn-btn sm" data-act="install">تثبيت</button><button type="button" class="rn-x" data-act="later" aria-label="لاحقًا">${ic('close')}</button></div>`;
             promo.addEventListener('click', e => {

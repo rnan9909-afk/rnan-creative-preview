@@ -11,8 +11,10 @@ button{height:46px;padding:0 26px;border:0;border-radius:14px;background:linear-
 <p>لوحة رنان تحتاج اتصالًا لعرض بياناتك المحدّثة.<br>تأكد من الشبكة ثم أعد المحاولة.</p>
 <button onclick="location.reload()">إعادة المحاولة</button></main></body></html>`;
 
-self.addEventListener('install', e => e.waitUntil(caches.open('rnan-app-v1').then(c => c.add('images/app/icon-192.png')).then(() => self.skipWaiting())));
-self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+self.addEventListener('install', e => e.waitUntil(caches.open('rnan-app-v2').then(c => c.add('images/app/icon-192.png')).then(() => self.skipWaiting())));
+self.addEventListener('activate', e => e.waitUntil(caches.keys()
+    .then(keys => Promise.all(keys.filter(k => k !== 'rnan-app-v2').map(k => caches.delete(k))))
+    .then(() => self.clients.claim())));
 self.addEventListener('fetch', e => {
     if (e.request.mode === 'navigate') {
         e.respondWith(fetch(e.request, { cache: 'no-cache' }).catch(() => new Response(OFFLINE, { headers: { 'Content-Type': 'text/html; charset=utf-8' } })));

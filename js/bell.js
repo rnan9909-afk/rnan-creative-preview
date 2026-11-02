@@ -106,7 +106,7 @@
     // ── تنبيه الجهاز (يعمل والتطبيق مفتوح أو في الخلفية) ──
     async function notify(title, body, data) {
         if (!('Notification' in window) || Notification.permission !== 'granted') return false;
-        const opts = { body, icon: 'images/app/icon-192.png', badge: 'images/app/icon-192.png', tag: (data && data.tag) || undefined, renotify: !!(data && data.tag), data: Object.assign({ url: 'admin.html' }, data || {}) };
+        const opts = { body, icon: 'images/app/icon-192.png?v=2', badge: 'images/app/icon-192.png?v=2', tag: (data && data.tag) || undefined, renotify: !!(data && data.tag), data: Object.assign({ url: 'admin.html' }, data || {}) };
         try {
             const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration('./admin');
             if (reg && reg.showNotification) { await reg.showNotification(title, opts); return true; }

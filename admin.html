@@ -7,19 +7,19 @@
     <title>لوحة إدارة رنان</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/svg+xml" href="images/ranan-logo.svg">
-    <link rel="apple-touch-icon" href="images/app/apple-touch-icon.png">
+    <link rel="apple-touch-icon" href="images/app/apple-touch-icon.png?v=2">
     <link rel="manifest" href="manifest.webmanifest">
     <meta name="theme-color" content="#02083A">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="رنان">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <script src="https://cdn.tailwindcss.com"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/tailwind.css?v=1">
 
 
     <!-- نافذة جميع العمليات المالية -->
@@ -87,50 +87,6 @@
         </div>
     </div>
 
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    // RANNAN · Midnight Mint (ألوان الشعار)
-                    colors: {
-                        primary: '#47E0AC',
-                        secondary: '#24b184',
-                        "accent-green": "#47E0AC",
-                        "bg-main": "#02083A",
-                        "bg-card": "#0a1250",
-                        "border-glass": "rgba(71,224,172,0.15)",
-                        muted: '#8590c4',
-                        "card-dark": "#0a1250",
-                        "card-border": "rgba(71,224,172,0.15)",
-                        "accent": "#47E0AC",
-                    },
-                    fontFamily: {
-                        display: ['Cairo', 'sans-serif'],
-                        sans: ['Cairo', 'sans-serif']
-                    },
-                    borderRadius: {
-                        // نصف قطر موحّد للبطاقات والأزرار
-                        'lg': '14px',
-                        'xl': '18px',
-                        '2xl': '20px',
-                        '3xl': '24px',
-                    },
-                    boxShadow: {
-                        'glow-primary': '0 0 32px -6px rgba(71, 224, 172, 0.30)',
-                        'glow-accent': '0 0 32px -6px rgba(71, 224, 172, 0.26)',
-                        'glow-secondary': '0 0 32px -6px rgba(67, 217, 196, 0.24)',
-                        'glow-cyan': '0 0 32px -6px rgba(67, 217, 196, 0.24)',
-                        'glass': '0 18px 50px -12px rgba(1, 4, 26, 0.85)',
-                    },
-                    animation: {
-                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'float': 'none',
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         /* ================= LIGHT MODE OVERRIDES ================= */
         html.light-mode body {
@@ -880,7 +836,7 @@
     <script defer src="js/studio/subs.js?v=2"></script>
     <script defer src="js/studio/time.js?v=2"></script>
     <link rel="stylesheet" href="css/pwa.css?v=2">
-    <script defer src="js/pwa.js?v=4"></script>
+    <script defer src="js/pwa.js?v=5"></script>
     <link rel="stylesheet" href="css/invoices.css?v=4">
     <script defer src="js/invoices.js?v=5"></script>
     <link rel="stylesheet" href="css/invoices-page.css?v=1">
@@ -916,7 +872,7 @@
     <link rel="stylesheet" href="css/bell.css?v=2">
     <link rel="stylesheet" href="css/polish.css?v=5">
     <script defer src="js/backup.js?v=1"></script>
-    <script defer src="js/bell.js?v=1"></script>
+    <script defer src="js/bell.js?v=2"></script>
     <link rel="stylesheet" href="css/home.css?v=2">
     <script defer src="js/home.js?v=3"></script>
     <link rel="stylesheet" href="css/finance.css?v=1">
@@ -1024,22 +980,6 @@
                     <span
                         class="material-symbols-rounded text-2xl group-hover:text-primary transition-colors">payments</span>
                     <span class="font-bold text-sm group-hover:translate-x-[-4px] transition-transform">المالية</span>
-                </button>
-
-                <button onclick="switchPage('rewards'); toggleSidebar()" id="nav-rewards"
-                    class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 group hover:bg-white/5 border border-transparent hover:border-white/5 client-only">
-                    <span
-                        class="material-symbols-rounded text-2xl group-hover:text-amber-400 transition-colors">hotel_class</span>
-                    <span class="font-bold text-sm group-hover:translate-x-[-4px] transition-transform">مكافآتي</span>
-                </button>
-
-                <button onclick="switchPage('updates'); toggleSidebar()" id="nav-updates"
-                    class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 group hover:bg-white/5 border border-transparent hover:border-white/5 relative client-only">
-                    <span
-                        class="material-symbols-rounded text-2xl group-hover:text-primary transition-colors">history_edu</span>
-                    <span class="font-bold text-sm group-hover:translate-x-[-4px] transition-transform">التحديثات</span>
-                    <span id="sidebar-updates-badge"
-                        class="w-2 h-2 bg-red-500 rounded-full absolute top-5 left-5 shadow-[0_0_10px_rgba(239,68,68,0.5)] hidden"></span>
                 </button>
 
                 <button onclick="switchPage('invoices'); toggleSidebar()" id="nav-invoices"
@@ -1317,169 +1257,6 @@
                     </div>
                 </div>
             </div>
-
-<div id="rewards-page" class="hidden space-y-10 max-w-[1400px] mx-auto animate-fadeIn pb-20">
-                <header class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
-                    <div>
-                        <h2
-                            class="text-3xl lg:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 mb-2">
-                            برنامج الولاء "رنان+"</h2>
-                        <p class="text-muted text-sm">كل ريال تدفعه = نقطة في رصيدك. استمتع بمكافآت حصرية!</p>
-                    </div>
-                    <div class="flex gap-3">
-                        <button onclick="document.getElementById('rewardsGuideModal').classList.add('open')"
-                            class="glass-panel px-4 py-2 rounded-xl border border-white/10 hover:bg-white/10 transition-colors flex items-center gap-2 text-white font-bold text-sm">
-                            <span class="material-symbols-rounded text-amber-400">info</span> عن البرنامج
-                        </button>
-                        <div
-                            class="glass-panel px-4 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 flex items-center gap-2">
-                            <span class="material-symbols-rounded text-amber-400">workspace_premium</span>
-                            <span class="text-amber-200 font-bold text-sm" id="reward-tier-badge">عضوية برونزية</span>
-                        </div>
-                    </div>
-                </header>
-
-                <!-- Hero Stats -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div
-                        class="lg:col-span-2 glass-panel rounded-3xl p-8 relative overflow-hidden group border border-amber-500/20">
-                        <div
-                            class="absolute -right-20 -top-20 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl group-hover:bg-amber-500/20 transition-all">
-                        </div>
-
-                        <div
-                            class="flex flex-col sm:flex-row justify-between items-start sm:items-center relative z-10 mb-8">
-                            <div>
-                                <p class="text-amber-400 font-bold text-xs uppercase tracking-widest mb-1">رصيد النقاط
-                                    الحالي</p>
-                                <div class="flex items-baseline gap-2">
-                                    <h3 class="text-6xl font-black text-white en-num drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]"
-                                        id="reward-points-balance">0</h3>
-                                    <span class="text-muted font-bold">نقطة</span>
-                                </div>
-                            </div>
-                            <div
-                                class="mt-4 sm:mt-0 text-center bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-md">
-                                <p class="text-xs text-muted mb-1">قيمة الاسترداد (كاش باك)</p>
-                                <p class="text-2xl font-bold text-green-400 en-num" id="reward-cashback-value">0 SAR</p>
-                            </div>
-                        </div>
-
-                        <!-- Tier Progress -->
-                        <div class="relative z-10">
-                            <div class="flex justify-between text-xs font-bold mb-2">
-                                <span class="text-muted" id="current-tier-name">برونزي</span>
-                                <span class="text-amber-400" id="next-tier-name">فضي</span>
-                            </div>
-                            <div
-                                class="w-full bg-black/40 rounded-full h-4 overflow-hidden border border-white/5 relative">
-                                <div id="tier-progress-bar"
-                                    class="h-full bg-gradient-to-r from-amber-700 via-amber-500 to-yellow-300 transition-all duration-1000 shadow-[0_0_15px_rgba(245,158,11,0.5)]"
-                                    style="width: 0%"></div>
-                            </div>
-                            <p class="text-xs text-muted mt-3 text-center" id="tier-progress-msg">باقي 1000 ريال للوصول
-                                للمستوى الفضي</p>
-                        </div>
-                    </div>
-
-                    <!-- Referral Card -->
-                    <div
-                        class="glass-panel rounded-3xl p-8 flex flex-col items-center text-center border border-indigo-500/20 relative overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-b from-indigo-500/5 to-transparent"></div>
-                        <div
-                            class="w-16 h-16 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mb-4 shadow-glow-primary">
-                            <span class="material-symbols-rounded text-3xl">diversity_3</span>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2">سفراء رنان</h3>
-                        <p class="text-xs text-muted leading-relaxed mb-6">ادعُ أصدقاءك واكسب <span
-                                class="text-white font-bold">300 نقطة</span> لكل عميل جديد! هم يحصلون على أولوية، وأنت
-                            تكسب نقاط مجانية.</p>
-
-                        <button onclick="shareReferral()"
-                            class="w-full btn-glow bg-[#25D366] hover:bg-[#128C7E] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-transform hover:scale-105">
-                            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                                <path
-                                    d="M12.031 6.172c-3.181 0-5.767 2.586-5.767 5.767 0 1.267.405 2.436 1.096 3.39l-.715 2.614 2.678-.702c.813.435 1.743.682 2.729.682 3.181 0 5.767-2.586 5.767-5.767 0-3.181-2.586-5.767-5.788-5.767zm3.391 8.221c-.144.405-.837.734-1.17.778-.319.044-.638.077-1.129-.111-.53-.204-2.128-.868-2.903-1.644-.775-.775-1.282-1.743-1.428-1.989-.144-.246-.015-.378.107-.502.11-.11.246-.288.371-.432.126-.144.168-.246.252-.405.084-.168.042-.319-.021-.444s-.546-1.314-.748-1.801c-.198-.475-.399-.41-.546-.417-.14-.007-.302-.007-.464-.007s-.425.061-.647.288c-.221.226-.846.828-.846 2.019s.868 2.339.989 2.504c.121.166 1.708 2.607 4.137 3.655.578.249 1.03.397 1.382.51.581.185 1.111.159 1.529.097.466-.07 1.428-.584 1.631-1.149.204-.564.204-1.05.143-1.149-.061-.1-.221-.16-.444-.26zM12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 22c-5.523 0-10-4.477-10-10S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
-                            </svg>
-                            دعوة صديق عبر واتساب
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Rewards Menu -->
-                <div>
-                    <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                        <span class="w-1 h-8 bg-gradient-to-b from-amber-400 to-orange-500 rounded-full"></span>
-                        متجر المكافآت
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="rewards-grid">
-                        <!-- Rewards will be injected here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Updates Page (Timeline) -->
-            <div id="updates-page" class="hidden space-y-10 max-w-[1000px] mx-auto animate-fadeIn pb-20">
-                <header class="flex flex-col lg:flex-row lg:items-end justify-between mb-8 gap-4">
-                    <div>
-                        <h2
-                            class="text-3xl lg:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 mb-2">
-                            مركز التحديثات</h2>
-                        <p class="text-muted text-sm lg:text-base">سجل زمني لجميع العمليات والأنشطة.</p>
-                    </div>
-                </header>
-
-                <div class="glass-panel p-8 rounded-3xl relative min-h-[500px]">
-                    <div id="updates-timeline"
-                        class="space-y-8 relative before:absolute before:top-0 before:bottom-0 before:right-6 before:w-0.5 before:bg-white/10">
-                        <!-- Timeline Items Injected Here -->
-                        <p class="text-center text-muted py-20">جاري تحميل التحديثات...</p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="client-home-page" class="hidden space-y-10 max-w-[1400px] mx-auto animate-fadeIn pb-20">
-                <header class="mb-8">
-                    <h2 class="text-3xl lg:text-4xl font-black text-white mb-2">مرحباً بك، <span
-                            id="client-greeting-name"></span></h2>
-                    <p class="text-muted text-sm">نظرة شاملة على مشاريعك وفواتيرك.</p>
-                </header>
-
-                <section>
-                    <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <span class="w-2 h-8 bg-primary rounded-full"></span> المشاريع قيد التنفيذ
-                    </h3>
-                    <div id="client-active-projects" class="space-y-4"></div>
-                </section>
-
-                <section>
-                    <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <span class="w-2 h-8 bg-accent-green rounded-full"></span> المشاريع المنجزة
-                    </h3>
-                    <div id="client-completed-projects" class="space-y-4"></div>
-                </section>
-
-                <section>
-                    <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <span class="w-2 h-8 bg-secondary rounded-full"></span> سجل الفواتير
-                    </h3>
-                    <div class="table-container bg-black/20 overflow-x-auto">
-                        <table class="w-full text-right text-sm modern-table min-w-[600px]">
-                            <thead>
-                                <tr>
-                                    <th class="px-6 py-4">رقم الفاتورة</th>
-                                    <th class="px-6 py-4">التاريخ</th>
-                                    <th class="px-6 py-4">المبلغ</th>
-                                    <th class="px-6 py-4 text-center">الحالة</th>
-                                    <th class="px-6 py-4 text-center">إجراءات</th>
-                                </tr>
-                            </thead>
-                            <tbody id="client-invoices-list" class="divide-y divide-border-glass"></tbody>
-                        </table>
-                    </div>
-                </section>
-            </div>
-
 
             <!-- ═══ طلبات الموقع: طلبات الخدمة + رسائل التواصل + استبدال النقاط ═══ -->
             <div id="requests-page" class="hidden space-y-8 max-w-[1400px] mx-auto animate-fadeIn pb-20">
@@ -2700,169 +2477,12 @@
 
         const RIYAL_IMG = 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Saudi_Riyal_Symbol.svg/330px-Saudi_Riyal_Symbol.svg.png';
 
-        // Rewards Data
-        const REWARDS_MENU = [
-            { id: 1, title: 'خصم 20 ريال', cost: 400, value: '20', icon: 'local_offer', color: 'text-blue-400', bg: 'bg-blue-400/20' },
-            { id: 2, title: 'خصم 50 ريال', cost: 1000, value: '50', icon: 'local_offer', color: 'text-amber-400', bg: 'bg-amber-400/20' },
-            { id: 3, title: 'خصم 70 ريال', cost: 1400, value: '70', icon: 'local_offer', color: 'text-purple-400', bg: 'bg-purple-400/20' }
-        ];
-
         function formatCurrency(amount) {
             let val = parseFloat(amount) || 0;
             return `<div class="flex items-center gap-1 justify-end inline-flex">
             <span class="en-num">${val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             <img src="${RIYAL_IMG}" class="riyal-logo" alt="SAR">
         </div>`;
-        }
-
-        // --- Rewards System Logic ---
-        function renderRewardsPage() {
-            let client = clientsData.find(c => c.name === currentClientName || c.company === currentClientName);
-            if (!client) return; // Should not happen in client mode
-
-            let points = client.points || 0;
-            let spent = client.totalSpent || 0;
-
-            // Update Balance
-            let balanceEl = document.getElementById('reward-points-balance');
-            if (balanceEl) balanceEl.innerText = points;
-
-            // Calculate Cashback Value (5% = Points / 20)
-            let cashbackVal = (points / 20).toFixed(2);
-            let cashbackEl = document.getElementById('reward-cashback-value');
-            if (cashbackEl) cashbackEl.innerText = cashbackVal + ' SAR';
-
-            // Calculate Tier
-            let tier = 'برونزي';
-            let nextTier = 'فضي';
-            let progress = 0;
-            let msg = '';
-            let tierColor = 'text-amber-700';
-
-            let bgClass = "bg-amber-500/10 border-amber-500/20";
-            let textGradient = "from-amber-200 via-amber-400 to-amber-600";
-            let shadowClass = "";
-
-            if (spent >= 5000) {
-                tier = 'ذهبي';
-                nextTier = 'VIP';
-                progress = 100;
-                msg = '🎉 مبروك! أنت في المستوى الذهبي (VIP)! استمتع بأولوية قصوى وخصم 1.25 نقطة.';
-                tierColor = 'text-yellow-400';
-                bgClass = "bg-gradient-to-br from-yellow-500/20 to-amber-600/20 border-yellow-500/50";
-                textGradient = "from-yellow-200 via-yellow-400 to-amber-500";
-                shadowClass = "shadow-[0_0_30px_rgba(234,179,8,0.2)]";
-            } else if (spent >= 1000) {
-                tier = 'فضي';
-                nextTier = 'ذهبي';
-                progress = ((spent - 1000) / (5000 - 1000)) * 100;
-                let remain = 5000 - spent;
-                msg = `👏 رائع! أنت في المستوى الفضي (أولوية متوسطة). باقي <span class="en-num font-bold text-white">${remain}</span> ريال للوصول للذهبي`;
-                tierColor = 'text-slate-300';
-                bgClass = "bg-gradient-to-br from-slate-500/20 to-gray-600/20 border-slate-400/50";
-                textGradient = "from-slate-200 via-slate-300 to-gray-400";
-                shadowClass = "shadow-[0_0_30px_rgba(148,163,184,0.2)]";
-            } else {
-                // Bronze
-                tier = 'برونزي';
-                nextTier = 'فضي';
-                progress = (spent / 1000) * 100;
-                let remain = 1000 - spent;
-                msg = `بداية موفقة! باقي <span class="en-num font-bold text-white">${remain}</span> ريال للوصول للمستوى الفضي`;
-                tierColor = 'text-amber-700';
-            }
-
-            // Apply Styles to Hero Card
-            let heroCard = document.querySelector('#rewards-page .glass-panel.rounded-3xl');
-            if (heroCard) {
-                heroCard.className = `lg:col-span-2 glass-panel rounded-3xl p-8 relative overflow-hidden group border transition-all duration-500 ${bgClass.split(' ')[2] || 'border-amber-500/20'} ${shadowClass}`;
-                // We can't easily replace all classes, so we rely on the border and shadow being additive or cascading
-                // A better approach is to set specific style properties or clearer class manipulation
-                // For now, let's update the specific visual container if possible, or just the badge
-            }
-
-            let tierTitle = document.querySelector('#rewards-page h2');
-            if (tierTitle) tierTitle.className = `text-3xl lg:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r ${textGradient} mb-2 transition-all duration-500`;
-
-            let tierBadge = document.getElementById('reward-tier-badge');
-            if (tierBadge) tierBadge.innerText = 'عضوية ' + tier;
-
-            let currTierName = document.getElementById('current-tier-name');
-            if (currTierName) currTierName.innerText = tier;
-
-            let nextTierName = document.getElementById('next-tier-name');
-            if (nextTierName) nextTierName.innerText = nextTier;
-
-            let progressBar = document.getElementById('tier-progress-bar');
-            if (progressBar) progressBar.style.width = progress + '%';
-
-            let progressMsg = document.getElementById('tier-progress-msg');
-            if (progressMsg) progressMsg.innerHTML = msg;
-
-            // Render Rewards Menu
-            let grid = document.getElementById('rewards-grid');
-            if (grid) {
-                grid.innerHTML = '';
-                REWARDS_MENU.forEach(r => {
-                    let canRedeem = points >= r.cost;
-                    let btnClass = canRedeem ? 'bg-primary hover:bg-blue-600 shadow-glow-primary text-white' : 'bg-white/5 text-muted cursor-not-allowed';
-                    let btnText = canRedeem ? 'استبدال الآن' : 'رصيد غير كافٍ';
-                    let onClick = canRedeem ? `onclick="requestRedeem('${r.title}', ${r.cost})"` : '';
-
-                    grid.innerHTML += `
-                    <div class="glass-panel rounded-2xl p-6 border border-white/5 relative group hover:border-amber-500/30 transition-all">
-                        <div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <div class="flex justify-between items-start mb-4 relative z-10">
-                            <div class="w-12 h-12 rounded-xl ${r.bg} ${r.color} flex items-center justify-center">
-                                <span class="material-symbols-rounded text-2xl">${r.icon}</span>
-                            </div>
-                            <span class="px-3 py-1 rounded-full bg-white/5 text-xs font-bold text-muted border border-white/5">قيمة ${r.value}</span>
-                        </div>
-                        <h4 class="font-bold text-lg text-white mb-2 relative z-10">${r.title}</h4>
-                        <div class="flex items-center gap-2 mb-6 relative z-10">
-                            <span class="text-2xl font-black text-amber-400 en-num">${r.cost}</span>
-                            <span class="text-xs text-muted font-bold">نقطة</span>
-                        </div>
-                        <button ${onClick} class="w-full py-3 rounded-xl font-bold text-sm transition-all ${btnClass} relative z-10">
-                            ${btnText}
-                        </button>
-                    </div>
-                    `;
-                });
-            }
-        }
-
-        function shareReferral() {
-            let client = clientsData.find(c => c.name === currentClientName || c.company === currentClientName);
-            if (!client) return;
-
-            let myPhone = client.phone || "";
-            // Create WhatsApp Link
-            let text = `مرحباً! أنا أتعامل مع "رنان للتصميم" وخدمتهم ممتازة.
-استخدم رقم جوالي (${myPhone}) عند الطلب عشان تحصل على خصم أو أولوية في الخدمة! 
-تواصل معهم هنا: https://wa.me/966500000000`; // Replace with actual business number
-
-            let url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-            window.open(url, '_blank');
-        }
-
-        async function requestRedeem(title, cost) {
-            let confirmMsg = `هل أنت متأكد من استبدال ${cost} نقطة للحصول على "${title}"؟`;
-            if (await rnConfirm(confirmMsg)) {
-                let client = clientsData.find(c => c.name === currentClientName || c.company === currentClientName);
-                // Find reward value from menu
-                let rewardObj = REWARDS_MENU.find(r => r.title === title);
-                let rewardValue = rewardObj ? rewardObj.value : 0;
-
-                google.script.run.withSuccessHandler((res) => {
-                    if (res.success) {
-                        alert(res.message);
-                        loadAllData(); // Refresh points
-                    } else {
-                        alert(res.message);
-                    }
-                }).redeemReward(rewardValue, cost, client.phone);
-            }
         }
 
         function toggleTheme() {
@@ -3064,11 +2684,8 @@
 
         // --- Standard Functions ---
         function switchPage(pageId) {
-            if (currentUserRole === 'client' && pageId === 'dashboard') {
-                pageId = 'client-home';
-            }
             // Hide all pages first
-            ['dashboard', 'invoices', 'clients', 'projects', 'client-home', 'rewards', 'updates', 'client-profile', 'finance', 'requests', 'site', 'proposals', 'templates', 'prices', 'subs', 'time'].forEach(p => {
+            ['dashboard', 'invoices', 'clients', 'projects', 'client-profile', 'finance', 'requests', 'site', 'proposals', 'templates', 'prices', 'subs', 'time'].forEach(p => {
                 let el = document.getElementById(p + '-page');
                 if (el) el.classList.add('hidden');
 
@@ -3084,13 +2701,8 @@
             let targetPage = document.getElementById(pageId + '-page');
             if (targetPage) targetPage.classList.remove('hidden');
 
-            // Update Nav Button (If exists)
-            // بالنسبة للعميل، زر "الرئيسية" يوجه لـ client-home
             let navId = pageId;
-            if (currentUserRole === 'client' && pageId === 'client-home') navId = 'dashboard';
 
-            if (pageId === 'rewards') renderRewardsPage();
-            if (pageId === 'updates') checkUpdates();
             if (pageId === 'finance') updateFinancePage();
             if (pageId === 'requests') loadRequests();
             if (pageId === 'site') loadSitePage();
@@ -3119,38 +2731,21 @@
                 google.script.run.withSuccessHandler((inv) => {
                     invoicesData = inv;
 
-                    // Client Filter for Invoices
-                    if (currentUserRole === 'client') {
-                        let myInvoices = invoicesData.filter(i => i.client === currentClientName);
-                        let myProjects = projectsData.filter(p => p.client === currentClientName);
-                        // Render Unified Client Dashboard
-                        renderClientDashboard(myProjects, myInvoices);
-                    } else {
-                        filterInvoices();
-                        updateDashboard();
-                    }
+                    filterInvoices();
+                    updateDashboard();
 
                     google.script.run.withSuccessHandler((proj) => {
                         projectsData = proj;
 
-                        // Client Filter for Projects
-                        if (currentUserRole === 'client') {
-                            let myInvoices = invoicesData.filter(i => i.client === currentClientName);
-                            let myProjects = projectsData.filter(p => p.client === currentClientName);
-                            // Render Unified Client Dashboard
-                            renderClientDashboard(myProjects, myInvoices);
-                            checkUpdates();
-                        } else {
-                            renderClients(clientsData);
-                            renderProjects(projectsData);
-                            updateStats();
-                            updateDashboard();
-                            renderCalendar();
-                            checkNotifications();
-                            filterArchive();
-                            loadRequests();
-                            runRecurringInvoices();
-                        }
+                        renderClients(clientsData);
+                        renderProjects(projectsData);
+                        updateStats();
+                        updateDashboard();
+                        renderCalendar();
+                        checkNotifications();
+                        filterArchive();
+                        loadRequests();
+                        runRecurringInvoices();
                         if (typeof done === 'function') done(); // السحب للتحديث في تطبيق الجوال
                     }).getProjectsData();
 
@@ -3164,124 +2759,7 @@
             }
         }
 
-        // دالة جديدة لعرض صفحة العميل الموحدة
-        function renderClientDashboard(myProjects, myInvoices) {
-            // 1. Active Projects
-            const activeContainer = document.getElementById('client-active-projects');
-            activeContainer.innerHTML = '';
-            let activeProjs = myProjects.filter(p => p.status !== 'مكتمل');
-
-            if (activeProjs.length === 0) {
-                activeContainer.innerHTML = '<p class="col-span-3 text-center text-muted py-8 bg-white/5 rounded-xl">لا توجد مشاريع قيد التنفيذ حالياً</p>';
-            } else {
-                activeProjs.forEach(p => {
-                    let html = createProjectCardHTML(p);
-                    activeContainer.innerHTML += html;
-                });
-            }
-
-            // 2. Completed Projects
-            const completedContainer = document.getElementById('client-completed-projects');
-            completedContainer.innerHTML = '';
-            let completedProjs = myProjects.filter(p => p.status === 'مكتمل');
-
-            if (completedProjs.length === 0) {
-                completedContainer.innerHTML = '<p class="col-span-3 text-center text-muted py-8 bg-white/5 rounded-xl">لا توجد مشاريع منجزة</p>';
-            } else {
-                completedProjs.forEach(p => {
-                    let html = createProjectCardHTML(p);
-                    completedContainer.innerHTML += html;
-                });
-            }
-
-            // 3. Invoices Table
-            const invContainer = document.getElementById('client-invoices-list');
-            invContainer.innerHTML = '';
-            if (myInvoices.length === 0) {
-                invContainer.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-muted">لا يوجد سجل فواتير</td></tr>';
-            } else {
-                myInvoices.forEach(i => {
-                    let statusClass = i.status === 'مدفوعة' ? 'status-paid' : 'status-pending';
-                    let statusText = i.status || 'غير محدد';
-
-                    invContainer.innerHTML += `
-                <tr class="transition-all hover:bg-white/5">
-                    <td class="px-6 py-4 font-bold text-primary en-num" dir="ltr">#${i.number}</td>
-                    <td class="px-6 py-4 text-muted text-sm en-num">${i.date}</td>
-                    <td class="px-6 py-4 font-bold en-num text-white">${formatCurrency(i.amount)}</td>
-                    <td class="px-6 py-4 text-center"><span class="status-pill ${statusClass}">${statusText}</span></td>
-                    <td class="px-6 py-4 text-center flex gap-2 justify-center">
-                        <button onclick='printInvoiceDirectly(${JSON.stringify(i)})' class="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center text-muted hover:text-white transition" title="عرض وطباعة"><span class="material-symbols-rounded text-sm">visibility</span></button>
-                    </td>
-                </tr>`;
-                });
-            }
-        }
-
         // دالة مساعدة لإنشاء HTML بطاقة المشروع
-        function createProjectCardHTML(p) {
-            let prog = parseInt(p.progress) || 0;
-            let barColor = 'bg-primary';
-            let statusBg = 'bg-primary/10 text-primary border-primary/20';
-            let actionHTML = '';
-
-            // Global index for identification
-            let globalIndex = projectsData.findIndex(x => x.rowIndex === p.rowIndex);
-
-            if (p.status === 'مكتمل') {
-                barColor = 'bg-accent-green';
-                statusBg = 'bg-accent-green/10 text-accent-green border-accent-green/20';
-
-                // Rating UI
-                let stars = '';
-                let currentRating = parseInt(p.rating) || 0;
-                for (let i = 1; i <= 5; i++) {
-                    let icon = i <= currentRating ? 'star' : 'star_outline';
-                    let color = i <= currentRating ? 'text-yellow-500' : 'text-gray-600';
-                    stars += `<span class="material-symbols-rounded cursor-pointer ${color} hover:text-yellow-400 transition" onclick="openRatingModal(${globalIndex}, ${i})">${icon}</span>`;
-                }
-                actionHTML = `<div class="flex items-center gap-1 mt-2 p-2 bg-white/5 rounded-lg w-fit">
-                            <span class="text-[10px] text-muted ml-2">تقييمك:</span>
-                            <div class="flex">${stars}</div>
-                          </div>`;
-
-            } else if (p.status === 'معلق') {
-                barColor = 'bg-yellow-500';
-                statusBg = 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
-            } else {
-                // Active Project: Show Details Button
-                actionHTML = `<button onclick="openClientDetails(${globalIndex})" class="mt-4 w-full text-xs font-bold bg-white/10 hover:bg-white/20 text-white py-2 rounded-lg transition-colors border border-white/10">
-                            عرض وتعديل التفاصيل
-                          </button>`;
-            }
-
-            // Layout: Horizontal Bar (Name - Dates - Status - Progress Bar)
-            return `
-        <div class="glass-panel rounded-xl p-4 border border-border-glass flex flex-col md:flex-row md:items-center justify-between gap-4 select-none hover:bg-white/5 transition-colors"> 
-            <div class="flex-1">
-                <div class="flex items-center gap-3 mb-1">
-                    <h3 class="text-lg font-bold text-white">${p.name}</h3>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded border ${statusBg}">${p.status}</span>
-                </div>
-                <div class="flex gap-4 text-xs text-muted">
-                    <span class="flex items-center gap-1"><span class="material-symbols-rounded text-[14px]">calendar_today</span> البدء: <span class="en-num text-gray-300">${p.startDate || '-'}</span></span>
-                    <span class="flex items-center gap-1"><span class="material-symbols-rounded text-[14px]">event</span> التسليم: <span class="en-num text-gray-300">${p.deadline || '-'}</span></span>
-                </div>
-                ${actionHTML}
-            </div>
-
-            <div class="w-full md:w-1/3 flex flex-col justify-center">
-                <div class="flex justify-between text-xs mb-1">
-                    <span class="text-muted">الإنجاز</span>
-                    <span class="font-bold text-white en-num">${prog}%</span>
-                </div>
-                <div class="w-full bg-black/40 rounded-full h-2 overflow-hidden">
-                    <div class="h-full ${barColor} transition-all duration-1000" style="width: ${prog}%"></div>
-                </div>
-            </div>
-        </div>`;
-        }
-
         // --- Client Details Logic ---
         function openClientDetails(index) {
             let p = projectsData[index];
@@ -5032,92 +4510,6 @@ ${link}
             document.getElementById('notificationModal').classList.add('hidden');
         }
 
-        // --- Updates Page System ---
-        let updatesData = [];
-
-        function checkUpdates() {
-            if (!currentClientName) return;
-
-            google.script.run.withSuccessHandler((updates) => {
-                updatesData = updates;
-
-                // Badge Logic
-                let hasUnread = updates.some(u => !u.isRead);
-                let badge = document.getElementById('sidebar-updates-badge');
-                if (badge) {
-                    if (hasUnread) badge.classList.remove('hidden');
-                    else badge.classList.add('hidden');
-                }
-
-                // If on updates page, render immediately
-                if (!document.getElementById('updates-page').classList.contains('hidden')) {
-                    renderUpdatesPage();
-                }
-
-            }).getClientUpdates(currentClientName);
-        }
-
-        function renderUpdatesPage() {
-            let container = document.getElementById('updates-timeline');
-            container.innerHTML = '';
-
-            if (updatesData.length === 0) {
-                container.innerHTML = '<p class="text-center text-muted py-20">لا توجد تحديثات حتى الآن</p>';
-                return;
-            }
-
-            updatesData.forEach((u, index) => {
-                let icon = 'notifications';
-                let color = 'bg-primary';
-                let isNew = !u.isRead;
-
-                if (u.type === 'system_welcome') { icon = 'waving_hand'; color = 'bg-emerald-500'; }
-                else if (u.type === 'tier_upgrade') { icon = 'hotel_class'; color = 'bg-amber-500'; }
-                else if (u.type === 'points_earned') { icon = 'savings'; color = 'bg-green-500'; }
-                else if (u.type.includes('invoice')) { icon = 'receipt_long'; color = 'bg-blue-500'; }
-                else if (u.type.includes('project')) { icon = 'rocket_launch'; color = 'bg-pink-500'; }
-
-                // Add delay for animation based on index
-                let delay = index * 100;
-
-                let item = `
-                <div class="relative flex items-start gap-6 group animate-fadeIn" style="animation-delay: ${delay}ms">
-                    <div class="absolute right-[-2.35rem] w-4 h-4 rounded-full ${color} border-4 border-[#0F172A] shadow-glow-primary z-10 top-1"></div>
-                    <div class="flex-1 glass-panel p-6 rounded-2xl border ${isNew ? 'border-primary/50 bg-primary/5' : 'border-white/5'} transition-all hover:bg-white/5">
-                        <div class="flex justify-between items-start mb-2">
-                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl ${color}/20 text-white flex items-center justify-center">
-                                    <span class="material-symbols-rounded text-xl">${icon}</span>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-white text-lg">${u.type === 'system_welcome' ? 'مرحباً بك!' : 'تحديث جديد'} ${isNew ? '<span class="px-2 py-0.5 rounded text-[10px] bg-red-500 text-white mr-2">جديد</span>' : ''}</h4>
-                                    <p class="text-[10px] text-muted font-mono" dir="ltr">${u.date}</p>
-                                </div>
-                             </div>
-                        </div>
-                        <p class="text-gray-300 leading-relaxed">${u.message}</p>
-                    </div>
-                </div>`;
-                container.innerHTML += item;
-            });
-
-            // Mark visible as read logic (or via button)
-            // Ideally we mark them read when the user visits the page.
-            if (updatesData.some(u => !u.isRead)) {
-                markAllUpdatesRead();
-            }
-        }
-
-        function markAllUpdatesRead() {
-            google.script.run.withSuccessHandler(() => {
-                document.getElementById('sidebar-updates-badge').classList.add('hidden');
-                // Update local status
-                updatesData.forEach(u => u.isRead = true);
-                // Re-render to remove "New" badges if we want, or keep them until refresh?
-                // Let's keep them but remove the red dot.
-            }).markAllNotificationsRead(currentClientName);
-        }
-    
         async function deleteClient(index) {
             let c = clientsData[index];
             if (await rnConfirm("هل أنت متأكد من حذف العميل " + c.company + "؟ سيؤدي ذلك إلى حذفه من قاعدة البيانات.")) {
