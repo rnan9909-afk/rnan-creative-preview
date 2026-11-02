@@ -879,6 +879,8 @@
     <script defer src="js/studio/time.js?v=1"></script>
     <link rel="stylesheet" href="css/pwa.css?v=2">
     <script defer src="js/pwa.js?v=2"></script>
+    <link rel="stylesheet" href="css/invoices.css?v=1">
+    <script defer src="js/invoices.js?v=1"></script>
 
     <!-- Firebase SDK & Backend Shim -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -1950,6 +1952,26 @@
                     </div>
                 </div>
 
+                <div class="glass-panel p-4 rounded-xl mb-6 grid grid-cols-2 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-3 items-end">
+                    <div class="col-span-2 md:col-span-1 min-w-0">
+                        <label for="filter-client" class="block text-[10px] text-muted font-bold uppercase mb-1">الجهة</label>
+                        <select id="filter-client" onchange="filterInvoices()" class="form-input-modern py-2 text-sm w-full">
+                            <option value="">كل الجهات</option>
+                        </select>
+                    </div>
+                    <div class="min-w-0">
+                        <label for="filter-date-from" class="block text-[10px] text-muted font-bold uppercase mb-1">من تاريخ</label>
+                        <input type="date" id="filter-date-from" onchange="filterInvoices()" class="form-input-modern py-2 text-sm">
+                    </div>
+                    <div class="min-w-0">
+                        <label for="filter-date-to" class="block text-[10px] text-muted font-bold uppercase mb-1">إلى تاريخ</label>
+                        <input type="date" id="filter-date-to" onchange="filterInvoices()" class="form-input-modern py-2 text-sm">
+                    </div>
+                    <button onclick="resetDateFilter()"
+                        class="col-span-2 md:col-span-1 h-[42px] px-5 bg-white/10 text-white rounded-lg text-sm font-bold hover:bg-white/20 transition flex items-center justify-center gap-1.5"><span
+                            class="material-symbols-rounded text-base">filter_alt_off</span> مسح الفلاتر</button>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div class="glass-panel rounded-2xl p-6 relative overflow-hidden group">
                         <div class="flex justify-between items-start">
@@ -1992,24 +2014,6 @@
                     </div>
                 </div>
 
-                <div class="glass-panel p-4 rounded-xl mb-6 flex flex-col sm:flex-row flex-wrap gap-4 items-end">
-                    <div class="flex-1 min-w-[150px] w-full">
-                        <label class="block text-[10px] text-muted font-bold uppercase mb-1">من تاريخ</label>
-                        <input type="date" id="filter-date-from" class="form-input-modern py-2 text-sm">
-                    </div>
-                    <div class="flex-1 min-w-[150px] w-full">
-                        <label class="block text-[10px] text-muted font-bold uppercase mb-1">إلى تاريخ</label>
-                        <input type="date" id="filter-date-to" class="form-input-modern py-2 text-sm">
-                    </div>
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <button onclick="filterInvoices()"
-                            class="flex-1 sm:flex-none px-5 py-2 bg-primary text-white rounded-lg text-sm font-bold hover:bg-blue-600 transition">تطبيق</button>
-                        <button onclick="resetDateFilter()"
-                            class="flex-1 sm:flex-none px-5 py-2 bg-white/10 text-white rounded-lg text-sm font-bold hover:bg-white/20 transition">إعادة
-                            تعيين</button>
-                    </div>
-                </div>
-
                 <div class="flex gap-2 mb-6">
                     <div class="flex-1 glass-panel rounded-xl p-1 relative">
                         <span class="absolute inset-y-0 right-0 pr-4 flex items-center text-muted"><span
@@ -2029,6 +2033,7 @@
                         الانتظار</button>
                 </div>
 
+                <div id="invoices-cards"></div>
                 <div class="table-container bg-black/20 overflow-x-auto">
                     <table class="w-full text-right text-sm modern-table min-w-[600px]">
                         <thead>
@@ -4686,9 +4691,11 @@ ${link}
                 document.getElementById('tab-' + activeId).className = "whitespace-nowrap px-6 py-2 rounded-t-lg text-sm font-bold transition-all text-white border-b-2 border-primary";
             }
 
+            if (window.InvoicesUI) InvoicesUI.fillClients();
             let term = document.getElementById('invoice-search').value.toLowerCase();
             let dateFrom = document.getElementById('filter-date-from').value;
             let dateTo = document.getElementById('filter-date-to').value;
+            let clientFilter = (document.getElementById('filter-client') || {}).value || '';
 
             let fromTime = dateFrom ? new Date(dateFrom).getTime() : null;
             let toTime = dateTo ? new Date(dateTo).getTime() : null;
@@ -4696,6 +4703,7 @@ ${link}
             let filtered = invoicesData.filter(i => {
                 let matchesSearch = String(i.number).toLowerCase().includes(term) || i.client.toLowerCase().includes(term);
                 if (!matchesSearch) return false;
+                if (clientFilter && (i.client || '').trim() !== clientFilter) return false;
 
                 let matchesStatus = true;
                 if (currentInvoiceStatusFilter === 'مدفوعة') matchesStatus = i.status === 'مدفوعة';
@@ -4719,6 +4727,7 @@ ${link}
         function resetDateFilter() {
             document.getElementById('filter-date-from').value = '';
             document.getElementById('filter-date-to').value = '';
+            if (document.getElementById('filter-client')) document.getElementById('filter-client').value = '';
             filterInvoices();
         }
 
@@ -4877,6 +4886,7 @@ ${link}
         }
 
         function renderInvoicesList(inv) {
+            if (window.InvoicesUI) InvoicesUI.cards(inv);
             const tbody = document.getElementById('invoices-list');
             tbody.innerHTML = '';
             if (inv.length === 0) {
@@ -4904,6 +4914,7 @@ ${link}
                 <td class="px-6 py-4 font-bold en-num text-white">${formatCurrency(i.amount)}</td>
                 <td class="px-6 py-4 text-center"><span class="status-pill ${statusClass}">${statusText}</span></td>
                 <td class="px-6 py-4 text-center flex gap-2 justify-center">
+                    ${window.InvoicesUI && InvoicesUI.payable(i) ? `<button onclick='InvoicesUI.pay(${globalIndex})' class="inv-pay-ic" title="اعتماد السداد"><span class="material-symbols-rounded text-sm">task_alt</span></button>` : ''}
                     <button onclick='openInvoiceModal("edit", ${globalIndex})' class="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center text-muted hover:text-white transition" title="عرض التفاصيل"><span class="material-symbols-rounded text-sm">${currentUserRole === 'admin' ? 'edit' : 'visibility'}</span></button>
                     ${currentUserRole === 'admin' ? `<button onclick='sendInvoiceWhatsApp(${globalIndex})' class="w-8 h-8 rounded-full hover:bg-[#25D366]/20 text-muted hover:text-[#25D366] flex items-center justify-center transition" title="إرسال عبر واتساب"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.767 5.767 0 1.267.405 2.436 1.096 3.39l-.715 2.614 2.678-.702c.813.435 1.743.682 2.729.682 3.181 0 5.767-2.586 5.767-5.767 0-3.181-2.586-5.767-5.788-5.767zm3.391 8.221c-.144.405-.837.734-1.17.778-.319.044-.638.077-1.129-.111-.53-.204-2.128-.868-2.903-1.644-.775-.775-1.282-1.743-1.428-1.989-.144-.246-.015-.378.107-.502.11-.11.246-.288.371-.432.126-.144.168-.246.252-.405.084-.168.042-.319-.021-.444s-.546-1.314-.748-1.801c-.198-.475-.399-.41-.546-.417-.14-.007-.302-.007-.464-.007s-.425.061-.647.288c-.221.226-.846.828-.846 2.019s.868 2.339.989 2.504c.121.166 1.708 2.607 4.137 3.655.578.249 1.03.397 1.382.51.581.185 1.111.159 1.529.097.466-.07 1.428-.584 1.631-1.149.204-.564.204-1.05.143-1.149-.061-.1-.221-.16-.444-.26zM12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 22c-5.523 0-10-4.477-10-10S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg></button>` : ''}
                     <button onclick='printInvoiceDirectly(${JSON.stringify(i)})' class="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center text-muted hover:text-white transition" title="طباعة"><span class="material-symbols-rounded text-sm">print</span></button>

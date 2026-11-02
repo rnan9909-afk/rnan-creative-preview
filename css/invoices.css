@@ -1,0 +1,133 @@
+/* صفحة الفواتير (js/invoices.js): بطاقات الجوال، زر اعتماد السداد، ونافذة التأكيد.
+   الأصناف تبدأ بـ inv- ولا تستخدم فئات Tailwind الملوّنة حتى لا تلتقطها قواعد admin-site.css العامة. */
+:root {
+    --inv-navy: #101965;
+    --inv-night: #02083A;
+    --inv-mint: #47E0AC;
+    --inv-teal: #43D9C4;
+    --inv-mist: #A9B2D8;
+    --inv-amber: #fbbf24;
+}
+
+/* الجدول للشاشات المتوسطة فما فوق، والبطاقات للجوال */
+#invoices-cards { display: none; }
+@media (max-width: 767.98px) {
+    #invoices-page .table-container { display: none; }
+    #invoices-cards { display: grid; gap: 12px; }
+}
+
+/* زر اعتماد السداد في الجدول */
+.inv-pay-ic { width: 32px; height: 32px; border-radius: 999px; border: 0; display: flex; align-items: center; justify-content: center; cursor: pointer;
+    background: rgba(71, 224, 172, .14); color: var(--inv-mint); transition: background .2s, color .2s, transform .15s; }
+.inv-pay-ic:hover { background: linear-gradient(135deg, var(--inv-mint), var(--inv-teal)); color: var(--inv-night); }
+.inv-pay-ic:active { transform: scale(.92); }
+
+/* ── بطاقة الفاتورة ── */
+.inv-count { margin: 0 4px -2px; color: var(--inv-mist); font-size: 12px; font-weight: 600; }
+.inv-card { position: relative; padding: 14px; border-radius: 22px; background: rgba(255, 255, 255, .045); border: 1px solid rgba(255, 255, 255, .08); color: #fff; overflow: hidden; }
+.inv-card::before { content: ''; position: absolute; inset-block: 16px; inset-inline-start: 0; width: 3px; border-radius: 0 3px 3px 0; background: var(--inv-amber); opacity: .85; }
+.inv-card.paid::before { background: var(--inv-mint); }
+.inv-card-top { display: flex; align-items: center; gap: 10px; }
+.inv-av { width: 40px; height: 40px; border-radius: 13px; flex-shrink: 0; display: grid; place-items: center; font-weight: 800; font-size: 16px;
+    background: rgba(71, 224, 172, .13); color: var(--inv-mint); border: 1px solid rgba(71, 224, 172, .18); }
+.inv-who { flex: 1; min-width: 0; line-height: 1.45; }
+.inv-who b { display: block; font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.inv-who small { display: block; text-align: right; color: var(--inv-mist); font-size: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.inv-st { flex-shrink: 0; padding: 4px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; background: rgba(251, 191, 36, .14); color: var(--inv-amber); border: 1px solid rgba(251, 191, 36, .25); }
+.inv-card.paid .inv-st { background: rgba(71, 224, 172, .13); color: var(--inv-mint); border-color: rgba(71, 224, 172, .25); }
+.inv-card-mid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 10px; margin: 12px 0; padding: 12px; border-radius: 16px; background: rgba(0, 0, 0, .18); }
+.inv-card-mid > div { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.inv-card-mid small { color: var(--inv-mist); font-size: 11px; font-weight: 600; }
+.inv-card-mid strong { font-size: 18px; font-weight: 800; }
+.inv-card-mid strong > div { justify-content: flex-start !important; }
+.inv-card-mid span { font-size: 14px; font-weight: 600; padding-top: 4px; }
+
+.inv-pay { width: 100%; height: 48px; margin-bottom: 8px; border: 0; border-radius: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
+    background: linear-gradient(135deg, var(--inv-mint), var(--inv-teal)); color: var(--inv-night); font-weight: 800; font-size: 15px;
+    box-shadow: 0 10px 22px -12px rgba(71, 224, 172, .8); -webkit-tap-highlight-color: transparent; transition: transform .15s; }
+.inv-pay .material-symbols-rounded { font-size: 21px; }
+.inv-pay:active { transform: scale(.98); }
+.inv-acts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.inv-acts.two { grid-template-columns: repeat(2, 1fr); }
+.inv-acts button { height: 44px; min-width: 0; border-radius: 14px; border: 1px solid rgba(255, 255, 255, .09); background: rgba(255, 255, 255, .06); color: #fff;
+    display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background .2s, transform .15s; }
+.inv-acts button .material-symbols-rounded { font-size: 19px; color: var(--inv-mist); }
+.inv-acts button.wa svg { color: #25D366; }
+.inv-acts button:active { transform: scale(.95); background: rgba(255, 255, 255, .1); }
+.inv-empty { padding: 36px 16px; border-radius: 22px; text-align: center; color: var(--inv-mist); background: rgba(255, 255, 255, .03); border: 1px dashed rgba(255, 255, 255, .12); }
+.inv-empty .material-symbols-rounded { font-size: 34px; opacity: .6; }
+.inv-empty p { margin: 6px 0 0; font-size: 13px; }
+
+/* ── نافذة تأكيد السداد ── */
+.inv-dlg-wrap { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.inv-dlg-wrap[hidden] { display: none; }
+.inv-dlg-scrim { position: absolute; inset: 0; background: rgba(2, 6, 40, .62); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; transition: opacity .28s; }
+.inv-dlg { position: relative; width: 100%; max-width: 420px; max-height: calc(100vh - 32px); overflow-y: auto; padding: 24px 22px 20px; border-radius: 28px; color: #fff; text-align: center;
+    background: linear-gradient(180deg, #141E78 0%, #0A1152 50%, #070D45 100%); border: 1px solid rgba(255, 255, 255, .12); box-shadow: 0 30px 70px -20px rgba(0, 0, 0, .8);
+    opacity: 0; transform: translateY(14px) scale(.97); transition: transform .32s cubic-bezier(.2, .9, .25, 1.1), opacity .25s; }
+.inv-dlg-wrap.open .inv-dlg-scrim { opacity: 1; }
+.inv-dlg-wrap.open .inv-dlg { opacity: 1; transform: none; }
+.inv-grab { display: none; }
+@media (max-width: 767.98px) {
+    .inv-dlg-wrap { align-items: flex-end; padding: 0; }
+    .inv-dlg { max-width: none; max-height: 90vh; border-radius: 28px 28px 0 0; padding: 8px 18px calc(18px + env(safe-area-inset-bottom, 0px)); border-bottom: 0;
+        opacity: 1; transform: translateY(105%); transition: transform .38s cubic-bezier(.2, .9, .25, 1); }
+    .inv-grab { display: block; width: 42px; height: 5px; margin: 4px auto 14px; border-radius: 999px; background: rgba(255, 255, 255, .26); }
+}
+.inv-dlg-ic { width: 64px; height: 64px; margin: 0 auto 12px; border-radius: 22px; display: grid; place-items: center; color: var(--inv-mint);
+    background: linear-gradient(135deg, rgba(71, 224, 172, .2), rgba(67, 217, 196, .06)); border: 1px solid rgba(71, 224, 172, .25); }
+.inv-dlg-ic .material-symbols-rounded { font-size: 32px; }
+.inv-dlg-ic.ok { border-radius: 999px; background: linear-gradient(135deg, var(--inv-mint), var(--inv-teal)); color: var(--inv-night); box-shadow: 0 0 0 8px rgba(71, 224, 172, .12); animation: invPop .45s cubic-bezier(.2, .9, .25, 1.4); }
+.inv-dlg-ic.ok .material-symbols-rounded { font-weight: 700; }
+@keyframes invPop { from { transform: scale(.5); opacity: 0; } to { transform: none; opacity: 1; } }
+.inv-dlg h3 { margin: 0 0 6px; font-size: 19px; font-weight: 800; color: #fff; }
+.inv-dlg-q { margin: 0 0 16px; color: #D5DAF0; font-size: 14px; line-height: 1.7; }
+.inv-dlg-q b { color: var(--inv-mint); }
+.inv-dlg-sum { margin: 0 0 12px; padding: 4px 14px; border-radius: 18px; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .08); text-align: start; }
+.inv-dlg-sum > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, .06); }
+.inv-dlg-sum > div:last-child { border-bottom: 0; }
+.inv-dlg-sum dt { color: var(--inv-mist); font-size: 12.5px; font-weight: 600; flex-shrink: 0; }
+.inv-dlg-sum dd { margin: 0; min-width: 0; font-size: 14px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.inv-dlg-sum .amt dd { font-size: 20px; font-weight: 800; color: var(--inv-mint); }
+.inv-dlg-note { display: flex; align-items: flex-start; gap: 6px; margin: 0 0 16px; color: var(--inv-mist); font-size: 12px; line-height: 1.6; text-align: start; }
+.inv-dlg-note .material-symbols-rounded { font-size: 16px; margin-top: 1px; }
+.inv-dlg-err { margin: -6px 0 14px; padding: 10px 12px; border-radius: 12px; background: rgba(248, 113, 113, .12); color: #fca5a5; font-size: 13px; font-weight: 600; }
+.inv-dlg-err[hidden] { display: none; }
+.inv-dlg-btns { display: grid; gap: 8px; }
+.inv-ok, .inv-no { height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 800; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform .15s, opacity .2s; }
+.inv-ok { border: 0; background: linear-gradient(135deg, var(--inv-mint), var(--inv-teal)); color: var(--inv-night); box-shadow: 0 12px 26px -12px rgba(71, 224, 172, .8); }
+.inv-ok.wa { background: #25D366; color: #fff; box-shadow: 0 12px 26px -12px rgba(37, 211, 102, .7); }
+.inv-ok:disabled { opacity: .75; cursor: wait; }
+.inv-no { border: 1px solid rgba(255, 255, 255, .12); background: rgba(255, 255, 255, .05); color: #fff; font-weight: 700; }
+.inv-ok:active, .inv-no:active { transform: scale(.98); }
+.inv-spin { width: 18px; height: 18px; border-radius: 999px; border: 2.5px solid currentColor; border-top-color: transparent; animation: invSpin .7s linear infinite; }
+@keyframes invSpin { to { transform: rotate(360deg); } }
+
+/* ── الوضع الفاتح ── */
+html.light-mode .inv-card { background: #fff; border-color: rgba(16, 25, 101, .08); color: var(--inv-navy); box-shadow: 0 8px 24px -16px rgba(16, 25, 101, .35); }
+html.light-mode .inv-card-mid { background: #F3F5FC; }
+html.light-mode .inv-who small, html.light-mode .inv-card-mid small, html.light-mode .inv-count { color: #5A628F; }
+html.light-mode .inv-av { background: rgba(71, 224, 172, .16); color: #0B8A64; border-color: rgba(11, 138, 100, .14); }
+html.light-mode .inv-st { background: #FEF3C7; color: #B45309; border-color: #FDE68A; }
+html.light-mode .inv-card.paid .inv-st { background: #DCFCE7; color: #0B8A64; border-color: #BBF7D0; }
+html.light-mode .inv-acts button { background: #F3F5FC; border-color: rgba(16, 25, 101, .08); color: var(--inv-navy); }
+html.light-mode .inv-acts button .material-symbols-rounded { color: #5A628F; }
+html.light-mode .inv-empty { background: #fff; border-color: rgba(16, 25, 101, .14); color: #5A628F; }
+html.light-mode .inv-pay-ic { background: rgba(11, 138, 100, .1); color: #0B8A64; }
+html.light-mode .inv-dlg { background: #fff; color: var(--inv-navy); border-color: rgba(16, 25, 101, .08); }
+html.light-mode .inv-dlg h3 { color: var(--inv-navy); }
+html.light-mode .inv-dlg-q { color: #3B4373; }
+html.light-mode .inv-dlg-q b, html.light-mode .inv-dlg-sum .amt dd { color: #0B8A64; }
+html.light-mode .inv-dlg-sum { background: #F3F5FC; border-color: rgba(16, 25, 101, .06); }
+html.light-mode .inv-dlg-sum > div { border-bottom-color: rgba(16, 25, 101, .07); }
+html.light-mode .inv-dlg-sum dt, html.light-mode .inv-dlg-note { color: #5A628F; }
+html.light-mode .inv-dlg-ic { color: #0B8A64; background: rgba(71, 224, 172, .16); border-color: rgba(11, 138, 100, .14); }
+html.light-mode .inv-dlg-ic.ok { color: #fff; background: #0B8A64; }
+html.light-mode .inv-no { background: #F3F5FC; border-color: rgba(16, 25, 101, .08); color: var(--inv-navy); }
+html.light-mode .inv-grab { background: rgba(16, 25, 101, .18); }
+html.light-mode .inv-dlg-err { background: #FEF2F2; color: #DC2626; }
+/* رمز الريال أبيض في الوضع الداكن (.dark body .riyal-logo) فيختفي على الخلفيات الفاتحة */
+html.light-mode #invoices-page .riyal-logo, html.light-mode .inv-dlg .riyal-logo { filter: brightness(0); }
+
+@media print { #invoices-cards, .inv-dlg-wrap { display: none !important; } }
+@media (prefers-reduced-motion: reduce) { .inv-dlg, .inv-dlg-scrim { transition: none; } .inv-dlg-ic.ok { animation: none; } }
