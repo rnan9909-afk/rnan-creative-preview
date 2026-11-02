@@ -211,6 +211,10 @@
         return `<section class="hm-card hm-active" style="--i:7">
             <header><h3>${ic('rocket_launch')} المشاريع النشطة</h3><button type="button" class="hm-link" data-hm="page" data-page="projects">كل المشاريع ${ic('arrow_back')}</button></header>
             <div id="dash-active-projects-list" class="dp-list"></div>
+            ${openProjects().filter(p => p.status === ACTIVE).length < 4 ? `<div class="hm-room">${ic('add_circle')}<b>جدولك يتّسع لمشروع جديد</b><p>${openProjects().filter(p => p.status === ACTIVE).length ? 'عندك مساحة لاستقبال عمل إضافي هذا الأسبوع.' : 'لا مشاريع جارية الآن — ابدأ مشروعك القادم.'}</p><button type="button" class="hm-btn sm" data-hm="new-project">${ic('add')} مشروع جديد</button></div>` : ''}
+            ${(() => { const act = openProjects().filter(p => p.status === ACTIVE), val = openProjects().reduce((s, p) => s + (parseFloat(p.value) || 0), 0);
+                const avg = act.length ? Math.round(act.reduce((s, p) => s + (parseInt(p.progress) || 0), 0) / act.length) : 0;
+                return act.length ? `<footer class="hm-card-foot"><span>${ic('payments')} قيمة الجارية <b>${money(val)}</b></span><span>${ic('donut_large')} متوسط الإنجاز <b class="en-num">${avg}%</b></span></footer>` : ''; })()}
         </section>`;
     }
     function chartCard() {
@@ -223,17 +227,31 @@
         </section>`;
     }
     function clientsCard() {
-        const rows = C().map(c => ({ c, v: I().filter(i => (i.client === c.company || i.client === c.name) && i.status === PAID).reduce((s, i) => s + amount(i), 0) }))
-            .filter(x => x.v > 0).sort((a, b) => b.v - a.v).slice(0, 5);
-        const max = rows.length ? rows[0].v : 1, total = rows.reduce((a, x) => a + x.v, 0) || 1;
+        const paidAll = C().map(c => ({ c, v: I().filter(i => (i.client === c.company || i.client === c.name) && i.status === PAID).reduce((s, i) => s + amount(i), 0) }))
+            .filter(x => x.v > 0).sort((a, b) => b.v - a.v);
+        const rows = paidAll.slice(0, 4), rest = paidAll.slice(4).reduce((a, x) => a + x.v, 0);
+        const max = rows.length ? rows[0].v : 1, total = paidAll.reduce((a, x) => a + x.v, 0) || 1;
         const hue = s => [160, 220, 262, 38, 330, 190][[...String(s || '')].reduce((a, ch) => a + ch.charCodeAt(0), 0) % 6];
+        // دائرة حصص الإيراد: تتمدّد في المساحة المتاحة فتتوازن البطاقة مع المشاريع النشطة بجانبها
+        const r = 54, circ = 2 * Math.PI * r;
+        let acc = 0;
+        const segs = rows.map(x => ({ v: x.v, col: `hsl(${hue(x.c.company || x.c.name)} 70% 60%)` })).concat(rest ? [{ v: rest, col: 'rgba(169,178,216,.45)' }] : []);
+        const donut = rows.length ? `<div class="hm-donut"><svg viewBox="0 0 140 140" aria-hidden="true"><circle cx="70" cy="70" r="${r}" class="track"/>${segs.map(sg => {
+                const len = sg.v / total * circ, gap = segs.length > 1 ? 2 : 0, el = `<circle cx="70" cy="70" r="${r}" stroke="${sg.col}" stroke-dasharray="${Math.max(len - gap, 0.5).toFixed(1)} ${(circ - Math.max(len - gap, 0.5)).toFixed(1)}" stroke-dashoffset="${(-acc).toFixed(1)}"/>`;
+                acc += len; return el; }).join('')}</svg>
+            <div class="hm-donut-t"><small>إجمالي المحصّل</small><b>${money(total)}</b><small class="en-num">${plural(paidAll.length, 'عميل واحد', 'عميلان', 'عملاء', 'عميلًا')}</small></div></div>` : '';
         return `<section class="hm-card hm-clients" style="--i:10">
             <header><h3>${ic('workspace_premium')} أفضل العملاء</h3><button type="button" class="hm-link" data-hm="page" data-page="clients">الكل ${ic('arrow_back')}</button></header>
+            ${donut}
             ${rows.length ? `<ol class="hm-clist">${rows.map((x, n) => { const name = x.c.company || x.c.name || ''; return `<li style="--hue:${hue(name)}">
                 <span class="hm-rank en-num">${n + 1}</span><span class="hm-av">${esc(name.trim().charAt(0))}</span>
                 <div class="hm-cl-t"><b>${esc(name)}</b><span class="hm-bar"><i style="width:${Math.max(6, x.v / max * 100)}%"></i></span></div>
                 <div class="hm-cl-v"><b>${money(x.v)}</b><small class="en-num">${Math.round(x.v / total * 100)}%</small></div></li>`; }).join('')}</ol>`
                 : `<p class="hm-empty">${ic('group')} لا توجد مدفوعات بعد</p>`}
+            ${(() => { const all = C(), month = Date.now() - 30 * 864e5, fresh = all.filter(c => (Date.parse(c.dateAdded || '') || 0) >= month).length;
+                const paying = C().map(c => I().filter(i => (i.client === c.company || i.client === c.name) && i.status === PAID).reduce((s, i) => s + amount(i), 0)).filter(Boolean);
+                const avg = paying.length ? paying.reduce((a, v) => a + v, 0) / paying.length : 0;
+                return all.length ? `<footer class="hm-card-foot"><span>${ic('group')} <b class="en-num">${all.length}</b> عميل${fresh ? ` · <b class="en-num">${fresh}</b> جديد هذا الشهر` : ''}</span>${avg ? `<span>${ic('person_check')} متوسط ما يدفعه العميل <b>${money(avg)}</b></span>` : ''}</footer>` : ''; })()}
         </section>`;
     }
     function timeCard() {
@@ -306,10 +324,10 @@
             ${goalCard(k)}
             ${kpiTiles(k)}
             ${focusCard(items)}
-            ${activeCard()}
             ${weekCard()}
-            ${chartCard()}
+            ${activeCard()}
             ${clientsCard()}
+            ${chartCard()}
             ${timeCard()}
             ${pulseCard()}
         </div>`;

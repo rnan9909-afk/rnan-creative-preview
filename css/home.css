@@ -9,15 +9,16 @@
     --hm-line: rgba(255, 255, 255, .08);
 }
 #dashboard-page.hm.hidden { display: none; }
-.hm-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; align-items: start; }
+/* البطاقات المتجاورة بطول واحد، والتذييل في أسفل كل بطاقة */
+.hm-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
 .hm-hero { grid-column: span 8; }
 .hm-goal { grid-column: span 4; }
 .hm-kpis { grid-column: 1 / -1; }
-.hm-focus { grid-column: span 7; }
-.hm-active { grid-column: span 5; }
+.hm-focus { grid-column: 1 / -1; }
 .hm-week { grid-column: 1 / -1; }
-.hm-chart { grid-column: span 8; }
-.hm-clients { grid-column: span 4; }
+.hm-active { grid-column: span 7; }
+.hm-clients { grid-column: span 5; }
+.hm-chart { grid-column: 1 / -1; }
 .hm-time { grid-column: span 5; }
 .hm-pulse { grid-column: span 7; }
 .hm-grid.intro > *, .hm-grid.intro .hm-kpi { animation: hmIn .65s cubic-bezier(.2, .9, .25, 1) both; animation-delay: calc(var(--i, 0) * 55ms); }
@@ -52,7 +53,13 @@
 .hm-q.icon { width: 46px; padding: 0; justify-content: center; }
 
 /* ── البطاقات ── */
-.hm-card { min-width: 0; padding: 18px; border-radius: 24px; background: var(--hm-card); border: 1px solid var(--hm-line); color: #fff; }
+.hm-card { min-width: 0; padding: 18px; border-radius: 24px; background: var(--hm-card); border: 1px solid var(--hm-line); color: #fff; display: flex; flex-direction: column; }
+.hm-card-foot { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--hm-line); display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; color: var(--hm-mist); font-size: 12.5px; }
+.hm-card-foot span { display: inline-flex; align-items: center; gap: 5px; }
+.hm-card-foot .material-symbols-rounded { font-size: 17px; color: var(--hm-mint); }
+.hm-card-foot b { color: #fff; font-weight: 800; }
+.hm-card-foot b > div { display: inline-flex !important; }
+.hm-active .dp-list, .hm-clients .hm-clist { margin-bottom: 14px; }
 .hm-card > header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
 .hm-card h3 { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 800; color: #fff; }
 .hm-card h3 > .material-symbols-rounded { font-size: 21px; color: var(--hm-mint); }
@@ -120,7 +127,7 @@
 
 /* ── مركز اليوم ── */
 .hm-focus { background: linear-gradient(180deg, rgba(71, 224, 172, .05), transparent 40%), var(--hm-card); }
-.hm-flist { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.hm-flist { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .hm-f { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 16px; background: rgba(255, 255, 255, .035); border: 1px solid var(--hm-line); --c: var(--hm-mint); overflow: hidden; }
 .hm-f::before { content: ''; position: absolute; inset-inline-start: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 3px; background: var(--c); }
 .hm-f.red { --c: #f87171; } .hm-f.rose { --c: #fb7185; } .hm-f.amber { --c: #fbbf24; } .hm-f.blue { --c: #60a5fa; } .hm-f.mint { --c: var(--hm-mint); }
@@ -157,6 +164,19 @@
 .hm-free { color: rgba(169, 178, 216, .35); font-size: 13px; text-align: center; padding-top: 10px; }
 
 /* ── العملاء والوقت والنبض ── */
+.hm-donut { flex: 1; min-height: 170px; position: relative; display: grid; place-items: center; margin-bottom: 12px; }
+.hm-donut svg { width: 170px; height: 170px; transform: rotate(-90deg); }
+.hm-donut circle { fill: none; stroke-width: 16; }
+.hm-donut .track { stroke: rgba(255, 255, 255, .06); }
+.hm-donut-t { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; line-height: 1.4; }
+.hm-donut-t small { color: var(--hm-mist); font-size: 11px; }
+.hm-donut-t b { font-size: 15px; font-weight: 900; }
+.hm-donut-t b > div { justify-content: center !important; }
+.hm-room { flex: 1; min-height: 120px; margin-bottom: 14px; padding: 16px; border-radius: 18px; border: 1.5px dashed rgba(71, 224, 172, .3); background: rgba(71, 224, 172, .04);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; color: var(--hm-mist); }
+.hm-room > .material-symbols-rounded { font-size: 34px; color: var(--hm-mint); }
+.hm-room b { color: #fff; font-size: 15px; }
+.hm-room p { margin: 0 0 8px; font-size: 12.5px; }
 .hm-clist { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
 .hm-clist li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 14px; background: rgba(255, 255, 255, .03); }
 .hm-rank { width: 20px; flex-shrink: 0; color: var(--hm-mist); font-size: 12px; font-weight: 800; text-align: center; }
@@ -172,7 +192,8 @@
 .hm-cl-v small { color: var(--hm-mist); font-size: 11px; }
 .hm-time-top b { font-size: 34px; font-weight: 900; line-height: 1.1; }
 .hm-time-top small { display: block; color: var(--hm-mist); font-size: 12.5px; margin-top: 2px; }
-.hm-bars { margin-top: 14px; height: 140px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; align-items: end; }
+.hm-time { display: flex; flex-direction: column; }
+.hm-bars { margin-top: 14px; flex: 1; min-height: 140px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; align-items: end; }
 .hm-bars > div { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; }
 .hm-bars i { display: block; width: 100%; max-width: 34px; border-radius: 9px 9px 4px 4px; background: linear-gradient(180deg, #a78bfa, rgba(167, 139, 250, .35)); }
 .hm-bars .today i { background: linear-gradient(180deg, var(--hm-mint), rgba(71, 224, 172, .35)); box-shadow: 0 0 18px -4px rgba(71, 224, 172, .7); }
@@ -194,7 +215,6 @@
 @media (max-width: 1180px) {
     .hm-hero { grid-column: span 7; }
     .hm-goal { grid-column: span 5; }
-    .hm-focus, .hm-active, .hm-chart, .hm-clients { grid-column: 1 / -1; }
     .hm-time { grid-column: span 6; }
     .hm-pulse { grid-column: span 6; }
 }
@@ -204,7 +224,8 @@
     .hm-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     /* الجوال: الأهم أولًا */
     .hm-hero { order: 1; } .hm-focus { order: 2; } .hm-kpis { order: 3; } .hm-goal { order: 4; } .hm-week { order: 5; } .hm-active { order: 6; }
-    .hm-chart { order: 7; } .hm-clients { order: 8; } .hm-time { order: 9; } .hm-pulse { order: 10; }
+    .hm-clients { order: 7; } .hm-chart { order: 8; } .hm-time { order: 9; } .hm-pulse { order: 10; }
+    .hm-flist { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 767.98px) {
     .hm-hero { padding: 20px 16px 18px; border-radius: 24px; }
@@ -233,8 +254,8 @@
 
 /* ── الوضع الفاتح ── */
 html.light-mode .hm-card, html.light-mode .hm-kpi { background: #fff; border-color: rgba(16, 25, 101, .08); color: #101965; }
-html.light-mode .hm-card h3, html.light-mode .hm-day-h b, html.light-mode .hm-ring-t b, html.light-mode .hm-calm b, html.light-mode .hm-card > header small b, html.light-mode .hm-goal-tip b { color: #101965; }
-html.light-mode .hm-card > header small, html.light-mode .hm-kpi p, html.light-mode .hm-kpi-top small, html.light-mode .hm-f-t small, html.light-mode .hm-goal-nums small, html.light-mode .hm-ring-t small,
+html.light-mode .hm-card-foot b, html.light-mode .hm-card h3, html.light-mode .hm-day-h b, html.light-mode .hm-ring-t b, html.light-mode .hm-calm b, html.light-mode .hm-card > header small b, html.light-mode .hm-goal-tip b { color: #101965; }
+html.light-mode .hm-card-foot, html.light-mode .hm-card > header small, html.light-mode .hm-kpi p, html.light-mode .hm-kpi-top small, html.light-mode .hm-f-t small, html.light-mode .hm-goal-nums small, html.light-mode .hm-ring-t small,
 html.light-mode .hm-goal-tip, html.light-mode .hm-day-h small, html.light-mode .hm-cl-v small, html.light-mode .hm-bars small, html.light-mode .hm-ins small, html.light-mode .hm-ins p,
 html.light-mode .hm-time-top small, html.light-mode .hm-calm, html.light-mode .hm-more, html.light-mode .hm-rank { color: #5A628F; }
 html.light-mode .hm-f, html.light-mode .hm-goal-nums > div, html.light-mode .hm-day, html.light-mode .hm-clist li, html.light-mode .hm-ins > div { background: #F7F9FF; border-color: rgba(16, 25, 101, .07); }
@@ -259,3 +280,9 @@ html.light-mode #dashboard-page .hm-hero .riyal-logo { filter: none; }
     .hm-ring .bar { transition: none; }
 }
 @media print { .hm-aurora { display: none; } }
+
+html.light-mode .hm-card-foot { border-color: rgba(16, 25, 101, .08); }
+html.light-mode .hm-donut .track { stroke: #E8EBF5; }
+html.light-mode .hm-donut-t small, html.light-mode .hm-room { color: #5A628F; }
+html.light-mode .hm-donut-t b, html.light-mode .hm-room b { color: #101965; }
+html.light-mode .hm-room { background: #F0FBF6; border-color: rgba(11, 138, 100, .3); }
