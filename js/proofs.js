@@ -321,7 +321,12 @@
         const sum = { token, round, at, until: expiresAt };
         await ref('projects/' + p.rowIndex + '/proof').set(sum);
         if (p.code) await ref('track/' + p.code + '/review').set({ k: token, round, until: expiresAt });
-        if (window.google && google.script) google.script.run.logNotification(p.client, 'proof_ready', `🎨 تصميم «${p.name}» جاهز لمراجعتك (النسخة ${round}). شاهده واكتب ملاحظاتك أو اعتمده.`);
+        const msg = `🎨 تصميم «${p.name}» جاهز لمراجعتك (النسخة ${round}). شاهده واكتب ملاحظاتك أو اعتمده.`;
+        // النسخة المقفلة: الإشعار ثم إعادة بناء صفحة العميل (portalData) ليظهر زر «مراجعة التصميم» فورًا
+        if (typeof backendFunctions !== 'undefined' && backendFunctions.syncClientPortal) {
+            await backendFunctions.logNotification(p.client, 'proof_ready', msg).catch(() => null);
+            backendFunctions.syncClientPortal(p.client).catch(() => null);
+        } else if (window.google && google.script) google.script.run.logNotification(p.client, 'proof_ready', msg);
         p.proof = sum;
         return token;
     }
