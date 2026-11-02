@@ -94,7 +94,8 @@
         const dl = $('ie-desc-list');
         if (!dl) return;
         const types = (window.ProjectsUI && ProjectsUI.TYPES ? ProjectsUI.TYPES : []).map(t => t.t).filter(t => t && t !== 'أخرى');
-        const all = [...new Set([...history().map(h => h.d), ...types])].slice(0, 40);
+        const priced = window.PriceList ? PriceList.items().map(x => x.name) : [];
+        const all = [...new Set([...priced, ...history().map(h => h.d), ...types])].slice(0, 60);
         dl.innerHTML = all.map(d => `<option value="${esc(d)}"></option>`).join('');
     }
     function quick() {
@@ -265,6 +266,9 @@
                 setTerms(TERMS.includes(k) ? k : 'custom');
             }
         }
+        plButton();
+        if ($('ie-pl')) { $('ie-pl').hidden = true; document.querySelector('#invoice-edit-form [data-ie="pl"]').classList.remove('on'); }
+        if (window.PriceList) PriceList.load();
         datalist();
         clientCard();
         window.calculateTotals();
@@ -363,7 +367,28 @@
             quick();
         } else if (a === 'add-row') { const r = window.addItemRow(); r.querySelector('.item-desc').focus(); }
         else if (a === 'add') addPrefilled(b.dataset.d, b.dataset.p);
+        else if (a === 'pl') {
+            const box = $('ie-pl');
+            box.hidden = !box.hidden;
+            b.classList.toggle('on', !box.hidden);
+            if (!box.hidden) box.innerHTML = PriceList.pickerHtml();
+        }
     });
+    // من قائمة الأسعار: بند بسعر الخدمة، ولوحدات الورقة/الدقيقة يتجه المؤشر إلى الكمية
+    document.addEventListener('click', e => {
+        const b = e.target.closest('#invoice-edit-form [data-plpick]');
+        if (!b || !window.PriceList) return;
+        const x = PriceList.find(b.dataset.plpick);
+        if (!x) return;
+        addPrefilled(x.name, x.price);
+        if (x.unit !== 'item') toast(x.unit === 'page' ? '📄 السعر للورقة — اكتب عدد الصفحات في الكمية' : '⏱️ السعر للدقيقة — اكتب عدد الدقائق في الكمية');
+    });
+    // زر «من قائمة الأسعار» ولوحته بجانب «إضافة بند» (تُضاف مرة واحدة)
+    function plButton() {
+        const add = document.querySelector('#invoice-edit-form [data-ie="add-row"]');
+        if (!add || !window.PriceList || $('ie-pl')) return;
+        add.insertAdjacentHTML('afterend', `<button type="button" data-ie="pl" class="ie-add ghost admin-only">${ic('sell')} من قائمة الأسعار</button><div id="ie-pl" class="ie-pl pl-pick" hidden></div>`);
+    }
     // الأرقام نصية حتى لا يعرضها المتصفح بالأرقام الهندية، وما يُكتب بلوحة عربية يتحوّل إلى أرقام لاتينية
     const DIGITS = { '٠': 0, '١': 1, '٢': 2, '٣': 3, '٤': 4, '٥': 5, '٦': 6, '٧': 7, '٨': 8, '٩': 9, '۰': 0, '۱': 1, '۲': 2, '۳': 3, '۴': 4, '۵': 5, '۶': 6, '۷': 7, '۸': 8, '۹': 9 };
     const latin = v => String(v).replace(/[٠-٩۰-۹]/g, d => DIGITS[d]).replace(/[٬,،]/g, '').replace(/٫/g, '.').replace(/[^\d.\-]/g, ''); // الفاصلة للآلاف، و«٫» عشرية
@@ -382,7 +407,8 @@
         else if (t.id === 'edit-status') dueText();
         else if (t.id === 'invoice-discount-type') window.calculateTotals();
         else if (t.classList.contains('item-desc')) {
-            const r = t.closest('.item-row'), pr = r.querySelector('.item-price'), h = history().find(x => x.d === t.value.trim());
+            const r = t.closest('.item-row'), pr = r.querySelector('.item-price'), pl = window.PriceList && PriceList.byName(t.value);
+            const h = pl ? { p: pl.price } : history().find(x => x.d === t.value.trim());
             if (h && !(parseFloat(pr.value) || 0)) { pr.value = h.p; window.calculateTotals(); }
             quick();
         }

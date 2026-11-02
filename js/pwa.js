@@ -179,7 +179,7 @@
     const TABS = ['dashboard', 'invoices', 'proposals', 'clients'];
     const SHORT = { proposals: 'العروض' };
     const GROUPS = [
-        ['أدوات العمل', ['templates', 'time', 'subs']],
+        ['أدوات العمل', ['templates', 'prices', 'time', 'subs']],
         ['الموقع والإعدادات', ['requests', 'site', 'bank', 'linkpage', 'visit']]
     ];
     function navItems() {

@@ -871,20 +871,22 @@
     <script defer src="js/link-platforms.js?v=1"></script>
     <!-- أدوات العمل: العروض والعقود · قوالب العروض · الاشتراكات · تتبّع الوقت -->
     <link rel="stylesheet" href="css/studio.css?v=2">
+    <link rel="stylesheet" href="css/prices.css?v=1">
     <script defer src="js/studio/data.js?v=1"></script>
-    <script defer src="js/studio/core.js?v=1"></script>
-    <script defer src="js/studio/proposals.js?v=3"></script>
+    <script defer src="js/studio/core.js?v=2"></script>
+    <script defer src="js/studio/proposals.js?v=4"></script>
     <script defer src="js/studio/templates.js?v=1"></script>
+    <script defer src="js/studio/prices.js?v=1"></script>
     <script defer src="js/studio/subs.js?v=1"></script>
     <script defer src="js/studio/time.js?v=1"></script>
     <link rel="stylesheet" href="css/pwa.css?v=2">
-    <script defer src="js/pwa.js?v=2"></script>
+    <script defer src="js/pwa.js?v=3"></script>
     <link rel="stylesheet" href="css/invoices.css?v=4">
     <script defer src="js/invoices.js?v=4"></script>
     <link rel="stylesheet" href="css/invoices-page.css?v=1">
     <link rel="stylesheet" href="css/invoice-edit.css?v=1">
     <script defer src="js/invoices-page.js?v=1"></script>
-    <script defer src="js/invoice-edit.js?v=1"></script>
+    <script defer src="js/invoice-edit.js?v=2"></script>
     <link rel="stylesheet" href="css/pickers.css?v=1">
     <script defer src="js/pickers.js?v=1"></script>
     <link rel="stylesheet" href="css/projects.css?v=3">
@@ -1054,6 +1056,11 @@
                     class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 group hover:bg-white/5 border border-transparent hover:border-white/5 admin-only">
                     <span class="material-symbols-rounded text-2xl group-hover:text-primary transition-colors">library_books</span>
                     <span class="font-bold text-sm group-hover:translate-x-[-4px] transition-transform">قوالب العروض</span>
+                </button>
+                <button onclick="switchPage('prices'); toggleSidebar()" id="nav-prices"
+                    class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 group hover:bg-white/5 border border-transparent hover:border-white/5 admin-only">
+                    <span class="material-symbols-rounded text-2xl group-hover:text-primary transition-colors">sell</span>
+                    <span class="font-bold text-sm group-hover:translate-x-[-4px] transition-transform">قائمة الأسعار</span>
                 </button>
                 <button onclick="switchPage('time'); toggleSidebar()" id="nav-time"
                     class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 group hover:bg-white/5 border border-transparent hover:border-white/5 admin-only">
@@ -1507,6 +1514,7 @@
             <!-- ═══ أدوات العمل (js/studio/*): كل صفحة تُرسم من JavaScript عند فتحها ═══ -->
             <div id="proposals-page" class="hidden studio-page max-w-[1300px] mx-auto animate-fadeIn pb-20"></div>
             <div id="templates-page" class="hidden studio-page max-w-[1300px] mx-auto animate-fadeIn pb-20"></div>
+            <div id="prices-page" class="hidden studio-page max-w-[1300px] mx-auto animate-fadeIn pb-20"></div>
             <div id="time-page" class="hidden studio-page max-w-[1300px] mx-auto animate-fadeIn pb-20"></div>
             <div id="subs-page" class="hidden studio-page max-w-[1300px] mx-auto animate-fadeIn pb-20"></div>
 
@@ -3040,7 +3048,7 @@
                 pageId = 'client-home';
             }
             // Hide all pages first
-            ['dashboard', 'invoices', 'clients', 'projects', 'client-home', 'rewards', 'updates', 'client-profile', 'finance', 'requests', 'site', 'proposals', 'templates', 'subs', 'time'].forEach(p => {
+            ['dashboard', 'invoices', 'clients', 'projects', 'client-home', 'rewards', 'updates', 'client-profile', 'finance', 'requests', 'site', 'proposals', 'templates', 'prices', 'subs', 'time'].forEach(p => {
                 let el = document.getElementById(p + '-page');
                 if (el) el.classList.add('hidden');
 

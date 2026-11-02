@@ -263,7 +263,8 @@
         const base = p ? JSON.parse(JSON.stringify(p)) : Object.assign({
             kind: 'quote', title: '', clientKey: '', clientName: '', clientPhone: '', intro: '',
             items: [{ desc: '', qty: 1, price: 0 }], phases: [], tasks: [], deposit: 50, discount: 0, vat: false,
-            validUntil: S.addDays(S.today(), 14), startDate: '', terms: StudioData.TERMS
+            // الصلاحية والشروط من قائمة الأسعار (30 يومًا وملاحظات العرض) إن وُجدت
+            validUntil: S.addDays(S.today(), window.PriceList ? PriceList.validity() : 14), startDate: '', terms: window.PriceList ? PriceList.terms() : StudioData.TERMS
         }, seed || {});
         const ed = S.edStart(base, onEdChange);
         const isNewClient = !ed.clientKey && !!ed.clientName;

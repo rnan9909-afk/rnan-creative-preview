@@ -166,8 +166,11 @@
     }
     function block(list, extra) {
         const L = LINES[list];
+        // بنود التسعير: منتقٍ من قائمة الأسعار (js/studio/prices.js)
+        const pick = list === 'items' && window.PriceList ? `<button type="button" class="st-btn xs ghost" onclick="PriceList.togglePicker(this)">${ic('sell')} من قائمة الأسعار</button>` : '';
         return `<div class="st-block"><div class="st-block-h"><b>${ic(L.icon)} ${L.title}</b>
-            <button type="button" class="st-btn xs soft" onclick="Studio.edAdd('${list}')">${ic('add')} إضافة</button></div>
+            <span class="st-block-acts">${pick}<button type="button" class="st-btn xs soft" onclick="Studio.edAdd('${list}')">${ic('add')} إضافة</button></span></div>
+            ${pick ? '<div class="pl-pick" hidden></div>' : ''}
             <div class="st-rows" id="st-rows-${list}"></div>${extra || ''}</div>`;
     }
     // مخطط زمني مصغّر للمراحل
