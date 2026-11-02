@@ -879,8 +879,12 @@
     <script defer src="js/studio/time.js?v=1"></script>
     <link rel="stylesheet" href="css/pwa.css?v=2">
     <script defer src="js/pwa.js?v=2"></script>
-    <link rel="stylesheet" href="css/invoices.css?v=3">
-    <script defer src="js/invoices.js?v=3"></script>
+    <link rel="stylesheet" href="css/invoices.css?v=4">
+    <script defer src="js/invoices.js?v=4"></script>
+    <link rel="stylesheet" href="css/invoices-page.css?v=1">
+    <link rel="stylesheet" href="css/invoice-edit.css?v=1">
+    <script defer src="js/invoices-page.js?v=1"></script>
+    <script defer src="js/invoice-edit.js?v=1"></script>
     <link rel="stylesheet" href="css/pickers.css?v=1">
     <script defer src="js/pickers.js?v=1"></script>
     <link rel="stylesheet" href="css/projects.css?v=3">
@@ -1612,130 +1616,9 @@
                 <div id="clients-grid" class="cl-list"></div>
             </div>
 
-            <div id="invoices-page" class="hidden space-y-8 max-w-[1400px] mx-auto animate-fadeIn pb-20">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-4 gap-4">
-                    <div>
-                        <h1 class="text-2xl sm:text-3xl font-black mb-1 text-white">إدارة الفواتير</h1>
-                        <p class="text-muted text-sm">نظام الفوترة والمتابعة المالية.</p>
-                    </div>
-                    <div class="flex gap-2 w-full sm:w-auto">
-                    <button onclick="openRecurringModal()"
-                        class="flex-1 sm:flex-none bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 border border-white/10 transition-colors admin-only">
-                        <span class="material-symbols-rounded text-sm">event_repeat</span> الفواتير المتكررة
-                    </button>
-                    <button onclick="openInvoiceModal('new')"
-                        class="flex-1 sm:flex-none btn-glow bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg admin-only">
-                        <span class="material-symbols-rounded text-sm">add</span> فاتورة جديدة
-                    </button>
-                    </div>
-                </div>
-
-                <div class="glass-panel p-4 rounded-xl mb-6 grid grid-cols-2 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-3 items-end">
-                    <div class="col-span-2 md:col-span-1 min-w-0">
-                        <label for="filter-client" class="block text-[10px] text-muted font-bold uppercase mb-1">الجهة</label>
-                        <select id="filter-client" onchange="filterInvoices()" class="form-input-modern py-2 text-sm w-full">
-                            <option value="">كل الجهات</option>
-                        </select>
-                    </div>
-                    <div class="min-w-0">
-                        <label for="filter-date-from" class="block text-[10px] text-muted font-bold uppercase mb-1">من تاريخ</label>
-                        <input type="date" id="filter-date-from" onchange="filterInvoices()" class="form-input-modern py-2 text-sm">
-                    </div>
-                    <div class="min-w-0">
-                        <label for="filter-date-to" class="block text-[10px] text-muted font-bold uppercase mb-1">إلى تاريخ</label>
-                        <input type="date" id="filter-date-to" onchange="filterInvoices()" class="form-input-modern py-2 text-sm">
-                    </div>
-                    <button onclick="resetDateFilter()"
-                        class="col-span-2 md:col-span-1 h-[42px] px-5 bg-white/10 text-white rounded-lg text-sm font-bold hover:bg-white/20 transition flex items-center justify-center gap-1.5"><span
-                            class="material-symbols-rounded text-base">filter_alt_off</span> مسح الفلاتر</button>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="glass-panel rounded-2xl p-6 relative overflow-hidden group">
-                        <div class="flex justify-between items-start">
-                            <div class="z-10">
-                                <p class="text-muted text-sm font-bold mb-2">إجمالي الإيرادات</p>
-                                <h3 class="text-3xl font-black en-num text-white drop-shadow-md" id="inv-total-revenue">
-                                    0.00
-                                </h3>
-                            </div>
-                            <div class="bg-primary/20 p-3 rounded-xl text-primary shadow-glow-primary"><span
-                                    class="material-symbols-rounded">payments</span></div>
-                        </div>
-                    </div>
-                    <div class="glass-panel rounded-2xl p-6 relative overflow-hidden group">
-                        <div class="flex justify-between items-start">
-                            <div class="z-10">
-                                <p class="text-muted text-sm font-bold mb-2">قيد الانتظار</p>
-                                <h3 class="text-3xl font-black en-num text-white drop-shadow-md" id="inv-pending-total">
-                                    0.00
-                                </h3>
-                                <p class="text-muted text-xs mt-2 font-mono"><span class="en-num text-white"
-                                        id="inv-pending-count">0</span> فواتير</p>
-                            </div>
-                            <div
-                                class="bg-yellow-500/20 p-3 rounded-xl text-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.3)]">
-                                <span class="material-symbols-rounded">pending_actions</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="glass-panel rounded-2xl p-6 relative overflow-hidden group">
-                        <div class="flex justify-between items-start">
-                            <div class="z-10">
-                                <p class="text-muted text-sm font-bold mb-2">المدفوعة</p>
-                                <h3 class="text-3xl font-black en-num text-white drop-shadow-md" id="inv-paid-total">
-                                    0.00</h3>
-                            </div>
-                            <div class="bg-accent-green/20 p-3 rounded-xl text-accent-green shadow-glow-accent"><span
-                                    class="material-symbols-rounded">check_circle</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex gap-2 mb-6">
-                    <div class="flex-1 glass-panel rounded-xl p-1 relative">
-                        <span class="absolute inset-y-0 right-0 pr-4 flex items-center text-muted"><span
-                                class="material-symbols-rounded">search</span></span>
-                        <input type="text" id="invoice-search" onkeyup="filterInvoices()" placeholder="بحث سريع..."
-                            class="w-full bg-transparent border-none py-2.5 pr-12 pl-4 text-white focus:outline-none placeholder-muted text-sm">
-                    </div>
-                </div>
-
-                <div class="flex gap-4 mb-4 border-b border-border-glass pb-1 overflow-x-auto">
-                    <button id="tab-all" onclick="filterInvoices('all')"
-                        class="whitespace-nowrap px-6 py-2 rounded-t-lg text-sm font-bold transition-all text-white border-b-2 border-primary">الكل</button>
-                    <button id="tab-paid" onclick="filterInvoices('مدفوعة')"
-                        class="whitespace-nowrap px-6 py-2 rounded-t-lg text-sm font-bold transition-all text-muted hover:text-white">مدفوعة</button>
-                    <button id="tab-pending" onclick="filterInvoices('قيد الانتظار')"
-                        class="whitespace-nowrap px-6 py-2 rounded-t-lg text-sm font-bold transition-all text-muted hover:text-white">قيد
-                        الانتظار</button>
-                </div>
-
-                <div id="invoices-cards"></div>
-                <div class="table-container bg-black/20 overflow-x-auto">
-                    <table class="w-full text-right text-sm modern-table min-w-[600px]">
-                        <thead>
-                            <tr>
-                                <th class="px-6 py-4">رقم الفاتورة</th>
-                                <th class="px-6 py-4">العميل</th>
-                                <th class="px-6 py-4">التاريخ</th>
-                                <th class="px-6 py-4">المبلغ</th>
-                                <th class="px-6 py-4 text-center">الحالة</th>
-                                <th class="px-6 py-4 text-center">إجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="invoices-list" class="divide-y divide-border-glass"></tbody>
-                    </table>
-                    <div
-                        class="p-4 border-t border-border-glass flex justify-between items-center text-xs text-muted bg-white/5">
-                        <span id="invoice-count-display">--</span>
-                        <div class="flex gap-2">
-                            <button class="px-3 py-1 bg-white/10 rounded hover:bg-white/20 transition">السابق</button>
-                            <button
-                                class="px-3 py-1 bg-primary text-white rounded hover:bg-blue-600 transition">التالي</button>
-                        </div>
-                    </div>
-                </div>
+            <div id="invoices-page" class="hidden iv-page max-w-[1400px] mx-auto animate-fadeIn pb-20">
+                <!-- الفواتير تُبنى في js/invoices-page.js: لوحة التحصيل، يحتاج انتباهك، الأدوات، القائمة، ولوحة تفاصيل الفاتورة -->
+                <div id="iv-root"></div>
             </div>
 
             <div id="projects-page" class="hidden pp-page max-w-[1400px] mx-auto animate-fadeIn pb-20">
@@ -1890,116 +1773,84 @@
 
     <div id="mainModal" class="modal fixed inset-0 z-50 bg-black/90 backdrop-blur-lg overflow-y-auto py-0 sm:py-10">
         <div class="min-h-screen w-full flex items-start justify-center px-0 sm:px-4 pt-0 sm:pt-10">
-            <div
+            <div id="main-modal-box"
                 class="bg-white w-full max-w-[210mm] rounded-none sm:rounded-lg shadow-2xl overflow-hidden relative min-h-[600px] font-cairo">
                 <button onclick="closeMainModal()"
                     class="absolute top-4 left-4 z-50 text-gray-400 hover:text-red-500 bg-white rounded-full p-2 shadow-md border no-print transition-colors"><span
                         class="material-symbols-rounded">close</span></button>
 
-                <div id="invoice-edit-form" class="p-6 sm:p-10 text-slate-800 no-print bg-[#f8fafc]">
-                    <div
-                        class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 border-b border-gray-200 pb-6 gap-4">
-                        <div>
-                            <h2 class="text-2xl sm:text-3xl font-black text-slate-800">بيانات الفاتورة</h2>
-                            <p class="text-sm text-slate-500">قم بتعبئة التفاصيل أدناه لإنشاء الفاتورة</p>
+                <div id="invoice-edit-form" class="ie no-print">
+                    <header class="ie-head">
+                        <span class="ie-head-ic"><span class="material-symbols-rounded">receipt_long</span></span>
+                        <div class="ie-head-t"><h2 id="ie-title">فاتورة جديدة</h2><p id="ie-sub">اختر العميل وأضف البنود</p></div>
+                        <span class="ie-num en-num" id="edit-invoice-id" dir="ltr">NEW</span>
+                    </header>
+                    <div class="ie-grid">
+                        <div class="ie-main">
+                            <section class="ie-sec">
+                                <h3><i class="en-num">1</i> العميل</h3>
+                                <div class="ie-client">
+                                    <select id="edit-client-select" class="ie-in" aria-label="العميل"></select>
+                                    <button type="button" onclick="openClientModal('new')" class="ie-ib admin-only" title="عميل جديد" aria-label="عميل جديد"><span class="material-symbols-rounded">person_add</span></button>
+                                </div>
+                                <div id="ie-client-card" class="ie-cc" hidden></div>
+                            </section>
+                            <section class="ie-sec">
+                                <h3><i class="en-num">2</i> التاريخ ومهلة السداد</h3>
+                                <div class="ie-row2">
+                                    <label class="ie-f"><small>تاريخ الإصدار</small><input type="date" id="edit-date" class="ie-in"></label>
+                                    <label class="ie-f"><small>الحالة</small><select id="edit-status" class="ie-in"><option value="قيد الانتظار">بانتظار السداد</option><option value="مدفوعة">مدفوعة</option><option value="ملغاة">ملغاة</option></select></label>
+                                </div>
+                                <div class="ie-f"><small>مهلة السداد</small>
+                                    <div class="ie-terms" id="ie-terms" role="radiogroup" aria-label="مهلة السداد">
+                                        <button type="button" role="radio" data-terms="0">عند الاستلام</button>
+                                        <button type="button" role="radio" data-terms="7"><span class="en-num">7</span> أيام</button>
+                                        <button type="button" role="radio" data-terms="15"><span class="en-num">15</span> يومًا</button>
+                                        <button type="button" role="radio" data-terms="30"><span class="en-num">30</span> يومًا</button>
+                                        <button type="button" role="radio" data-terms="custom">تاريخ محدد</button>
+                                    </div>
+                                </div>
+                                <div class="ie-due"><span class="material-symbols-rounded">event_available</span><p id="ie-due-text"></p>
+                                    <div id="ie-due-pick" class="ie-due-pick" hidden><input type="date" id="edit-due" class="ie-in" aria-label="تاريخ الاستحقاق"></div></div>
+                                <label id="edit-recurring-wrap" class="ie-recur"><input type="checkbox" id="edit-recurring">
+                                    <span class="ie-recur-t"><b>كرّرها تلقائيًا آخر كل شهر</b><small>تصدر نسخة جديدة كل شهر — تعدّلها أو توقفها من «الفواتير المتكررة»</small></span>
+                                    <span class="material-symbols-rounded">autorenew</span></label>
+                            </section>
+                            <section class="ie-sec">
+                                <h3><i class="en-num">3</i> البنود <em id="ie-count"></em></h3>
+                                <div class="ie-items-head" aria-hidden="true"><span>#</span><span>البيان</span><span>الكمية</span><span>السعر</span><span>الإجمالي</span><span></span></div>
+                                <table class="ie-items"><tbody id="edit-items-container"></tbody></table>
+                                <datalist id="ie-desc-list"></datalist>
+                                <button type="button" data-ie="add-row" class="ie-add admin-only"><span class="material-symbols-rounded">add_circle</span> إضافة بند</button>
+                                <div id="ie-quick" class="ie-quick" hidden></div>
+                            </section>
+                            <section class="ie-sec">
+                                <h3><i class="en-num">4</i> ملاحظات وبيانات الدفع</h3>
+                                <div class="ie-row2">
+                                    <label class="ie-f"><small>ملاحظات تظهر في الفاتورة</small><textarea id="invoice-notes" class="ie-in" rows="4" placeholder="مثال: الدفعة الثانية بعد تسليم الملفات المفتوحة"></textarea></label>
+                                    <label class="ie-f"><small>بيانات الدفع (البنك والتواصل)</small><textarea id="invoice-footer" class="ie-in mono" rows="4"></textarea></label>
+                                </div>
+                            </section>
                         </div>
-                        <div class="bg-blue-100 text-blue-600 px-4 py-2 rounded-lg font-mono font-bold tracking-wider self-end sm:self-auto"
-                            id="edit-invoice-id">NEW</div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
-                        <div class="col-span-1 md:col-span-6">
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">العميل</label>
-                            <div class="flex gap-2">
-                                <select id="edit-client-select"
-                                    class="form-input flex-1 border-gray-300 focus:border-blue-500 rounded-lg p-3"></select>
-                                <button onclick="openClientModal('new')"
-                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 rounded-lg font-bold transition-colors admin-only">+</button>
+                        <aside class="ie-side">
+                            <div class="ie-sum" id="ie-sum">
+                                <div class="ie-sum-t">ملخص الفاتورة</div>
+                                <div class="ie-sum-row"><span>المجموع الفرعي</span><b class="en-num" id="ie-subtotal">0.00</b></div>
+                                <div class="ie-disc"><small>الخصم</small>
+                                    <div><input type="text" id="invoice-discount-val" class="ie-in en-num" placeholder="0" inputmode="decimal" dir="ltr" autocomplete="off" aria-label="قيمة الخصم">
+                                    <select id="invoice-discount-type" class="ie-in" aria-label="نوع الخصم"><option value="fixed">ريال</option><option value="percent">%</option></select></div></div>
+                                <div class="ie-sum-row disc" id="ie-disc-row" hidden><span>قيمة الخصم</span><b class="en-num" id="ie-disc-amt">0.00</b></div>
+                                <div class="ie-grand"><span>الإجمالي</span><div id="edit-total">0.00</div></div>
+                                <p class="ie-due-mini" id="ie-due-mini"></p>
+                                <p class="ie-err" id="ie-err" role="alert" hidden></p>
+                                <button type="button" onclick="saveAndPreview()" data-ie="save" class="ie-save admin-only">حفظ وإصدار</button>
+                                <button type="button" onclick="closeMainModal()" class="ie-cancel">إلغاء</button>
+                                <button type="button" onclick="deleteInvoice()" id="ie-del" class="ie-del admin-only" hidden><span class="material-symbols-rounded">delete</span><span>حذف الفاتورة</span></button>
                             </div>
-                        </div>
-                        <div class="col-span-1 md:col-span-3">
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">التاريخ</label>
-                            <input type="date" id="edit-date"
-                                class="form-input border-gray-300 focus:border-blue-500 rounded-lg p-3 w-full">
-                        </div>
-                        <div class="col-span-1 md:col-span-3">
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">الحالة</label>
-                            <select id="edit-status"
-                                class="form-input border-gray-300 focus:border-blue-500 rounded-lg p-3 w-full">
-                                <option value="قيد الانتظار">قيد الانتظار</option>
-                                <option value="مدفوعة">مدفوعة</option>
-                            </select>
-                        </div>
-                        <label id="edit-recurring-wrap" class="col-span-1 md:col-span-3 flex items-center gap-3 p-3 rounded-lg border border-emerald-200 bg-emerald-50 cursor-pointer self-end">
-                            <input type="checkbox" id="edit-recurring" class="w-5 h-5 accent-emerald-600">
-                            <span class="text-sm font-bold text-slate-700">كرّرها تلقائيًا آخر كل شهر</span>
-                        </label>
+                        </aside>
                     </div>
-
-                    <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 mb-8 shadow-sm overflow-x-auto">
-                        <table class="w-full text-right mb-4 min-w-[500px]">
-                            <thead>
-                                <tr class="text-slate-400 text-xs uppercase border-b border-gray-100">
-                                    <th class="pb-3 w-1/2">الوصف</th>
-                                    <th class="w-24 text-center pb-3">الكمية</th>
-                                    <th class="w-32 text-center pb-3">السعر</th>
-                                    <th class="w-10 pb-3"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="edit-items-container" class="text-sm"></tbody>
-                        </table>
-                        <button onclick="addItemRow()"
-                            class="text-blue-600 font-bold hover:bg-blue-50 px-4 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm admin-only"><span
-                                class="material-symbols-rounded text-lg">add_circle</span> إضافة بند جديد</button>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">ملاحظات
-                                الفاتورة</label>
-                            <textarea id="invoice-notes"
-                                class="form-input border-gray-300 rounded-lg p-3 h-24 resize-none w-full text-sm"
-                                placeholder="اكتب ملاحظاتك هنا..."></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">بيانات التذييل
-                                (البنك/التواصل)</label>
-                            <textarea id="invoice-footer"
-                                class="form-input border-gray-300 rounded-lg p-3 h-24 resize-none w-full text-xs font-mono bg-gray-50"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 border-t border-gray-200 pt-4">
-                        <div class="md:col-start-2 flex items-center justify-end gap-2">
-                            <label class="text-xs font-bold text-slate-500 uppercase">الخصم:</label>
-                            <input type="number" id="invoice-discount-val" placeholder="0"
-                                class="form-input border-gray-300 rounded-lg p-2 w-24 text-center en-num"
-                                oninput="calculateTotals()">
-                            <select id="invoice-discount-type"
-                                class="form-input border-gray-300 rounded-lg p-2 w-24 text-sm"
-                                onchange="calculateTotals()">
-                                <option value="fixed">ريال</option>
-                                <option value="percent">%</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-end border-t border-gray-200 pt-6">
-                        <div class="w-full sm:w-72 flex justify-between text-2xl font-black text-slate-800">
-                            <span>الإجمالي</span>
-                            <span id="edit-total" class="en-num text-blue-600">0.00</span>
-                        </div>
-                    </div>
-
-                    <div class="mt-10 flex flex-col-reverse sm:flex-row justify-end gap-4">
-                        <button onclick="deleteInvoice()"
-                            class="px-8 py-3 border border-red-300 text-red-600 rounded-xl font-bold hover:bg-red-50 transition-colors admin-only">حذف</button>
-                        <button onclick="closeMainModal()"
-                            class="px-8 py-3 border border-gray-300 text-gray-600 rounded-xl font-bold hover:bg-gray-100 transition-colors">إلغاء</button>
-                        <button onclick="saveAndPreview()"
-                            class="px-8 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors shadow-lg flex items-center justify-center gap-2 admin-only"><span
-                                class="material-symbols-rounded">save</span> حفظ وإصدار</button>
-                    </div>
+                    <div class="ie-bar"><div><small>الإجمالي</small><b id="ie-bar-total">0.00</b></div>
+                        <button type="button" onclick="saveAndPreview()" data-ie="save" class="ie-save admin-only">حفظ وإصدار</button></div>
                 </div>
 
                 <div id="invoice-preview-template" class="hidden p-0 bg-white text-slate-800 relative">
@@ -2007,6 +1858,7 @@
                         <button onclick="printInvoicePreview()"
                             class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-bold transition-colors shadow-md flex items-center gap-2"><span
                                 class="material-symbols-rounded">print</span> طباعة / حفظ PDF</button>
+                        <button onclick="InvoiceEdit.sendShown()" class="inv-send-btn admin-only"><span class="material-symbols-rounded">send</span> إرسال للعميل</button>
                         <button onclick="backToEdit()"
                             class="bg-slate-700 hover:bg-slate-600 text-gray-200 px-6 py-2 rounded-lg font-bold transition-colors flex items-center gap-2 admin-only"><span
                                 class="material-symbols-rounded">edit</span> تعديل</button>
@@ -2025,7 +1877,7 @@
                             <div class="inv-meta">
                                 <div class="inv-to"><small><span class="ar-invoice">فاتورة إلى</span><span class="ar-quote">مقدَّم إلى</span></small><b id="prev-client-name">-</b></div>
                                 <div><small><span class="ar-invoice">رقم الفاتورة</span><span class="ar-quote">رقم العرض</span></small><b class="en-num" id="prev-id">-</b></div>
-                                <div><small>تاريخ الإصدار</small><b class="en-num" id="prev-date">-</b></div>
+                                <div><small>تاريخ الإصدار</small><b class="en-num" id="prev-date">-</b><span class="inv-due-line" id="prev-due" hidden>الاستحقاق <span class="en-num"></span></span></div>
                                 <div><small>الحالة</small><b id="prev-status" class="inv-status">-</b></div>
                             </div>
                             <table class="inv-table">
@@ -4107,6 +3959,7 @@ ${link}
         }
 
         function filterInvoices(statusParam) {
+            if (window.InvoicesPage) { InvoicesPage.render(); return; } // الصفحة الجديدة في js/invoices-page.js
             if (typeof statusParam !== 'undefined') {
                 currentInvoiceStatusFilter = statusParam;
                 ['all', 'paid', 'pending'].forEach(t => {
@@ -4499,7 +4352,8 @@ ${link}
             let data = {
                 invoiceNumber: currentInvoiceId, clientSelect: client, issueDate: document.getElementById('edit-date').value,
                 status: document.getElementById('edit-status').value, totalAmount: total, items: items, notes: notes,
-                footerText: footer
+                footerText: footer,
+                dueDate: (document.getElementById('edit-due') || {}).value || ''
             };
 
             let makeRecurring = currentInvoiceId === "تلقائي" && document.getElementById('edit-recurring').checked;

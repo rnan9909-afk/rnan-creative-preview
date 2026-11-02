@@ -163,6 +163,8 @@ const backendFunctions = {
                     items: val.items ? (typeof val.items === 'string' ? JSON.parse(val.items) : val.items) : [],
                     notes: val.notes || '',
                     footerText: val.footerText || '',
+                    dueDate: val.dueDate || '', sentAt: val.sentAt || '', remindedAt: val.remindedAt || '', reminders: val.reminders || 0,
+                    paidAt: val.paidAt || '', payMethod: val.payMethod || '', voidedAt: val.voidedAt || '', recurringId: val.recurringId || '',
                     id: child.key
                 });
             });
@@ -170,9 +172,17 @@ const backendFunctions = {
         return invoices.reverse(); // Assuming chronological order from Firebase
     },
 
+    // رقم تسلسلي للسنة: أعلى رقم موجود بصيغة INV-سنة-رقم + 1 (بدل الرقم العشوائي الذي قد يتكرر)
+    _nextInvoiceNumber: async function() {
+        let y = new Date().getFullYear(), max = 0;
+        let snap = await window.db.ref('invoices').once('value');
+        snap.forEach(c => { let m = /^INV-(\d{4})-(\d+)$/.exec(String((c.val() || {}).number || '')); if (m && +m[1] === y) max = Math.max(max, +m[2]); });
+        return 'INV-' + y + '-' + String(max + 1).padStart(4, '0');
+    },
+
     saveInvoiceToSheet: async function(data) {
         let isUpdate = data.invoiceNumber && data.invoiceNumber !== "تلقائي";
-        let invoiceId = isUpdate ? data.invoiceNumber : 'INV-' + new Date().getFullYear() + '-' + Math.floor(Math.random() * 10000); // Simplistic ID generator for demo
+        let invoiceId = isUpdate ? data.invoiceNumber : await backendFunctions._nextInvoiceNumber();
         
         let invData = {
             number: invoiceId,
@@ -185,6 +195,10 @@ const backendFunctions = {
             footerText: data.footerText || ''
         };
         if (data.recurringId) invData.recurringId = data.recurringId;
+        // تاريخ الاستحقاق من مهلة السداد في نافذة الفاتورة؛ الفواتير المنشأة آليًا (من المشروع أو التكرار) مهلتها 7 أيام
+        if (data.dueDate !== undefined) invData.dueDate = data.dueDate || null;
+        else if (!isUpdate && /^\d{4}-\d{2}-\d{2}$/.test(data.issueDate || '')) { let d = new Date(data.issueDate + 'T12:00:00'); d.setDate(d.getDate() + 7); invData.dueDate = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+        if (data.payMethod) invData.payMethod = data.payMethod;
         
         // Find existing to update status/loyalty points
         if (isUpdate) {
@@ -192,6 +206,11 @@ const backendFunctions = {
             if (snap.exists()) {
                 let key = Object.keys(snap.val())[0];
                 let oldData = snap.val()[key];
+                // سجل الحالة: تاريخ السداد عند التحويل إلى مدفوعة وتاريخ الإلغاء، ويُمسحان عند التراجع
+                if (invData.status === 'مدفوعة' && oldData.status !== 'مدفوعة') invData.paidAt = data.paidAt || new Date().toISOString();
+                else if (invData.status !== 'مدفوعة' && oldData.status === 'مدفوعة') { invData.paidAt = null; invData.payMethod = null; }
+                if (invData.status === 'ملغاة' && oldData.status !== 'ملغاة') invData.voidedAt = new Date().toISOString();
+                else if (invData.status !== 'ملغاة' && oldData.voidedAt) invData.voidedAt = null;
                 await window.db.ref('invoices/' + key).update(invData);
                 if (data.status === 'مدفوعة' && oldData.status !== 'مدفوعة') {
                     await backendFunctions._updateLoyaltyPoints(data.clientSelect, data.totalAmount);
@@ -202,6 +221,7 @@ const backendFunctions = {
         } 
         
         // New invoice
+        if (invData.status === 'مدفوعة') invData.paidAt = data.paidAt || new Date().toISOString();
         await window.db.ref('invoices').push(invData);
         if (data.status === 'مدفوعة') {
             await backendFunctions._updateLoyaltyPoints(data.clientSelect, data.totalAmount);

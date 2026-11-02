@@ -1,5 +1,5 @@
 // صفحة الفواتير: قائمة «الجهة» في الفلاتر، بطاقات الفواتير على الجوال (بدل الجدول العريض)،
-// واعتماد السداد السريع للفواتير قيد الانتظار بنافذة تأكيد. الأنماط في css/invoices.css.
+// واعتماد السداد السريع للفواتير قيد الانتظار بنافذة تأكيد (مع طريقة الدفع وتاريخه). الأنماط في css/invoices.css.
 (function () {
     const PAID = 'مدفوعة';
     const ic = n => `<span class="material-symbols-rounded">${n}</span>`;
@@ -9,6 +9,10 @@
     const isAdmin = () => typeof currentUserRole === 'undefined' || currentUserRole === 'admin';
     const indexOf = num => invoicesData.findIndex(x => x.number === num);
     const payable = i => !!i && isAdmin() && ![PAID, 'ملغي', 'ملغاة'].includes(i.status);
+    const METHODS = ['تحويل بنكي', 'STC Pay', 'Apple Pay', 'نقدًا', 'أخرى'];
+    const pad = n => String(n).padStart(2, '0');
+    const ymd = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+    const lastMethod = () => { try { return METHODS.includes(localStorage.getItem('rnan.payMethod')) ? localStorage.getItem('rnan.payMethod') : METHODS[0]; } catch (e) { return METHODS[0]; } };
 
     // ── قائمة الجهات: من أسماء العملاء في الفواتير، مع الإبقاء على الاختيار الحالي ──
     function fillClients() {
@@ -119,12 +123,18 @@
                 <div><dt>التاريخ</dt><dd class="en-num">${esc(inv.date || '-')}</dd></div>
                 <div class="amt"><dt>المبلغ</dt><dd>${money(inv.amount)}</dd></div>
             </dl>
+            <div class="inv-dlg-pm"><small>طريقة الدفع</small>
+                <div role="radiogroup" aria-label="طريقة الدفع">${METHODS.map(m => `<button type="button" role="radio" data-pm="${m}" class="${m === lastMethod() ? 'on' : ''}" aria-checked="${m === lastMethod()}">${m}</button>`).join('')}</div></div>
+            <label class="inv-dlg-date"><small>تاريخ السداد</small><input type="date" class="inv-dlg-in" value="${ymd(new Date())}"></label>
             <p class="inv-dlg-note">${ic('info')} تُضاف نقاط الولاء لحساب العميل ويصله إشعار بالسداد في صفحته.</p>
             <p class="inv-dlg-err" hidden></p>
             <div class="inv-dlg-btns">
                 <button type="button" class="inv-ok" data-ok>${ic('check_circle')} نعم، اعتماد السداد</button>
                 <button type="button" class="inv-no" data-no>إلغاء</button>
             </div>`);
+        dlg.querySelectorAll('[data-pm]').forEach(b => b.addEventListener('click', () => {
+            dlg.querySelectorAll('[data-pm]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-checked', x === b); });
+        }));
         dlg.querySelector('[data-ok]').addEventListener('click', () => confirmPay(num));
     }
 
@@ -140,18 +150,32 @@
             err.hidden = false;
             return;
         }
+        const pm = (dlg.querySelector('[data-pm].on') || {}).dataset;
+        const method = pm ? pm.pm : '';
+        const day = (dlg.querySelector('.inv-dlg-in') || {}).value || '';
+        if (day && day > ymd(new Date())) {
+            busy = false;
+            err.textContent = 'تاريخ السداد لا يكون في المستقبل.';
+            err.hidden = false;
+            return;
+        }
+        // سداد اليوم بوقته الفعلي، وسداد يوم سابق عند منتصف نهاره
+        const paidAt = !day || day === ymd(new Date()) ? new Date().toISOString() : new Date(day + 'T12:00:00').toISOString();
+        try { if (method) localStorage.setItem('rnan.payMethod', method); } catch (e) { /* تخزين المتصفح غير متاح */ }
         ok.disabled = true;
         ok.innerHTML = `<span class="inv-spin"></span> جارٍ الاعتماد...`;
         err.hidden = true;
         google.script.run.withSuccessHandler(() => {
             busy = false;
             inv.status = PAID;
+            inv.paidAt = paidAt;
+            if (method) inv.payMethod = method;
             if (typeof filterInvoices === 'function') filterInvoices();
             if (typeof loadAllData === 'function') loadAllData();
             openDlg(`<div class="inv-grab"></div>
                 <div class="inv-dlg-ic ok">${ic('check')}</div>
                 <h3 id="inv-dlg-title">تم اعتماد السداد</h3>
-                <p class="inv-dlg-q">الفاتورة <b dir="ltr">#${esc(num)}</b> لـ${esc(inv.client)} أصبحت <b>مدفوعة</b>.</p>
+                <p class="inv-dlg-q">الفاتورة <b dir="ltr">#${esc(num)}</b> لـ${esc(inv.client)} أصبحت <b>مدفوعة</b>${method ? ' · ' + esc(method) : ''}.</p>
                 <div class="inv-dlg-btns">
                     <button type="button" class="inv-ok wa" data-wa>${WA} إرسال تأكيد السداد للعميل</button>
                     <button type="button" class="inv-no" data-no>تم</button>
@@ -175,7 +199,9 @@
             totalAmount: inv.amount,
             items: inv.items,
             notes: inv.notes,
-            footerText: inv.footerText
+            footerText: inv.footerText,
+            paidAt: paidAt,
+            payMethod: method
         });
     }
 
