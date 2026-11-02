@@ -887,13 +887,15 @@
     <script defer src="js/projects-ui.js?v=1"></script>
     <link rel="stylesheet" href="css/charts.css?v=1">
     <script defer src="js/charts.js?v=1"></script>
+    <link rel="stylesheet" href="css/clients.css?v=1">
+    <script defer src="js/clients-ui.js?v=1"></script>
 
     <!-- Firebase SDK & Backend Shim -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="js/firebase-init.js"></script>
     <script src="js/rnan-core.js?v=1"></script>
-    <script src="js/backend-shim.js?v=6"></script>
+    <script src="js/backend-shim.js?v=7"></script>
 
     <script>
         // Apply theme immediately to prevent flashing
@@ -1855,61 +1857,23 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <div
-                        class="glass-panel rounded-2xl p-6 h-32 flex flex-col justify-between relative overflow-hidden group hover:border-primary/50 transition-all">
-                        <div
-                            class="absolute -right-6 -top-6 w-24 h-24 bg-primary/20 rounded-full blur-2xl group-hover:bg-primary/30 transition-all">
-                        </div>
-                        <p class="text-right text-muted font-bold text-xs relative z-10">إجمالي الإيرادات</p>
-                        <div class="flex items-center justify-between mt-2 relative z-10">
-                            <span
-                                class="text-accent-green font-bold text-[10px] bg-accent-green/10 px-2 py-1 rounded-full en-num border border-accent-green/20">+12%</span>
-                            <span class="text-2xl sm:text-3xl font-black text-white en-num drop-shadow-md"
-                                id="stat-total-revenue">0.00</span>
-                        </div>
-                    </div>
-                    <div
-                        class="glass-panel rounded-2xl p-6 h-32 flex flex-col justify-between relative overflow-hidden group hover:border-primary/50 transition-all">
-                        <div
-                            class="absolute -right-6 -top-6 w-24 h-24 bg-secondary/20 rounded-full blur-2xl group-hover:bg-secondary/30 transition-all">
-                        </div>
-                        <p class="text-right text-muted font-bold text-xs relative z-10">المشاريع النشطة</p>
-                        <div class="flex items-center justify-between mt-2 relative z-10">
-                            <span
-                                class="text-accent-green font-bold text-[10px] bg-accent-green/10 px-2 py-1 rounded-full en-num border border-accent-green/20">+2%</span>
-                            <span class="text-2xl sm:text-3xl font-black text-white en-num drop-shadow-md"
-                                id="stat-active-projects">0</span>
-                        </div>
-                    </div>
-                    <div
-                        class="glass-panel rounded-2xl p-6 h-32 flex flex-col justify-between relative overflow-hidden group hover:border-primary/50 transition-all">
-                        <div
-                            class="absolute -right-6 -top-6 w-24 h-24 bg-pink-500/20 rounded-full blur-2xl group-hover:bg-pink-500/30 transition-all">
-                        </div>
-                        <p class="text-right text-muted font-bold text-xs relative z-10">إجمالي العملاء</p>
-                        <div class="flex items-center justify-between mt-2 relative z-10">
-                            <span
-                                class="text-accent-green font-bold text-[10px] bg-accent-green/10 px-2 py-1 rounded-full en-num border border-accent-green/20">+5%</span>
-                            <span class="text-2xl sm:text-3xl font-black text-white en-num drop-shadow-md"
-                                id="stat-total-clients">0</span>
-                        </div>
-                    </div>
+                <div class="cl-stats">
+                    <div><span class="ic"><span class="material-symbols-rounded">groups</span></span><small>العملاء</small><b class="en-num" id="stat-total-clients">0</b></div>
+                    <div><span class="ic"><span class="material-symbols-rounded">payments</span></span><small>إجمالي المحصّل</small><b id="stat-total-revenue">0.00</b></div>
+                    <div><span class="ic"><span class="material-symbols-rounded">rocket_launch</span></span><small>مشاريع نشطة</small><b class="en-num" id="stat-active-projects">0</b></div>
+                    <div><span class="ic"><span class="material-symbols-rounded">pending_actions</span></span><small>مستحقات قائمة</small><b id="stat-clients-due">0.00</b></div>
                 </div>
-
-                <div class="flex flex-col sm:flex-row gap-3 glass-panel p-2 rounded-xl">
-                    <div class="flex-1 relative">
-                        <span class="absolute inset-y-0 right-0 pr-4 flex items-center text-muted"><span
-                                class="material-symbols-rounded">search</span></span>
-                        <input type="text" id="client-search" onkeyup="filterClients()"
-                            placeholder="ابحث عن اسم، شركة، جوال..."
-                            class="w-full bg-transparent border-none py-2.5 pr-12 pl-4 text-white focus:outline-none placeholder-muted text-sm font-medium">
+                <div class="cl-tools">
+                    <label class="cl-search"><span class="material-symbols-rounded">search</span><input type="search" id="client-search" oninput="ClientsUI.search(this.value)" placeholder="ابحث بالاسم أو الجوال..." autocomplete="off"></label>
+                    <div class="cl-chips">
+                        <button type="button" data-f="all" class="on">الكل <em>0</em></button>
+                        <button type="button" data-f="active">لديهم مشاريع <em>0</em></button>
+                        <button type="button" data-f="due">عليهم مستحقات <em>0</em></button>
+                        <button type="button" data-f="new">جدد هذا الشهر <em>0</em></button>
                     </div>
-                    <div class="flex items-center gap-1 sm:pl-1"><button onclick="filterClients('all')"
-                            class="w-full sm:w-auto px-5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold transition-colors">الكل</button>
-                    </div>
+                    <label class="cl-sort"><select id="client-sort" class="form-input-modern" onchange="ClientsUI.sort(this.value)" aria-label="ترتيب العملاء"><option value="value">الأعلى قيمة</option><option value="recent">الأحدث إضافة</option><option value="name">الاسم</option></select></label>
                 </div>
-                <div id="clients-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                <div id="clients-grid" class="cl-list"></div>
             </div>
 
             <div id="invoices-page" class="hidden space-y-8 max-w-[1400px] mx-auto animate-fadeIn pb-20">
@@ -5629,92 +5593,8 @@ ${link}
         }
 
         function renderClients(clients) {
-            const grid = document.getElementById('clients-grid');
-            grid.innerHTML = '';
-
-            if (currentUserRole === 'admin') {
-                grid.innerHTML += `
-           <div onclick="openClientModal('new')" class="glass-panel border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group min-h-[200px]">
-              <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors shadow-lg"><span class="material-symbols-rounded text-3xl">add</span></div>
-              <p class="text-white font-bold group-hover:text-primary transition-colors">إضافة عميل جديد</p>
-           </div>`;
-            }
-
-            if (!clients || clients.length === 0) return;
-
-            clients.forEach((c, index) => {
-                let globalIndex = clientsData.findIndex(x => x.rowIndex === c.rowIndex);
-                let clientRevenue = 0;
-                if (invoicesData.length > 0) {
-                    clientRevenue = invoicesData.filter(i => (i.client === c.company || i.client === c.name) && i.status === 'مدفوعة').reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
-                }
-
-                let clientActiveProj = 0;
-                if (projectsData.length > 0) {
-                    clientActiveProj = projectsData.filter(p => (p.client === c.company || p.client === c.name) && p.status !== 'مكتمل').length;
-                }
-
-                let initials = c.company ? c.company.substring(0, 2).toUpperCase() : '??';
-
-                grid.innerHTML += `
-          <div class="glass-panel relative rounded-3xl p-5 hover:scale-[1.02] transition-transform duration-300 overflow-hidden shadow-2xl border border-white/5">
-              <!-- Top Row: Actions & Title -->
-              <div class="flex justify-between items-start mb-5 relative z-10">
-                  <!-- Actions (Removed) -->
-                  
-                  <!-- Title & Avatar (Right) -->
-                  <div class="flex gap-3 text-right">
-                      <div class="flex flex-col justify-center items-end">
-                          <h3 class="text-white font-bold text-xl leading-none drop-shadow-sm">${c.company}</h3>
-                          
-                      </div>
-                      <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary/20 to-secondary/20 text-white flex items-center justify-center font-black text-2xl shadow-lg border border-white/10">
-                          ${initials}
-                      </div>
-                  </div>
-              </div>
-
-              <!-- Info Pills -->
-              <div class="space-y-3 mb-5 relative z-10">
-
-                  <div class="bg-white/5 rounded-xl p-3 flex justify-between items-center gap-3 border border-white/5">
-                      <span class="text-xs font-bold text-amber-400 flex items-center gap-1"><span class="material-symbols-rounded text-base">hotel_class</span><span class="en-num">${c.points || 0}</span> نقطة</span>
-                      <span class="flex items-center gap-3"><span class="text-sm font-bold text-slate-200 en-num">${c.phone}</span>
-                      <span class="material-symbols-rounded text-primary text-base">call</span></span>
-                  </div>
-              </div>
-
-              <!-- Main Action Buttons -->
-              <div class="flex gap-3 mb-5 relative z-10">
-                  <a href="https://wa.me/${c.phone.replace(/^0/, '966').replace(/\+/g, '')}" target="_blank" class="flex-1 bg-white/5 rounded-xl py-3 flex items-center justify-center gap-2 border border-white/5 font-bold text-slate-200 hover:bg-white/10 transition-colors">
-                      واتساب <span class="material-symbols-rounded text-[20px]">chat</span>
-                  </a>
-                  <a href="tel:${c.phone}" class="flex-1 bg-white/5 rounded-xl py-3 flex items-center justify-center gap-2 border border-white/5 font-bold text-slate-200 hover:bg-white/10 transition-colors">
-                      اتصال <span class="material-symbols-rounded text-[20px]">call</span>
-                  </a>
-              </div>
-
-              <!-- Client private link + Details -->
-              <div class="grid grid-cols-2 gap-3 mb-5 relative z-10">
-                  <button onclick="openClientLink(${globalIndex})" class="client-link-btn rounded-xl py-3 flex items-center justify-center gap-2 font-bold transition-colors border shadow-sm">
-                      رابط العميل <span class="material-symbols-rounded text-[20px]">link</span>
-                  </button>
-                  <button onclick="showClientDetails(${globalIndex})" class="bg-red-500/10 text-red-400 rounded-xl py-3 flex items-center justify-center gap-2 font-bold hover:bg-red-500/20 transition-colors border border-red-500/20 shadow-sm">
-                      التفاصيل <span class="material-symbols-rounded text-[20px]">visibility</span>
-                  </button>
-              </div>
-
-              <!-- Bottom Grid -->
-              <div class="grid grid-cols-2 gap-3 relative z-10">
-                  <button onclick="openClientModal('edit', ${globalIndex})" class="bg-white/5 rounded-xl py-2.5 flex items-center justify-center gap-1.5 border border-white/5 text-slate-200 text-sm font-bold hover:bg-white/10 transition-colors admin-only">
-                      تعديل <span class="material-symbols-rounded text-[18px]">edit_square</span>
-                  </button>
-                  <button onclick="deleteClient(${globalIndex})" class="bg-white/5 rounded-xl py-2.5 flex items-center justify-center gap-1.5 border border-white/5 text-slate-200 text-sm font-bold hover:bg-white/10 transition-colors admin-only">
-                      حذف <span class="material-symbols-rounded text-[18px]">delete</span>
-                  </button>
-              </div>
-          </div>`;
-            });
+            // الصفوف والبحث والفلاتر والترتيب في js/clients-ui.js (يقرأ clientsData مباشرة)
+            if (window.ClientsUI) ClientsUI.render();
         }
 
         function setProjectView(view) {

@@ -78,7 +78,8 @@ const backendFunctions = {
                     totalSpent: parseFloat(val.totalSpent) || 0,
                     invitedBy: val.invitedBy || '',
                     token: val.token,
-                    refCode: val.refCode
+                    refCode: val.refCode,
+                    dateAdded: val.dateAdded || ''
                 });
             });
         }
