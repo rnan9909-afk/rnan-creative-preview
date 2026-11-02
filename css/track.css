@@ -1,0 +1,77 @@
+/* صفحة التتبّع المستقلة (track.html): تبني على مكوّنات site.css (المراحل والإنجاز وبطاقة التتبّع) بتخطيط صفحة واحدة مركّزة */
+.tk-body { min-height: 100vh; display: flex; flex-direction: column;
+    background: radial-gradient(900px 600px at 85% -10%, rgba(var(--mint-rgb), .12), transparent 60%), radial-gradient(700px 500px at 0% 100%, rgba(67, 217, 196, .08), transparent 60%), var(--bg); }
+.tk-bar { position: sticky; top: 0; z-index: 20; background: rgba(3, 6, 32, .86); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+.tk-in { max-width: 920px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+.tk-logo img { height: 34px; }
+.tk-grow { flex: 1; }
+.tk-wa { height: 40px; padding: 0 14px; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; background: rgba(37, 211, 102, .12); border: 1px solid rgba(37, 211, 102, .35); color: #4ade80; font-size: 14px; font-weight: 600; }
+.tk-wa[hidden] { display: none; }
+.tk-wa .icon { width: 18px; height: 18px; }
+
+.tk { flex: 1; width: 100%; max-width: 920px; margin: 0 auto; padding: 28px 20px 40px; display: flex; flex-direction: column; gap: 18px; }
+.tk-card { padding: 28px; }
+.tk-card .tr-head h1 { margin: 2px 0 0; font-size: 24px; line-height: 1.5; }
+.tk-card .tr-head small { color: var(--text-3); font-size: 13px; }
+.tk-card .tr-meta small { color: var(--text-3); }
+.tk-card .stages { margin-top: 30px; }
+.tk-live { margin: 18px 0 0; display: flex; align-items: center; gap: 6px; color: var(--text-3); font-size: 12.5px; }
+.tk-live .icon { width: 15px; height: 15px; }
+.tk-other { margin: 0; text-align: center; }
+.tk-other button { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); font-size: 14px; padding: 8px 14px; border-radius: 999px; }
+.tk-other button:hover { color: var(--mint-3); background: rgba(255, 255, 255, .04); }
+.tk-other .icon { width: 16px; height: 16px; }
+.tk-foot { padding: 18px; text-align: center; color: var(--text-3); font-size: 13px; border-top: 1px solid var(--line); }
+.tk-foot a { color: var(--mint-3); }
+.tk-skel { display: flex; flex-direction: column; gap: 16px; }
+.tk-skel .skeleton { height: 120px; border-radius: 22px; }
+.tk-skel .skeleton:last-child { height: 280px; }
+
+/* البحث برقم */
+.tk-find { max-width: 560px; width: 100%; margin: 30px auto 0; padding: 34px 26px; text-align: center; }
+.tk-find-ic { width: 60px; height: 60px; margin: 0 auto 10px; border-radius: 20px; display: grid; place-items: center; background: rgba(var(--mint-rgb), .12); color: var(--mint); }
+.tk-find-ic .icon { width: 28px; height: 28px; }
+.tk-find h1 { margin: 0 0 6px; font-size: 24px; }
+.tk-find p { margin: 0 0 20px; color: var(--text-2); font-size: 14.5px; }
+.tk-find .track-form { margin: 0; }
+
+/* «التصميم جاهز لمراجعتك» */
+.tk-hero { position: relative; display: flex; align-items: center; gap: 18px; padding: 22px 24px; border-radius: 26px; color: var(--text); overflow: hidden;
+    background: linear-gradient(120deg, rgba(var(--mint-rgb), .2), rgba(67, 217, 196, .07) 60%, rgba(16, 25, 101, .4)); border: 1px solid rgba(var(--mint-rgb), .5);
+    box-shadow: 0 24px 60px -30px rgba(var(--mint-rgb), .7); animation: tkIn .5s cubic-bezier(.2, .9, .25, 1) both; }
+a.tk-hero:hover { border-color: var(--mint); transform: translateY(-2px); transition: transform .2s, border-color .2s; }
+.tk-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .08) 50%, transparent 70%); background-size: 220% 100%; animation: tkShine 3.2s ease-in-out infinite; pointer-events: none; }
+.tk-hero-ic { position: relative; width: 64px; height: 64px; flex-shrink: 0; border-radius: 20px; display: grid; place-items: center; background: var(--grad); color: var(--bg); }
+.tk-hero-ic .icon { width: 30px; height: 30px; }
+.tk-hero-ic i { position: absolute; top: -4px; left: -4px; width: 16px; height: 16px; border-radius: 50%; background: #f43f5e; border: 3px solid var(--bg); animation: tkPing 1.6s ease-out infinite; }
+.tk-hero-t { flex: 1; min-width: 0; line-height: 1.6; }
+.tk-hero-t small { display: inline-flex; align-items: center; gap: 4px; color: var(--mint-3); font-size: 13px; font-weight: 600; }
+.tk-hero-t small .icon { width: 14px; height: 14px; }
+.tk-hero-t b { display: block; font-size: 24px; font-weight: 700; line-height: 1.4; }
+.tk-hero-t span { display: block; margin-top: 4px; color: var(--text-2); font-size: 14.5px; }
+.tk-hero .btn { flex-shrink: 0; }
+.tk-hero.sent { background: linear-gradient(120deg, rgba(96, 165, 250, .16), rgba(16, 25, 101, .4)); border-color: rgba(96, 165, 250, .45); box-shadow: none; }
+.tk-hero.sent .tk-hero-ic { background: rgba(96, 165, 250, .2); color: #93c5fd; }
+.tk-hero.ok .tk-hero-ic { background: rgba(var(--mint-rgb), .2); color: var(--mint-3); }
+.tk-hero.sent::after, .tk-hero.ok::after { display: none; }
+.tk-hero.sent .tk-hero-t b, .tk-hero.ok .tk-hero-t b { font-size: 19px; }
+@keyframes tkIn { from { opacity: 0; transform: translateY(10px); } }
+@keyframes tkShine { 0%, 40% { background-position: 120% 0; } 100% { background-position: -120% 0; } }
+@keyframes tkPing { 0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, .6); } 100% { box-shadow: 0 0 0 12px rgba(244, 63, 94, 0); } }
+
+@media (max-width: 640px) {
+    .tk-in { padding: 10px 14px; }
+    .tk-logo img { height: 30px; }
+    .tk-wa span { display: none; }
+    .tk-wa { width: 40px; padding: 0; justify-content: center; }
+    .tk { padding: 18px 12px 30px; gap: 14px; }
+    .tk-card { padding: 18px 14px; }
+    .tk-card .tr-head h1 { font-size: 20px; }
+    .tk-hero { flex-direction: column; align-items: stretch; text-align: center; gap: 12px; padding: 22px 16px 16px; }
+    .tk-hero-ic { margin: 0 auto; }
+    .tk-hero-t b { font-size: 22px; }
+    .tk-hero .btn { width: 100%; justify-content: center; }
+    .tk-card .tr-meta { grid-template-columns: 1fr; }
+    .tk-card .substeps { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .tk-hero, .tk-hero::after, .tk-hero-ic i { animation: none; } }

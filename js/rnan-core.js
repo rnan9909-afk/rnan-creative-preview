@@ -142,7 +142,7 @@
     }
     function portalUrl(token) { return pageUrl('client.html', { k: token }); }
     function referralUrl(refCode) { return pageUrl('index.html', { ref: refCode }) + '#request'; }
-    function trackUrl(code) { return pageUrl('index.html', { track: code }) + '#track'; }
+    function trackUrl(code) { return pageUrl('track.html', { c: code }); }
 
     function intlPhone(phone) {
         let p = String(phone || '').replace(/[^\d+]/g, '').replace(/^\+/, '');

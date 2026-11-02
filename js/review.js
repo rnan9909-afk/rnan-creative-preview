@@ -23,7 +23,7 @@
     const ZOOM = '<svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5M11 8v6M8 11h6"/></svg>';
     const ZOOM_OUT = '<svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5M8 11h6"/></svg>';
 
-    let P = null, ver = null, fileIdx = 0, zoom = false, shellKey = '', seenSent = false, lastLatest = null;
+    let P = null, ver = null, fileIdx = 0, zoom = false, shellKey = '', seenSent = false, lastLatest = null, agencyWa = '';
     const cache = {};
 
     // ── الحماية: لا قائمة حفظ، لا سحب، لا طباعة، وتعتيم عند مغادرة الصفحة أو أزرار التصوير ──
@@ -94,6 +94,18 @@
         return true;
     }
 
+    // واتساب رنان: يصل المصمم تنبيه على جواله فورًا حين يرسل العميل ملاحظاته أو يعتمد
+    function tellUrl(kind) {
+        if (!agencyWa || !window.RNAN) return '';
+        const name = `«${P.title || 'التصميم'}»${P.code ? ' (' + P.code + ')' : ''}`;
+        const n = numbered().filter(c => !c.done).length;
+        const text = kind === 'approved'
+            ? `مرحبًا رنان 👋
+اعتمدت تصميم ${name}. شكرًا لكم!`
+            : `مرحبًا رنان 👋
+أرسلت ${n === 1 ? 'ملاحظة واحدة' : n === 2 ? 'ملاحظتين' : n + ' ملاحظات'} على تصميم ${name}، وهي بانتظاركم في صفحة المراجعة.`;
+        return RNAN.waLink(agencyWa, text);
+    }
     function status() {
         if (approved()) return ['ok', 'تم اعتماد التصميم'];
         if (expired()) return ['off', 'انتهت مدة العرض'];
@@ -143,7 +155,7 @@
                 <span class="rv-status"></span>
             </section>
             ${PREVIEW ? `<p class="rv-banner prev">${icon('eye')} معاينة المصمم — هكذا يرى العميل الصفحة، ولا تُحفظ أي ملاحظة أو اعتماد من هنا.</p>` : ''}
-            ${approved() ? `<section class="rv-banner ok">${icon('check')}<div><b>تم اعتماد التصميم — شكرًا لك!</b><span>اعتمده ${E(P.approval.name || '')} بتاريخ ${date(P.approval.at)}. سيتواصل معك فريق رنان لتسليم الملفات النهائية.</span></div></section>` : ''}
+            ${approved() ? `<section class="rv-banner ok">${icon('check')}<div><b>تم اعتماد التصميم — شكرًا لك!</b><span>اعتمده ${E(P.approval.name || '')} بتاريخ ${date(P.approval.at)}. سيتواصل معك فريق رنان لتسليم الملفات النهائية.</span></div>${!PREVIEW && tellUrl('approved') ? `<a class="rv-btn wa" href="${E(tellUrl('approved'))}" target="_blank" rel="noopener">${icon('whatsapp')} أبلغ المصمم</a>` : ''}</section>` : ''}
             ${v.note ? `<section class="rv-msg"><span class="rv-av">ر</span><div><b>رسالة المصمم</b><p>${E(v.note)}</p></div></section>` : ''}
             <div class="rv-vers" role="tablist" aria-label="النسخ"></div>
             <div class="rv-grid">
@@ -166,6 +178,7 @@
                         <textarea maxlength="1500" rows="3" placeholder="ملاحظة عامة على التصميم (الألوان، النصوص، الفكرة...)" aria-label="ملاحظة عامة"></textarea>
                         <button type="submit" class="rv-btn ghost">${icon('send')} إرسال الملاحظة</button>
                     </form>` : ''}
+                    <div id="rv-tell"></div>
                     ${!approved() && ver === latest() ? `<div class="rv-approve-box">
                         <button type="button" class="rv-btn main" data-approve ${PREVIEW ? 'disabled' : ''}>${icon('check')} اعتماد التصميم</button>
                         <p>اعتمد عندما يكون التصميم مناسبًا تمامًا ولا تحتاج تعديلات أخرى.</p>
@@ -210,6 +223,8 @@
         const list = $('#rv-list');
         if (!list) return;
         const fs = files(ver), all = numbered();
+        const tell = $('#rv-tell'), open = all.filter(c => !c.done).length;
+        if (tell) tell.innerHTML = canWrite() && open && tellUrl('notes') ? `<div class="rv-tell">${icon('check')}<p><b>انتهيت من ملاحظاتك؟</b>أبلغ المصمم الآن ليبدأ التعديل فورًا.</p><a class="rv-btn wa" href="${E(tellUrl('notes'))}" target="_blank" rel="noopener">${icon('whatsapp')} أبلغ المصمم بالواتساب</a></div>` : '';
         $('#rv-count').textContent = all.length;
         list.innerHTML = all.length ? all.map(c => {
             const fi = fs.findIndex(f => f.id === c.f);
@@ -353,10 +368,20 @@
     function fail(title, text) {
         $('#rv').innerHTML = `<section class="rv-card rv-gone">${icon('alert')}<h1>${title}</h1><p>${text}</p></section>`;
     }
+    async function agency() {
+        try {
+            const [site, phone] = await Promise.all([db.ref('settings/site').once('value'), db.ref('settings/phone').once('value')]);
+            const s = site.val() || {}, n = s.whatsapp || s.phone || phone.val() || '';
+            if (!window.RNAN || RNAN.intlPhone(n).length < 9 || /^0?9665{9}$/.test(String(n))) return;
+            agencyWa = n;
+            if (P) { shellKey = ''; render(); }
+        } catch (e) { /* بلا زر واتساب */ }
+    }
     function start() {
         if (!K) return fail('الرابط غير مكتمل', 'تأكّد من فتح رابط المراجعة كما وصلك من رنان.');
         if (!window.db) return fail('تعذّر الاتصال', 'تحقّق من الإنترنت ثم أعد تحميل الصفحة.');
         const t = setTimeout(() => { if (!P) fail('تعذّر التحميل', 'تحقّق من الإنترنت ثم أعد تحميل الصفحة.'); }, 20000);
+        agency();
         db.ref('proofs/' + K).on('value', snap => {
             clearTimeout(t);
             const val = snap.val();

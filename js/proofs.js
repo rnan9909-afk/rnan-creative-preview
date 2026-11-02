@@ -41,6 +41,21 @@
     const expired = r => r.filesDeleted || (r.expiresAt && Date.parse(r.expiresAt) < Date.now());
     const openNotes = r => list(r).filter(c => c.by !== 'admin' && c.v === r.current && !c.done);
     const unseen = r => list(r).filter(c => c.by !== 'admin' && !c.done && (!r.seenAt || String(c.at) > String(r.seenAt)));
+    const approvalUnseen = r => !!r.approval && (!r.seenAt || String(r.approval.at) > String(r.seenAt));
+
+    // جرس الإشعارات: ملاحظات العملاء والاعتمادات تبقى فيه حتى يُفتح المشروع (js/bell.js)
+    function bell() {
+        if (!window.AdminBell) return;
+        const items = [];
+        Object.values(all).forEach(r => {
+            if (!r || !r.versions) return;
+            const ns = unseen(r);
+            if (approvalUnseen(r)) items.push({ at: r.approval.at, html: `<div class="nb-item ok" data-nb-proj="${esc(r.project)}" role="button">${ic('verified')}<div><b>اعتمد ${esc(r.approval.name || r.client || 'العميل')} تصميم «${esc(r.title || '')}»</b><small>${ago(r.approval.at)} · افتح المشروع لتسليمه</small></div></div>` });
+            else if (ns.length && !expired(r)) items.push({ at: ns[ns.length - 1].at, html: `<div class="nb-item" data-nb-proj="${esc(r.project)}" role="button">${ic('rate_review')}<div><b>${plural(ns.length, 'ملاحظة جديدة', 'ملاحظتان جديدتان', 'ملاحظات جديدة', 'ملاحظة جديدة')} على «${esc(r.title || 'التصميم')}»</b><small>${esc(r.client || '')} · ${ago(ns[ns.length - 1].at)}</small></div></div>` });
+        });
+        items.sort((a, b) => String(b.at).localeCompare(String(a.at)));
+        AdminBell.set('proofs', items.map(x => x.html).join(''), items.length);
+    }
 
     // حالة المراجعة على بطاقة المشروع
     function state(p) {
@@ -61,7 +76,9 @@
         clearTimeout(tick);
         tick = setTimeout(() => {
             if (window.ProjectsPage) ProjectsPage.render();
-            if (cur && !busy && !(box() && box().querySelector('.pf-up.open'))) panel(cur);
+            bell();
+            // اللوحة تُحدَّث فقط ونافذة المشروع مفتوحة، فلا تُعلَّم الملاحظات مقروءة قبل أن تراها
+            if (cur && !busy && modalOpen() && !(box() && box().querySelector('.pf-up.open'))) panel(cur);
         }, 120);
     }
     function listen() {
@@ -85,9 +102,15 @@
                 const k = t + '/' + c.id;
                 if (known.has(k)) return;
                 known.add(k);
-                if (c.by !== 'admin') toast(`✎ ملاحظة جديدة من ${r.client || 'العميل'} على «${r.title || 'التصميم'}»`, ['فتح', open]);
+                if (c.by === 'admin') return;
+                toast(`✎ ملاحظة جديدة من ${r.client || 'العميل'} على «${r.title || 'التصميم'}»`, ['فتح', open]);
+                if (window.AdminBell) AdminBell.notify(`✎ ملاحظة جديدة من ${r.client || 'العميل'}`, `«${r.title || 'التصميم'}»: ${String(c.text || '').slice(0, 120)}`, { tag: 'proof-' + t, project: r.project });
             });
-            if (r.approval && !known.has(t + '/approval')) { known.add(t + '/approval'); toast(`🎉 اعتمد ${r.approval.name || r.client || 'العميل'} تصميم «${r.title || ''}»`, ['فتح', open]); }
+            if (r.approval && !known.has(t + '/approval')) {
+                known.add(t + '/approval');
+                toast(`🎉 اعتمد ${r.approval.name || r.client || 'العميل'} تصميم «${r.title || ''}»`, ['فتح', open]);
+                if (window.AdminBell) AdminBell.notify(`🎉 اعتمد ${r.approval.name || r.client || 'العميل'} التصميم`, `«${r.title || ''}» — جاهز للتسليم`, { tag: 'proof-' + t, project: r.project });
+            }
         });
     }
     function greet() {
@@ -230,6 +253,7 @@
     // ── اللوحة داخل نافذة المشروع ──
     let cur = null, busy = false, picked = [], upOpen = false, upDays = 30;
     const box = () => document.getElementById('pe-proof');
+    const modalOpen = () => { const m = document.getElementById('projectModal'); return !!m && m.classList.contains('open'); };
     function panel(p, opts) {
         const el = box();
         if (!el) return;
@@ -239,7 +263,7 @@
         if (!p || !p.rowIndex) { el.innerHTML = `<p class="pf-empty">${ic('save')} احفظ المشروع أولًا، ثم ارفع التصميم ليراجعه العميل.</p>`; return; }
         const r = forProject(p.rowIndex);
         if (!r || !r.versions) { upOpen = true; el.innerHTML = uploader(null); return; }
-        if (unseen(r).length) ref('proofs/' + r.token + '/seenAt').set(now()).catch(() => null);
+        if (modalOpen() && (unseen(r).length || approvalUnseen(r))) ref('proofs/' + r.token + '/seenAt').set(now()).catch(() => null);
         el.innerHTML = view(r) + (upOpen ? uploader(r) : '');
         thumbs(r);
     }
@@ -402,6 +426,7 @@
             upOpen = false;
             panel(cur, { keep: true });
             toast('✓ التصميم جاهز — أرسل الرابط للعميل');
+            if (window.AdminBell && AdminBell.canAsk) setTimeout(() => !document.querySelector('.pp-toast.show') && AdminBell.canAsk && toast('🔔 فعّل تنبيهات الجهاز لتصلك ملاحظات العميل فورًا', ['تفعيل', () => Notification.requestPermission().then(() => AdminBell.paint())]), 4500);
         } catch (e) {
             busy = false;
             btn.disabled = false;

@@ -1,0 +1,42 @@
+/* جرس الإشعارات (js/bell.js): عناصر ملاحظات العملاء وزر تفعيل تنبيهات الجهاز، ولوحة الجرس السفلية على الجوال */
+#notif-extra:empty { display: none; }
+.nb-item { margin-bottom: 8px; padding: 10px 12px; border-radius: 12px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer; text-align: start;
+    background: rgba(251, 113, 133, .08); border: 1px solid rgba(251, 113, 133, .3); color: #fff; transition: background .2s; }
+.nb-item:hover { background: rgba(251, 113, 133, .14); }
+.nb-item > .material-symbols-rounded { font-size: 20px; color: #fb7185; margin-top: 1px; }
+.nb-item.ok { background: rgba(71, 224, 172, .08); border-color: rgba(71, 224, 172, .3); }
+.nb-item.ok:hover { background: rgba(71, 224, 172, .14); }
+.nb-item.ok > .material-symbols-rounded { color: #47E0AC; }
+.nb-item div { min-width: 0; line-height: 1.55; }
+.nb-item b { display: block; font-size: 13px; font-weight: 800; }
+.nb-item small { display: block; color: #C9CFEA; font-size: 11.5px; }
+.nb-perm { width: 100%; margin-bottom: 8px; padding: 10px 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; text-align: start; cursor: pointer; font-family: inherit;
+    background: rgba(96, 165, 250, .08); border: 1px dashed rgba(96, 165, 250, .45); color: #fff; }
+.nb-perm > .material-symbols-rounded { font-size: 22px; color: #93c5fd; }
+.nb-perm b { display: block; font-size: 13px; font-weight: 800; }
+.nb-perm small { display: block; color: #C9CFEA; font-size: 11.5px; line-height: 1.5; }
+
+/* فوق الإشعار العائم حتى لا يغطي عناصر الجرس */
+.nb-wrap { position: fixed; inset: 0; z-index: 125; }
+.nb-scrim { position: absolute; inset: 0; background: rgba(2, 6, 40, .55); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); opacity: 0; transition: opacity .25s; }
+.nb-sheet { position: absolute; left: 0; right: 0; bottom: 0; max-height: 80vh; display: flex; flex-direction: column; border-radius: 26px 26px 0 0; color: #fff;
+    background: linear-gradient(180deg, #141E78, #0A1152); border-top: 1px solid rgba(255, 255, 255, .12); transform: translateY(105%); transition: transform .32s cubic-bezier(.2, .9, .25, 1); }
+.nb-wrap.open .nb-scrim { opacity: 1; }
+.nb-wrap.open .nb-sheet { transform: none; }
+.nb-grab { flex-shrink: 0; width: 42px; height: 5px; margin: 8px auto 4px; border-radius: 999px; background: rgba(255, 255, 255, .26); }
+.nb-sheet header { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 4px 16px 10px; }
+.nb-sheet header b { display: flex; align-items: center; gap: 8px; font-size: 16px; }
+.nb-sheet header b .material-symbols-rounded { color: #47E0AC; }
+.nb-sheet header button { width: 38px; height: 38px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .1); background: rgba(255, 255, 255, .06); color: #fff; display: grid; place-items: center; }
+.nb-body { flex: 1; min-height: 0; overflow-y: auto; padding: 0 14px calc(18px + env(safe-area-inset-bottom, 0px)); }
+.nb-body > div > div, .nb-body > div { cursor: pointer; }
+.nb-empty { margin: 0; padding: 26px 0; text-align: center; color: #A9B2D8; font-size: 13px; }
+
+html.light-mode .nb-item { background: #FFF1F2; color: #101965; border-color: rgba(225, 29, 72, .25); }
+html.light-mode .nb-item.ok { background: #E8F9F2; border-color: rgba(11, 138, 100, .25); }
+html.light-mode .nb-item small, html.light-mode .nb-perm small { color: #5A628F; }
+html.light-mode .nb-perm { background: #EFF6FF; color: #101965; }
+html.light-mode .nb-sheet { background: #fff; color: #101965; border-top-color: rgba(16, 25, 101, .08); }
+html.light-mode .nb-sheet header button { background: #F3F5FC; color: #101965; border-color: rgba(16, 25, 101, .1); }
+html.light-mode .nb-grab { background: rgba(16, 25, 101, .18); }
+@media print { .nb-wrap { display: none !important; } }

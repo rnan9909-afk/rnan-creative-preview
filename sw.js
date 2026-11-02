@@ -20,3 +20,14 @@ self.addEventListener('fetch', e => {
         e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
     }
 });
+
+// الضغط على تنبيه (ملاحظة عميل أو اعتماد) يفتح اللوحة على المشروع المعني
+self.addEventListener('notificationclick', e => {
+    e.notification.close();
+    const d = e.notification.data || {};
+    e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+        const win = list.find(w => /\/admin/.test(w.url));
+        if (win) { if (d.project) win.postMessage({ type: 'rnan-open-project', project: d.project }); return win.focus(); }
+        return self.clients.openWindow(d.url || 'admin.html');
+    }));
+});

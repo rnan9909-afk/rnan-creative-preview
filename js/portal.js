@@ -90,7 +90,35 @@
         return `<a class="btn btn-primary proj-review" href="${E(RNAN.pageUrl('review.html', { k: r.token }))}">${icon('eye')} مراجعة التصميم${r.round > 1 ? ' — النسخة ' + r.round : ''}</a>`;
     }
 
+    // «التصميم جاهز لمراجعتك» بارزًا أعلى الصفحة لكل تصميم لم يُعتمد بعد
+    let bannerKey = '';
+    function reviewBanner() {
+        const live = state.projects.filter(p => p.proof && p.proof.token && (!p.proof.until || Date.parse(p.proof.until) > Date.now()));
+        const key = live.map(p => p.proof.token + ':' + p.proof.round).join();
+        if (key === bannerKey) return;
+        bannerKey = key;
+        let box = $('#review-banner');
+        if (!box) {
+            const hello = $('.p-hello');
+            if (!hello) return;
+            hello.insertAdjacentHTML('afterend', '<div id="review-banner" class="review-banners"></div>');
+            box = $('#review-banner');
+        }
+        box.innerHTML = '';
+        live.forEach(async p => {
+            let ap = null;
+            try { ap = (await db.ref('proofs/' + p.proof.token + '/approval').once('value')).val(); } catch (e) { /* نعرضه */ }
+            if (ap) return;
+            box.insertAdjacentHTML('beforeend', `<a class="review-hero" href="${E(RNAN.pageUrl('review.html', { k: p.proof.token }))}">
+                <span class="rh-ic">${icon('eye')}<i></i></span>
+                <span class="rh-t"><small>${icon('sparkle')} ${p.proof.round > 1 ? 'وصلت النسخة المعدّلة' : 'جديد'}</small><b>التصميم جاهز لمراجعتك</b><span>«${E(p.name)}» — شاهده واكتب ملاحظاتك عليه، أو اعتمده إن كان مناسبًا.</span></span>
+                <span class="btn btn-primary btn-sm">شاهد التصميم ${icon('arrow')}</span>
+            </a>`);
+        });
+    }
+
     function renderProjects() {
+        reviewBanner();
         const list = state.projects
             .filter(p => state.tab === 'done' ? p.status === 'مكتمل' : p.status !== 'مكتمل')
             .sort((a, b) => String(b.startDate || '').localeCompare(String(a.startDate || '')));

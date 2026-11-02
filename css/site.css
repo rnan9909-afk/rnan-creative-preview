@@ -927,3 +927,25 @@ textarea.input { height: auto; min-height: 130px; padding: 14px 18px; resize: ve
 .tr-review small { display: block; margin-top: 2px; color: var(--text-2); font-size: 13px; line-height: 1.6; }
 .tr-review > .icon:last-child { margin-inline-start: auto; color: var(--mint); }
 .proj-review { margin-top: 16px; width: 100%; }
+
+/* «التصميم جاهز لمراجعتك» أعلى صفحة العميل */
+.review-banners { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; }
+.review-banners:empty { display: none; }
+.review-hero { position: relative; display: flex; align-items: center; gap: 16px; padding: 18px 20px; border-radius: 24px; color: var(--text); overflow: hidden;
+    background: linear-gradient(120deg, rgba(var(--mint-rgb), .2), rgba(67, 217, 196, .07) 60%, rgba(16, 25, 101, .4)); border: 1px solid rgba(var(--mint-rgb), .5);
+    box-shadow: 0 24px 60px -30px rgba(var(--mint-rgb), .7); transition: transform .2s, border-color .2s; }
+.review-hero:hover { transform: translateY(-2px); border-color: var(--mint); }
+.review-hero .rh-ic { position: relative; width: 56px; height: 56px; flex-shrink: 0; border-radius: 18px; display: grid; place-items: center; background: var(--grad); color: var(--bg); }
+.review-hero .rh-ic .icon { width: 26px; height: 26px; }
+.review-hero .rh-ic i { position: absolute; top: -4px; left: -4px; width: 14px; height: 14px; border-radius: 50%; background: #f43f5e; border: 3px solid var(--bg); }
+.review-hero .rh-t { flex: 1; min-width: 0; line-height: 1.6; }
+.review-hero .rh-t small { display: inline-flex; align-items: center; gap: 4px; color: var(--mint-3); font-size: 12.5px; font-weight: 600; }
+.review-hero .rh-t small .icon { width: 13px; height: 13px; }
+.review-hero .rh-t b { display: block; font-size: 20px; line-height: 1.45; }
+.review-hero .rh-t > span { display: block; color: var(--text-2); font-size: 13.5px; }
+.review-hero .btn { flex-shrink: 0; }
+@media (max-width: 640px) {
+    .review-hero { flex-direction: column; align-items: stretch; text-align: center; gap: 10px; }
+    .review-hero .rh-ic { margin: 0 auto; }
+    .review-hero .btn { justify-content: center; }
+}

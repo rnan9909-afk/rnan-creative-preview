@@ -427,7 +427,7 @@
 
             form.hidden = true;
             $('#success-code').textContent = code;
-            $('#success-track').href = '#track';
+            $('#success-track').href = RNAN.trackUrl(code);
             const wa = waNumber();
             if (wa) {
                 const link = $('#success-wa');
@@ -490,6 +490,8 @@
         });
         const fromUrl = params.get('track');
         if (fromUrl) {
+            location.replace(RNAN.trackUrl(fromUrl));
+            return;
             $('#track-input').value = RNAN.normalizeCode(fromUrl).replace('RN-', '');
             lookupTrack(fromUrl);
         }

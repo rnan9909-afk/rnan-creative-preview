@@ -114,6 +114,14 @@ button, input, textarea { font-family: inherit; }
 .rv-btn.main { background: linear-gradient(135deg, var(--mint), var(--teal)); color: var(--night); box-shadow: 0 12px 26px -12px rgba(71, 224, 172, .8); }
 .rv-btn.ghost { background: rgba(255, 255, 255, .06); border-color: rgba(255, 255, 255, .14); color: #fff; }
 .rv-btn:disabled { opacity: .55; cursor: not-allowed; }
+.rv-btn.wa { background: #25D366; color: #052e16; border-color: transparent; }
+.rv-btn.wa .icon { fill: currentColor; stroke: none; }
+.rv-tell { margin-top: 12px; padding: 12px; border-radius: 16px; background: rgba(37, 211, 102, .08); border: 1px solid rgba(37, 211, 102, .3); display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.rv-tell > .icon { color: #4ade80; }
+.rv-tell p { flex: 1; min-width: 160px; margin: 0; font-size: 13px; line-height: 1.7; color: #D5DAF0; }
+.rv-tell p b { display: block; color: #fff; font-size: 14px; }
+.rv-tell .rv-btn { flex: 1 1 100%; height: 44px; font-size: 14px; }
+.rv-banner.ok .rv-btn { margin-inline-start: auto; height: 40px; flex-shrink: 0; font-size: 13.5px; }
 .rv-approve-box { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
 .rv-approve-box .rv-btn { width: 100%; }
 .rv-approve-box p { margin: 8px 0 0; color: var(--mist); font-size: 12.5px; line-height: 1.7; text-align: center; }
