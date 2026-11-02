@@ -1,0 +1,108 @@
+/* قوائم الاختيار والتقويم بهوية رنان (js/pickers.js): لوحة سفلية على الجوال، ومنسدلة تحت الحقل على الشاشات الكبيرة.
+   البادئة :not(#_r1)…:not(#_r5) تتغلّب على قواعد الحقول العامة في admin-site.css (حتى أربعة معرّفات). */
+:root {
+    --rnp-navy: #101965;
+    --rnp-night: #02083A;
+    --rnp-mint: #47E0AC;
+    --rnp-teal: #43D9C4;
+    --rnp-mist: #A9B2D8;
+}
+
+/* الحقل الأصلي لا يستقبل النقر (فلا تُفتح نافذة المتصفح)؛ النقرة تمرّ لأبيه ويلتقطها pickers.js */
+[data-rnp] { pointer-events: none; }
+html:not(#_r1):not(#_r2):not(#_r3):not(#_r4):not(#_r5) input[data-rnp="d"] {
+    direction: ltr; text-align: right; caret-color: transparent; padding-left: 42px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238A93BF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4.5' width='18' height='16.5' rx='3'/%3E%3Cpath d='M3 9.5h18M8 2.5v4M16 2.5v4'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important; background-position: left 14px center !important; background-size: 18px !important;
+}
+html:not(#_r1):not(#_r2):not(#_r3):not(#_r4):not(#_r5) [data-rnp].rnp-owner { border-color: rgba(71, 224, 172, .65) !important; box-shadow: 0 0 0 4px rgba(71, 224, 172, .12) !important; }
+
+/* ── الغلاف ── */
+.rnp-wrap { position: fixed; inset: 0; z-index: 130; }
+.rnp-wrap[hidden] { display: none; }
+.rnp-scrim { position: absolute; inset: 0; }
+.rnp-wrap.sheet .rnp-scrim { background: rgba(2, 6, 40, .55); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); opacity: 0; transition: opacity .25s; }
+.rnp-wrap.sheet.open .rnp-scrim { opacity: 1; }
+
+.rnp-panel { position: fixed; display: flex; flex-direction: column; overflow: hidden; direction: rtl; text-align: right; color: #fff; font-family: inherit;
+    background: linear-gradient(180deg, #141E78 0%, #0A1152 60%, #070D45 100%); border: 1px solid rgba(255, 255, 255, .12); border-radius: 18px;
+    box-shadow: 0 24px 50px -16px rgba(0, 0, 0, .75); opacity: 0; transform: translateY(-6px) scale(.98); transform-origin: top center; transition: opacity .18s, transform .2s; }
+.rnp-wrap.open .rnp-panel { opacity: 1; transform: none; }
+.rnp-wrap.sheet .rnp-panel { left: 0; right: 0; top: auto; bottom: 0; width: auto !important; max-height: 84vh !important; border-radius: 28px 28px 0 0; border-bottom: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px); opacity: 1; transform: translateY(105%); transition: transform .34s cubic-bezier(.2, .9, .25, 1); }
+.rnp-wrap.sheet.open .rnp-panel { transform: none; }
+.rnp-panel.drag { transition: none !important; }
+.rnp-grab { flex-shrink: 0; width: 42px; height: 5px; margin: 10px auto 2px; border-radius: 999px; background: rgba(255, 255, 255, .26); }
+.rnp-title { flex-shrink: 0; padding: 8px 20px 12px; text-align: center; font-size: 15px; font-weight: 800; }
+
+/* ── قائمة الاختيار ── */
+.rnp-search { flex-shrink: 0; margin: 8px 8px 2px; height: 42px; padding: 0 12px; display: flex; align-items: center; gap: 8px; border-radius: 12px;
+    background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .1); color: var(--rnp-mist); }
+.rnp-wrap.sheet .rnp-search { margin: 0 16px 6px; height: 46px; border-radius: 14px; }
+.rnp-search .material-symbols-rounded { font-size: 20px; }
+html:not(#_r1):not(#_r2):not(#_r3):not(#_r4):not(#_r5) .rnp-search input { flex: 1; min-width: 0; height: 100%; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important;
+    box-shadow: none !important; outline: 0; color: #fff !important; font: inherit; font-size: 14px; }
+.rnp-search input::-webkit-search-cancel-button { display: none; }
+.rnp-list { overflow-y: auto; overscroll-behavior: contain; padding: 6px; }
+.rnp-wrap.sheet .rnp-list { padding: 2px 12px 18px; }
+.rnp-opt { width: 100%; min-height: 42px; padding: 8px 12px; border: 0; border-radius: 12px; background: transparent; color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    text-align: start; font-family: inherit; font-size: 14px; font-weight: 600; line-height: 1.5; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background .15s; }
+.rnp-wrap.sheet .rnp-opt { min-height: 52px; padding: 10px 14px; font-size: 15px; border-radius: 14px; }
+.rnp-opt + .rnp-opt { margin-top: 2px; }
+.rnp-opt[hidden] { display: none; }
+.rnp-opt .material-symbols-rounded { font-size: 20px; color: var(--rnp-mint); opacity: 0; flex-shrink: 0; }
+.rnp-opt:hover, .rnp-opt:focus-visible { background: rgba(255, 255, 255, .07); outline: 0; }
+.rnp-opt:active { background: rgba(255, 255, 255, .1); }
+.rnp-opt.on { background: rgba(71, 224, 172, .12); color: var(--rnp-mint); }
+.rnp-opt.on .material-symbols-rounded { opacity: 1; }
+.rnp-opt:disabled { opacity: .4; cursor: default; }
+.rnp-none { margin: 16px 0; text-align: center; color: var(--rnp-mist); font-size: 13px; }
+
+/* ── التقويم ── */
+.rnp-cal { padding: 12px 14px 14px; }
+.rnp-wrap.sheet .rnp-cal { padding: 0 18px 18px; }
+.rnp-cal-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.rnp-cal-head b { font-size: 15.5px; font-weight: 800; }
+.rnp-nav { width: 38px; height: 38px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .1); background: rgba(255, 255, 255, .06); color: #fff; display: grid; place-items: center; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.rnp-nav .material-symbols-rounded { font-size: 22px; }
+.rnp-nav:active { transform: scale(.92); }
+.rnp-week, .rnp-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.rnp-week span { padding: 4px 0 6px; text-align: center; color: var(--rnp-mist); font-size: 10.5px; font-weight: 600; }
+.rnp-day { height: 38px; border: 0; border-radius: 999px; background: transparent; color: #fff; display: grid; place-items: center; font-family: inherit; font-size: 13.5px; font-weight: 600;
+    font-variant-numeric: tabular-nums; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background .15s; }
+.rnp-wrap.sheet .rnp-day { height: 44px; font-size: 15px; }
+.rnp-day.out { color: rgba(169, 178, 216, .38); }
+.rnp-day:hover:not(.on):not(:disabled) { background: rgba(255, 255, 255, .08); }
+.rnp-day.today { color: var(--rnp-mint); box-shadow: inset 0 0 0 1.5px rgba(71, 224, 172, .6); }
+.rnp-day.on { background: linear-gradient(135deg, var(--rnp-mint), var(--rnp-teal)); color: var(--rnp-night); font-weight: 800; box-shadow: 0 6px 14px -6px rgba(71, 224, 172, .8); }
+.rnp-day:disabled { opacity: .25; cursor: default; }
+.rnp-sel { margin: 10px 0 0; padding: 9px 12px; border-radius: 12px; background: rgba(255, 255, 255, .05); text-align: center; font-size: 13px; font-weight: 700; line-height: 1.6; }
+.rnp-sel small { display: block; color: var(--rnp-mist); font-size: 11.5px; font-weight: 500; }
+.rnp-foot { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; margin-top: 10px; }
+.rnp-btn { height: 42px; border: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 800;
+    background: linear-gradient(135deg, var(--rnp-mint), var(--rnp-teal)); color: var(--rnp-night); -webkit-tap-highlight-color: transparent; }
+.rnp-wrap.sheet .rnp-btn { height: 48px; border-radius: 14px; }
+.rnp-btn.ghost { background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .12); color: #fff; font-weight: 700; }
+.rnp-btn .material-symbols-rounded { font-size: 19px; }
+.rnp-btn:active { transform: scale(.98); }
+
+/* ── الوضع الفاتح ── */
+html.light-mode .rnp-panel { background: #fff; color: var(--rnp-navy); border-color: rgba(16, 25, 101, .1); box-shadow: 0 24px 50px -18px rgba(16, 25, 101, .35); }
+html.light-mode .rnp-grab { background: rgba(16, 25, 101, .18); }
+html.light-mode .rnp-search { background: #F3F5FC; border-color: rgba(16, 25, 101, .08); color: #5A628F; }
+html.light-mode:not(#_r1):not(#_r2):not(#_r3):not(#_r4):not(#_r5) .rnp-search input { color: var(--rnp-navy) !important; }
+html.light-mode .rnp-opt { color: var(--rnp-navy); }
+html.light-mode .rnp-opt:hover, html.light-mode .rnp-opt:focus-visible { background: #F3F5FC; }
+html.light-mode .rnp-opt.on { background: rgba(71, 224, 172, .14); color: #0B8A64; }
+html.light-mode .rnp-opt .material-symbols-rounded { color: #0B8A64; }
+html.light-mode .rnp-nav { background: #F3F5FC; border-color: rgba(16, 25, 101, .08); color: var(--rnp-navy); }
+html.light-mode .rnp-week span, html.light-mode .rnp-sel small { color: #5A628F; }
+html.light-mode .rnp-day { color: var(--rnp-navy); }
+html.light-mode .rnp-day.out { color: rgba(90, 98, 143, .4); }
+html.light-mode .rnp-day:hover:not(.on):not(:disabled) { background: #F3F5FC; }
+html.light-mode .rnp-day.today { color: #0B8A64; box-shadow: inset 0 0 0 1.5px rgba(11, 138, 100, .5); }
+html.light-mode .rnp-sel { background: #F3F5FC; }
+html.light-mode .rnp-btn.ghost { background: #F3F5FC; border-color: rgba(16, 25, 101, .08); color: var(--rnp-navy); }
+
+@media print { .rnp-wrap { display: none !important; } }
+@media (prefers-reduced-motion: reduce) { .rnp-panel, .rnp-scrim { transition: none !important; } }

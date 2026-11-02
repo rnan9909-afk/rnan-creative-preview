@@ -879,15 +879,17 @@
     <script defer src="js/studio/time.js?v=1"></script>
     <link rel="stylesheet" href="css/pwa.css?v=2">
     <script defer src="js/pwa.js?v=2"></script>
-    <link rel="stylesheet" href="css/invoices.css?v=1">
-    <script defer src="js/invoices.js?v=1"></script>
+    <link rel="stylesheet" href="css/invoices.css?v=2">
+    <script defer src="js/invoices.js?v=2"></script>
+    <link rel="stylesheet" href="css/pickers.css?v=1">
+    <script defer src="js/pickers.js?v=1"></script>
 
     <!-- Firebase SDK & Backend Shim -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="js/firebase-init.js"></script>
     <script src="js/rnan-core.js?v=1"></script>
-    <script src="js/backend-shim.js?v=5"></script>
+    <script src="js/backend-shim.js?v=6"></script>
 
     <script>
         // Apply theme immediately to prevent flashing
@@ -2587,30 +2589,18 @@
                         <textarea id="proj-notes" class="form-input-modern h-32 resize-none leading-relaxed"
                             placeholder="سجل هنا أي ملاحظات، أفكار، أو متطلبات خاصة بالمشروع..."></textarea>
                     </div>
-                    <div class="glass-panel p-4 rounded-xl flex items-center justify-between mt-4">
-                        <div class="flex items-center gap-4">
+                    <div class="glass-panel p-4 rounded-xl flex items-center justify-between gap-3 mt-4">
+                        <div class="flex items-center gap-4 min-w-0">
                             <div
-                                class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                                class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
                                 <span class="material-symbols-rounded">request_quote</span>
                             </div>
-                            <div>
-                                <p class="font-bold text-sm text-white">إنشاء عرض سعر</p>
-                                <p class="text-xs text-muted">تحميل ملف PDF تلقائي</p>
+                            <div class="min-w-0">
+                                <p class="font-bold text-sm text-white">عرض السعر</p>
+                                <p id="proj-quote-sub" class="text-xs text-muted">يُحفظ داخل المشروع وتفتحه متى شئت</p>
                             </div>
                         </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="proj-auto-quotation" class="sr-only peer"
-                                onchange="toggleQuotationDownload()">
-                            <div
-                                class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 shadow-inner">
-                            </div>
-                        </label>
-                    </div>
-                    <div id="quotation-download-area" class="hidden">
-                        <button onclick="generateQuotation()"
-                            class="w-full bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all">
-                            <span class="material-symbols-rounded">download</span> تحميل المستند
-                        </button>
+                        <button type="button" id="proj-quote-btn" onclick="openProjectQuotation()" class="proj-quote-btn admin-only"></button>
                     </div>
                 </div>
             </div>
@@ -3605,19 +3595,44 @@
             }
         }
 
-        function toggleQuotationDownload() {
-            let isChecked = document.getElementById('proj-auto-quotation').checked;
-            let area = document.getElementById('quotation-download-area');
-            if (isChecked) area.classList.remove('hidden'); else area.classList.add('hidden');
+        // عرض سعر المشروع: رقمه وتاريخه ثابتان ويُحفظان داخل المشروع، فيُفتح متى شئت فوق نافذة المشروع
+        let projectQuotation = null;
+        function renderProjectQuotation() {
+            const sub = document.getElementById('proj-quote-sub');
+            const btn = document.getElementById('proj-quote-btn');
+            if (!sub || !btn) return;
+            if (projectQuotation) {
+                sub.innerHTML = `<span class="en-num" dir="ltr">${projectQuotation.number}</span> · <span class="en-num">${projectQuotation.date}</span>`;
+                btn.innerHTML = '<span class="material-symbols-rounded">visibility</span> عرض وطباعة';
+            } else {
+                sub.innerText = 'يُحفظ داخل المشروع وتفتحه متى شئت';
+                btn.innerHTML = '<span class="material-symbols-rounded">add</span> إنشاء عرض سعر';
+            }
         }
 
-        function generateQuotation() {
+        function openProjectQuotation() {
+            if (!projectQuotation) {
+                projectQuotation = { number: 'Q-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000), date: new Date().toLocaleDateString('en-CA') };
+                let rowIdx = document.getElementById('proj-row-index').value;
+                if (rowIdx) {
+                    const q = projectQuotation;
+                    google.script.run.withSuccessHandler(() => {
+                        let p = projectsData.find(x => String(x.rowIndex) === String(rowIdx));
+                        if (p) p.quotation = q;
+                    }).withFailureHandler(err => console.error('Quotation:', err)).saveProjectQuotation(rowIdx, q);
+                }
+                renderProjectQuotation();
+            }
+            generateQuotation(projectQuotation);
+        }
+
+        function generateQuotation(q) {
             document.getElementById('invoice-preview-template').classList.add('quotation-mode');
             document.getElementById('preview-doc-title').innerText = "QUOTATION";
 
             document.getElementById('prev-client-name').innerText = document.getElementById('proj-client').value || "عميل محتمل";
-            document.getElementById('prev-date').innerText = new Date().toLocaleDateString('en-CA');
-            document.getElementById('prev-id').innerText = "Q-" + Math.floor(Math.random() * 10000);
+            document.getElementById('prev-date').innerText = (q && q.date) || new Date().toLocaleDateString('en-CA');
+            document.getElementById('prev-id').innerText = (q && q.number) || ("Q-" + Math.floor(Math.random() * 10000));
 
             let val = document.getElementById('proj-value').value || 0;
             let name = document.getElementById('proj-name').value || "مشروع جديد";
@@ -3627,7 +3642,7 @@
             document.getElementById('prev-notes').innerText = "عرض سعر مبدئي";
             document.getElementById('prev-footer-details').innerText = DEFAULT_BANK_INFO;
 
-            document.getElementById('mainModal').classList.add('open');
+            document.getElementById('mainModal').classList.add('open', 'over-project');
             document.getElementById('invoice-edit-form').classList.add('hidden');
             document.getElementById('invoice-preview-template').classList.remove('hidden');
         }
@@ -4913,12 +4928,7 @@ ${link}
                 <td class="px-6 py-4 text-muted text-sm en-num">${i.date}</td>
                 <td class="px-6 py-4 font-bold en-num text-white">${formatCurrency(i.amount)}</td>
                 <td class="px-6 py-4 text-center"><span class="status-pill ${statusClass}">${statusText}</span></td>
-                <td class="px-6 py-4 text-center flex gap-2 justify-center">
-                    ${window.InvoicesUI && InvoicesUI.payable(i) ? `<button onclick='InvoicesUI.pay(${globalIndex})' class="inv-pay-ic" title="اعتماد السداد"><span class="material-symbols-rounded text-sm">task_alt</span></button>` : ''}
-                    <button onclick='openInvoiceModal("edit", ${globalIndex})' class="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center text-muted hover:text-white transition" title="عرض التفاصيل"><span class="material-symbols-rounded text-sm">${currentUserRole === 'admin' ? 'edit' : 'visibility'}</span></button>
-                    ${currentUserRole === 'admin' ? `<button onclick='sendInvoiceWhatsApp(${globalIndex})' class="w-8 h-8 rounded-full hover:bg-[#25D366]/20 text-muted hover:text-[#25D366] flex items-center justify-center transition" title="إرسال عبر واتساب"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.767 5.767 0 1.267.405 2.436 1.096 3.39l-.715 2.614 2.678-.702c.813.435 1.743.682 2.729.682 3.181 0 5.767-2.586 5.767-5.767 0-3.181-2.586-5.767-5.788-5.767zm3.391 8.221c-.144.405-.837.734-1.17.778-.319.044-.638.077-1.129-.111-.53-.204-2.128-.868-2.903-1.644-.775-.775-1.282-1.743-1.428-1.989-.144-.246-.015-.378.107-.502.11-.11.246-.288.371-.432.126-.144.168-.246.252-.405.084-.168.042-.319-.021-.444s-.546-1.314-.748-1.801c-.198-.475-.399-.41-.546-.417-.14-.007-.302-.007-.464-.007s-.425.061-.647.288c-.221.226-.846.828-.846 2.019s.868 2.339.989 2.504c.121.166 1.708 2.607 4.137 3.655.578.249 1.03.397 1.382.51.581.185 1.111.159 1.529.097.466-.07 1.428-.584 1.631-1.149.204-.564.204-1.05.143-1.149-.061-.1-.221-.16-.444-.26zM12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 22c-5.523 0-10-4.477-10-10S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg></button>` : ''}
-                    <button onclick='printInvoiceDirectly(${JSON.stringify(i)})' class="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center text-muted hover:text-white transition" title="طباعة"><span class="material-symbols-rounded text-sm">print</span></button>
-                </td>
+                <td class="px-4 py-4">${window.InvoicesUI ? InvoicesUI.actions(i, globalIndex) : ''}</td>
             </tr>`;
             });
             document.getElementById('invoice-count-display').innerText = `${inv.length}`;
@@ -4926,6 +4936,7 @@ ${link}
 
         function openInvoiceModal(mode, index = null) {
             document.getElementById('mainModal').classList.add('open');
+            document.getElementById('mainModal').classList.remove('over-project');
             document.getElementById('invoice-edit-form').classList.remove('hidden');
             document.getElementById('invoice-preview-template').classList.add('hidden');
             document.getElementById('invoice-preview-template').classList.remove('quotation-mode');
@@ -5326,6 +5337,7 @@ ${link}
 
         function printInvoiceDirectly(inv) {
             document.getElementById('mainModal').classList.add('open');
+            document.getElementById('mainModal').classList.remove('over-project');
             document.getElementById('invoice-edit-form').classList.add('hidden');
             document.getElementById('invoice-preview-template').classList.remove('hidden');
             document.getElementById('invoice-preview-template').classList.remove('quotation-mode');
@@ -5349,7 +5361,7 @@ ${link}
             setInvoiceStatus(inv.status);
         }
 
-        function closeMainModal() { document.getElementById('mainModal').classList.remove('open'); }
+        function closeMainModal() { document.getElementById('mainModal').classList.remove('open', 'over-project'); }
         function backToEdit() { document.getElementById('invoice-edit-form').classList.remove('hidden'); document.getElementById('invoice-preview-template').classList.add('hidden'); }
 
         // --- Project Functions ---
@@ -5546,7 +5558,8 @@ ${link}
 
             let stepsContainer = document.getElementById('proj-steps-container');
             stepsContainer.innerHTML = '';
-            document.getElementById('quotation-download-area').classList.add('hidden');
+            projectQuotation = mode == 'edit' && projectsData[index] ? (projectsData[index].quotation || null) : null;
+            renderProjectQuotation();
 
             // التحكم في ظهور زر الواتساب
             const wsBtn = document.getElementById('whatsapp-btn');
@@ -5698,7 +5711,8 @@ ${link}
                 name: name, client: client, value: val, progress: prog,
                 deadline: date, startDate: startDate,
                 status: stat, steps: steps,
-                notes: notes
+                notes: notes,
+                quotation: projectQuotation
             };
 
             let btn = event.target;

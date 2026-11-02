@@ -16,11 +16,30 @@
     #invoices-cards { display: grid; gap: 12px; }
 }
 
-/* زر اعتماد السداد في الجدول */
-.inv-pay-ic { width: 32px; height: 32px; border-radius: 999px; border: 0; display: flex; align-items: center; justify-content: center; cursor: pointer;
-    background: rgba(71, 224, 172, .14); color: var(--inv-mint); transition: background .2s, color .2s, transform .15s; }
-.inv-pay-ic:hover { background: linear-gradient(135deg, var(--inv-mint), var(--inv-teal)); color: var(--inv-night); }
-.inv-pay-ic:active { transform: scale(.92); }
+/* عرض السعر المفتوح من داخل المشروع يظهر فوق نافذة المشروع (z-60) */
+#mainModal.over-project { z-index: 70 !important; }
+.proj-quote-btn { flex-shrink: 0; height: 40px; padding: 0 16px; border-radius: 12px; border: 1px solid rgba(71, 224, 172, .35); background: rgba(71, 224, 172, .1); color: var(--inv-mint);
+    display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; white-space: nowrap; cursor: pointer; transition: background .2s, transform .15s; }
+.proj-quote-btn .material-symbols-rounded { font-size: 18px; }
+.proj-quote-btn:hover { background: rgba(71, 224, 172, .18); }
+.proj-quote-btn:active { transform: scale(.97); }
+html.light-mode .proj-quote-btn { background: rgba(71, 224, 172, .14); color: #0B8A64; border-color: rgba(11, 138, 100, .3); }
+
+/* ── أزرار الإجراءات في جدول الفواتير ── */
+.inv-actions { display: flex; align-items: center; justify-content: center; gap: 6px; }
+.inv-a { width: 36px; height: 36px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .08); background: rgba(255, 255, 255, .04); color: var(--inv-mist);
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; transition: background .2s, color .2s, border-color .2s, transform .15s; }
+.inv-a .material-symbols-rounded { font-size: 19px; }
+.inv-a:hover { transform: translateY(-1px); }
+.inv-a:active { transform: scale(.94); }
+.inv-a.edit:hover { background: rgba(129, 140, 248, .14); border-color: rgba(129, 140, 248, .35); color: #A5B4FC; }
+.inv-a.wa { color: #25D366; }
+.inv-a.wa:hover { background: rgba(37, 211, 102, .12); border-color: rgba(37, 211, 102, .35); }
+.inv-a.print:hover { background: rgba(255, 255, 255, .1); color: #fff; }
+.inv-a.pay, .inv-a-gap { width: 78px; flex-shrink: 0; }
+.inv-a.pay { border: 0; background: linear-gradient(135deg, var(--inv-mint), var(--inv-teal)); color: var(--inv-night); box-shadow: 0 8px 18px -10px rgba(71, 224, 172, .8); }
+.inv-a.pay em { font-style: normal; font-size: 12.5px; font-weight: 800; }
+.inv-a.pay .material-symbols-rounded { font-size: 18px; }
 
 /* ── بطاقة الفاتورة ── */
 .inv-count { margin: 0 4px -2px; color: var(--inv-mist); font-size: 12px; font-weight: 600; }
@@ -47,13 +66,18 @@
     box-shadow: 0 10px 22px -12px rgba(71, 224, 172, .8); -webkit-tap-highlight-color: transparent; transition: transform .15s; }
 .inv-pay .material-symbols-rounded { font-size: 21px; }
 .inv-pay:active { transform: scale(.98); }
-.inv-acts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+/* شريط الإجراءات أسفل البطاقة: أيقونة ملوّنة في مربع ناعم فوق اسمها */
+.inv-acts { display: grid; grid-template-columns: repeat(3, 1fr); margin: 2px -6px -6px; padding-top: 8px; border-top: 1px solid rgba(255, 255, 255, .07); }
 .inv-acts.two { grid-template-columns: repeat(2, 1fr); }
-.inv-acts button { height: 44px; min-width: 0; border-radius: 14px; border: 1px solid rgba(255, 255, 255, .09); background: rgba(255, 255, 255, .06); color: #fff;
-    display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background .2s, transform .15s; }
-.inv-acts button .material-symbols-rounded { font-size: 19px; color: var(--inv-mist); }
-.inv-acts button.wa svg { color: #25D366; }
-.inv-acts button:active { transform: scale(.95); background: rgba(255, 255, 255, .1); }
+.inv-acts button { min-width: 0; padding: 6px 4px 4px; border: 0; border-radius: 14px; background: transparent; color: #D5DAF0; display: flex; flex-direction: column; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background .2s; }
+.inv-acts button i { width: 42px; height: 34px; border-radius: 12px; display: grid; place-items: center; font-style: normal; transition: transform .15s; }
+.inv-acts button i .material-symbols-rounded { font-size: 20px; }
+.inv-acts i.edit { background: rgba(129, 140, 248, .14); color: #A5B4FC; }
+.inv-acts i.wa { background: rgba(37, 211, 102, .13); color: #25D366; }
+.inv-acts i.print { background: rgba(169, 178, 216, .12); color: var(--inv-mist); }
+.inv-acts button:active { background: rgba(255, 255, 255, .05); }
+.inv-acts button:active i { transform: scale(.9); }
 .inv-empty { padding: 36px 16px; border-radius: 22px; text-align: center; color: var(--inv-mist); background: rgba(255, 255, 255, .03); border: 1px dashed rgba(255, 255, 255, .12); }
 .inv-empty .material-symbols-rounded { font-size: 34px; opacity: .6; }
 .inv-empty p { margin: 6px 0 0; font-size: 13px; }
@@ -110,10 +134,16 @@ html.light-mode .inv-who small, html.light-mode .inv-card-mid small, html.light-
 html.light-mode .inv-av { background: rgba(71, 224, 172, .16); color: #0B8A64; border-color: rgba(11, 138, 100, .14); }
 html.light-mode .inv-st { background: #FEF3C7; color: #B45309; border-color: #FDE68A; }
 html.light-mode .inv-card.paid .inv-st { background: #DCFCE7; color: #0B8A64; border-color: #BBF7D0; }
-html.light-mode .inv-acts button { background: #F3F5FC; border-color: rgba(16, 25, 101, .08); color: var(--inv-navy); }
-html.light-mode .inv-acts button .material-symbols-rounded { color: #5A628F; }
+html.light-mode .inv-acts { border-top-color: rgba(16, 25, 101, .08); }
+html.light-mode .inv-acts button { color: var(--inv-navy); }
+html.light-mode .inv-acts i.edit { background: #EEF0FF; color: #4F46E5; }
+html.light-mode .inv-acts i.wa { background: #E8F9EF; color: #16A34A; }
+html.light-mode .inv-acts i.print { background: #F3F5FC; color: #5A628F; }
+html.light-mode .inv-a { background: #F3F5FC; border-color: rgba(16, 25, 101, .08); color: #5A628F; }
+html.light-mode .inv-a.wa { color: #16A34A; }
+html.light-mode .inv-a.edit:hover { background: #EEF0FF; color: #4F46E5; }
+html.light-mode .inv-a.pay { color: var(--inv-night); background: linear-gradient(135deg, var(--inv-mint), var(--inv-teal)); }
 html.light-mode .inv-empty { background: #fff; border-color: rgba(16, 25, 101, .14); color: #5A628F; }
-html.light-mode .inv-pay-ic { background: rgba(11, 138, 100, .1); color: #0B8A64; }
 html.light-mode .inv-dlg { background: #fff; color: var(--inv-navy); border-color: rgba(16, 25, 101, .08); }
 html.light-mode .inv-dlg h3 { color: var(--inv-navy); }
 html.light-mode .inv-dlg-q { color: #3B4373; }

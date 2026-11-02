@@ -277,7 +277,8 @@ const backendFunctions = {
                     startDate: val.startDate || '',
                     notes: val.notes || '',
                     rating: val.rating || 0,
-                    review: val.review || ''
+                    review: val.review || '',
+                    quotation: val.quotation || null
                 });
             });
         }
@@ -299,6 +300,7 @@ const backendFunctions = {
             startDate: data.startDate,
             notes: data.notes || ''
         };
+        if (data.quotation) projData.quotation = data.quotation;
 
         if (data.rowIndex) {
             let oldSnap = await window.db.ref('projects/' + data.rowIndex).once('value');
@@ -324,6 +326,12 @@ const backendFunctions = {
             await window.db.ref('track/' + projData.code).set(RNAN.trackFromProject(projData));
             return { message: "تم حفظ المشروع الجديد", rowIndex: ref.key, code: projData.code };
         }
+    },
+
+    // عرض سعر المشروع: رقم وتاريخ ثابتان يُحفظان داخل المشروع
+    saveProjectQuotation: async function(rowIndex, quotation) {
+        await window.db.ref('projects/' + rowIndex + '/quotation').set(quotation);
+        return quotation;
     },
 
     deleteProjectFromSheet: async function(rowIndex) {

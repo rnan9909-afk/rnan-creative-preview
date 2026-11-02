@@ -49,17 +49,29 @@
                 </div>
                 ${payable(i) ? `<button type="button" class="inv-pay" data-act="pay">${ic('task_alt')} اعتماد السداد</button>` : ''}
                 <div class="inv-acts${admin ? '' : ' two'}">
-                    <button type="button" data-act="edit">${ic(admin ? 'edit' : 'visibility')}<span>${admin ? 'تعديل' : 'عرض'}</span></button>
-                    ${admin ? `<button type="button" data-act="wa" class="wa">${WA}<span>إرسال</span></button>` : ''}
-                    <button type="button" data-act="print">${ic('print')}<span>طباعة</span></button>
+                    <button type="button" data-act="edit"><i class="edit">${ic(admin ? 'edit_square' : 'visibility')}</i><span>${admin ? 'تعديل' : 'عرض'}</span></button>
+                    ${admin ? `<button type="button" data-act="wa"><i class="wa">${WA}</i><span>إرسال</span></button>` : ''}
+                    <button type="button" data-act="print"><i class="print">${ic('print')}</i><span>طباعة</span></button>
                 </div>
             </article>`;
         }).join('');
     }
+
+    // ── أزرار الإجراءات في جدول سطح المكتب (السداد أولًا، ومكانه محجوز في المدفوعة لتصطفّ الأيقونات) ──
+    function actions(i, idx) {
+        const admin = isAdmin();
+        return `<div class="inv-actions" data-i="${idx}">
+            ${payable(i) ? `<button type="button" class="inv-a pay" data-act="pay" title="اعتماد السداد">${ic('task_alt')}<em>سداد</em></button>` : '<span class="inv-a-gap"></span>'}
+            <button type="button" class="inv-a edit" data-act="edit" title="${admin ? 'تعديل الفاتورة' : 'عرض الفاتورة'}">${ic(admin ? 'edit_square' : 'visibility')}</button>
+            ${admin ? `<button type="button" class="inv-a wa" data-act="wa" title="إرسال عبر واتساب">${WA}</button>` : ''}
+            <button type="button" class="inv-a print" data-act="print" title="طباعة / PDF">${ic('print')}</button>
+        </div>`;
+    }
+
     document.addEventListener('click', e => {
-        const b = e.target.closest('#invoices-cards [data-act]');
+        const b = e.target.closest('#invoices-cards [data-act], #invoices-list [data-act]');
         if (!b) return;
-        const idx = +b.closest('.inv-card').dataset.i;
+        const idx = +b.closest('[data-i]').dataset.i;
         const inv = invoicesData[idx];
         if (!inv) return;
         const act = b.dataset.act;
@@ -167,5 +179,5 @@
         });
     }
 
-    window.InvoicesUI = { fillClients, cards, pay, payable };
+    window.InvoicesUI = { fillClients, cards, actions, pay, payable };
 })();
