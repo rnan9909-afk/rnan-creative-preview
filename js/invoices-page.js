@@ -615,5 +615,11 @@
         } else if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('.iv-row')) { e.preventDefault(); openDrawer(e.target.dataset.n); }
     });
 
-    window.InvoicesPage = { render, open: openDrawer, close: closeDrawer, statement, state, dueLabel, show(o) { Object.assign(S, o || {}); render(); } };
+    window.InvoicesPage = { render, open: openDrawer, close: closeDrawer, statement, state, dueLabel, show(o) {
+        Object.assign(S, o || {}, { limit: 40 });
+        render();
+        clientsSel();
+        [['iv-client', S.client], ['iv-period', S.period], ['iv-sort', S.sort], ['iv-q', S.q]].forEach(([id, v]) => { const el = document.getElementById(id); if (el) el.value = v; });
+        tabs(); list();
+    } };
 })();

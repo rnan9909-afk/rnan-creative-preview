@@ -7,7 +7,12 @@
 .ra-strip.mini .ra-t small { display: none; }
 .ra-strip.mini .ra-ic { width: 30px; height: 30px; border-radius: 10px; }
 .ra-strip.mini .ra-go { height: 32px; }
-@media (min-width: 1024px) { .ra-strip.mini { width: min(460px, calc(100% - 340px)); border-radius: 999px; } .ra-strip.mini .ra-t b { font-size: 13px; } }
+/* سطح المكتب: الشريط في جهة اليمين بعيدًا عن أزرار البحث والجرس والمظهر في اليسار */
+@media (min-width: 1024px) {
+    .ra-strip { width: min(640px, calc(100% - 380px)); margin-left: auto; margin-right: 0; }
+    .ra-strip.mini { width: min(460px, calc(100% - 380px)); border-radius: 999px; }
+    .ra-strip.mini .ra-t b { font-size: 13px; }
+}
 
 /* التنبيه السفلي لا يختفي تحت شريط «ثبّت رنان» على الجوال */
 body:has(.rn-promo.show) .pp-toast, body:has(.rn-promo.show) #admin-toast { bottom: calc(118px + env(safe-area-inset-bottom, 0px)) !important; }
