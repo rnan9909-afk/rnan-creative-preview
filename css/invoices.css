@@ -61,11 +61,11 @@ html.light-mode .proj-quote-btn { background: rgba(71, 224, 172, .14); color: #0
 .inv-card-mid strong > div { justify-content: flex-start !important; }
 .inv-card-mid span { font-size: 14px; font-weight: 600; padding-top: 4px; }
 
-.inv-pay { width: 100%; height: 48px; margin-bottom: 8px; border: 0; border-radius: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
+.inv-paybtn { width: 100%; height: 48px; margin-bottom: 8px; border: 0; border-radius: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
     background: linear-gradient(135deg, var(--inv-mint), var(--inv-teal)); color: var(--inv-night); font-weight: 800; font-size: 15px;
     box-shadow: 0 10px 22px -12px rgba(71, 224, 172, .8); -webkit-tap-highlight-color: transparent; transition: transform .15s; }
-.inv-pay .material-symbols-rounded { font-size: 21px; }
-.inv-pay:active { transform: scale(.98); }
+.inv-paybtn .material-symbols-rounded { font-size: 21px; }
+.inv-paybtn:active { transform: scale(.98); }
 /* شريط الإجراءات أسفل البطاقة: أيقونة ملوّنة في مربع ناعم فوق اسمها */
 .inv-acts { display: grid; grid-template-columns: repeat(3, 1fr); margin: 2px -6px -6px; padding-top: 8px; border-top: 1px solid rgba(255, 255, 255, .07); }
 .inv-acts.two { grid-template-columns: repeat(2, 1fr); }

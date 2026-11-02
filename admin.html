@@ -870,19 +870,21 @@
     <script defer src="js/icons.js?v=2"></script>
     <script defer src="js/link-platforms.js?v=1"></script>
     <!-- أدوات العمل: العروض والعقود · قوالب العروض · الاشتراكات · تتبّع الوقت -->
-    <link rel="stylesheet" href="css/studio.css?v=1">
+    <link rel="stylesheet" href="css/studio.css?v=2">
     <script defer src="js/studio/data.js?v=1"></script>
     <script defer src="js/studio/core.js?v=1"></script>
-    <script defer src="js/studio/proposals.js?v=2"></script>
+    <script defer src="js/studio/proposals.js?v=3"></script>
     <script defer src="js/studio/templates.js?v=1"></script>
     <script defer src="js/studio/subs.js?v=1"></script>
     <script defer src="js/studio/time.js?v=1"></script>
     <link rel="stylesheet" href="css/pwa.css?v=2">
     <script defer src="js/pwa.js?v=2"></script>
-    <link rel="stylesheet" href="css/invoices.css?v=2">
-    <script defer src="js/invoices.js?v=2"></script>
+    <link rel="stylesheet" href="css/invoices.css?v=3">
+    <script defer src="js/invoices.js?v=3"></script>
     <link rel="stylesheet" href="css/pickers.css?v=1">
     <script defer src="js/pickers.js?v=1"></script>
+    <link rel="stylesheet" href="css/projects.css?v=1">
+    <script defer src="js/projects-ui.js?v=1"></script>
 
     <!-- Firebase SDK & Backend Shim -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -1306,21 +1308,7 @@
                             <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
                                 <span class="material-symbols-rounded text-primary">rocket_launch</span> قائمة المشاريع النشطة
                             </h3>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-sm text-right">
-                                    <thead class="text-xs text-muted uppercase bg-black/20">
-                                        <tr>
-                                            <th class="px-4 py-3 rounded-r-lg">المشروع</th>
-                                            <th class="px-4 py-3">العميل</th>
-                                            <th class="px-4 py-3">الموعد</th>
-                                            <th class="px-4 py-3 rounded-l-lg text-left">الإنجاز</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="dash-active-projects-list" class="divide-y divide-white/5">
-                                        <tr><td colspan="4" class="text-center py-4 text-muted text-sm">جاري التحميل...</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                            <div id="dash-active-projects-list" class="dp-list"><p class="dp-empty">جاري التحميل...</p></div>
                         </div>
                     </div>
                 </div>
@@ -4275,30 +4263,7 @@ ${link}
                 }
                 document.getElementById('dash-recent-activities').innerHTML = activitiesHTML;
 
-                let activeListHTML = '';
-                let topActiveProjects = projectsData.filter(p => p.status === 'قيد التنفيذ').slice(0, 5);
-                if (topActiveProjects.length > 0) {
-                    topActiveProjects.forEach(p => {
-                        let progress = p.progress || 0;
-                        activeListHTML += `
-                        <tr class="hover:bg-white/5 transition-colors group">
-                            <td class="px-4 py-3 font-bold text-white">${p.name || ''}</td>
-                            <td class="px-4 py-3 text-muted">${p.client || ''}</td>
-                            <td class="px-4 py-3 text-muted en-num">${p.deadline || '-'}</td>
-                            <td class="px-4 py-3 text-left">
-                                <div class="flex items-center gap-2 justify-end">
-                                    <span class="text-xs font-bold text-primary en-num">${progress}%</span>
-                                    <div class="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                                        <div class="h-full bg-primary" style="width: ${progress}%"></div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>`;
-                    });
-                } else {
-                    activeListHTML = `<tr><td colspan="4" class="text-center py-4 text-muted text-sm">لا توجد مشاريع نشطة حالياً</td></tr>`;
-                }
-                document.getElementById('dash-active-projects-list').innerHTML = activeListHTML;
+                if (window.ProjectsUI) ProjectsUI.active(projectsData);
             } else {
                 let dashProjCount = document.getElementById('dash-active-proj-count');
                 if (dashProjCount) dashProjCount.innerText = projectsData.filter(p => p.status === 'قيد التنفيذ').length;

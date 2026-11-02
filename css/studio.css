@@ -318,3 +318,30 @@ html.light-mode .st-empty h3, html.light-mode .st-ledger b, html.light-mode .st-
 html.light-mode .st-card, html.light-mode .st-stat, html.light-mode .st-steps3 > div, html.light-mode .st-sub, html.light-mode .st-log,
 html.light-mode .st-explain, html.light-mode .st-flow > div { background: #fff; border-color: rgba(2, 8, 58, .1); }
 html.light-mode .st-btn.ghost { color: #0f172a; background: rgba(2, 8, 58, .04); border-color: rgba(2, 8, 58, .12); }
+
+/* ── الاتفاقية: طلبات تعديل العميل على النص، وزر/نافذة تحرير البنود ── */
+.st-agreq { border-color: rgba(251, 191, 36, .3); background: rgba(251, 191, 36, .05); }
+.st-agreq-i { padding: 12px 14px; border-radius: 14px; background: rgba(255, 255, 255, .04); border: 1px solid var(--rs-line); }
+.st-agreq-i small { display: block; color: var(--rs-text-3); font-size: 11.5px; font-weight: 600; }
+.st-agreq-i q { display: block; margin: 4px 0; padding-inline-start: 10px; border-inline-start: 3px solid #fbbf24; color: var(--rs-text-2); font-size: 13px; line-height: 1.8; }
+.st-agreq-i p { margin: 0 0 8px; color: #fff; font-size: 13.5px; font-weight: 600; line-height: 1.8; white-space: pre-line; }
+.st-agreq-i .meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; color: var(--rs-text-3); font-size: 12px; }
+.st-agreq-i.done { opacity: .6; }
+.st-agreq-i.done q { border-color: #47E0AC; }
+.st-agedit-btn { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; border: 1px solid rgba(71, 224, 172, .3); background: rgba(71, 224, 172, .06);
+    color: #fff; text-align: start; cursor: pointer; transition: background .2s; }
+.st-agedit-btn:hover { background: rgba(71, 224, 172, .1); }
+.st-agedit-btn > span:nth-child(2) { flex: 1; min-width: 0; }
+.st-agedit-btn b { display: block; font-size: 14px; }
+.st-agedit-btn small { display: block; color: var(--rs-text-2); font-size: 12px; line-height: 1.7; }
+.st-agedit-btn > .material-symbols-rounded { color: #47E0AC; }
+.st-agedit { padding: 0 22px; }
+.st-agedit iframe { display: block; width: 100%; height: min(68vh, 880px); border: 0; border-radius: 16px; background: #E6E9F4; }
+@media (max-width: 640px) {
+    .st-agedit { padding: 0 10px; }
+    .st-agedit iframe { height: 64vh; border-radius: 12px; }
+    .st-agedit-hint { display: none; }
+}
+html.light-mode .st-agreq-i { background: #fff; border-color: rgba(2, 8, 58, .1); }
+html.light-mode .st-agreq-i p, html.light-mode .st-agedit-btn { color: #0f172a; }
+.st-agedit-btn .st-ico { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0; }

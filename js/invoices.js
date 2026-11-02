@@ -47,7 +47,7 @@
                     <div><small>المبلغ</small><strong>${money(i.amount)}</strong></div>
                     <div><small>التاريخ</small><span class="en-num">${esc(i.date || '-')}</span></div>
                 </div>
-                ${payable(i) ? `<button type="button" class="inv-pay" data-act="pay">${ic('task_alt')} اعتماد السداد</button>` : ''}
+                ${payable(i) ? `<button type="button" class="inv-paybtn" data-act="pay">${ic('task_alt')} اعتماد السداد</button>` : ''}
                 <div class="inv-acts${admin ? '' : ' two'}">
                     <button type="button" data-act="edit"><i class="edit">${ic(admin ? 'edit_square' : 'visibility')}</i><span>${admin ? 'تعديل' : 'عرض'}</span></button>
                     ${admin ? `<button type="button" data-act="wa"><i class="wa">${WA}</i><span>إرسال</span></button>` : ''}

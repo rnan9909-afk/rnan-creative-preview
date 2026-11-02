@@ -62,6 +62,43 @@
         : (required ? `<tr><th>${label}</th><td><span class="blank"></span></td></tr>` : '');
     const ol = lines => `<ol>${lines.filter(Boolean).map(l => `<li>${l}</li>`).join('')}</ol>`;
     const lines = t => String(t || '').split('\n').map(x => x.trim()).filter(Boolean);
+    const svg = n => `<svg class="icon"><use href="#i-${n}"/></svg>`;
+
+    // ── نص البنود المحرَّر من لوحة الإدارة (agreement.edits[مفتاح البند] = { blocks }) ──
+    // كتل نصية فقط: فقرة p أو بند مرقّم li، و keep للجداول المولَّدة (البنود والمراحل) فتبقى كما هي
+    const keyOf = t => String(t).replace(/[.#$\/\[\]]/g, '-');
+    function fromBlocks(blocks, origHtml) {
+        const tpl = document.createElement('template');
+        tpl.innerHTML = origHtml;
+        const tables = [...tpl.content.querySelectorAll('table')];
+        let out = '', li = [];
+        const flush = () => { if (li.length) { out += `<ol>${li.map(x => `<li>${x}</li>`).join('')}</ol>`; li = []; } };
+        (blocks || []).forEach(b => {
+            if (b.t === 'li') { li.push(E(b.x).replace(/\n/g, '<br>')); return; }
+            flush();
+            if (b.t === 'keep') { if (tables[b.i]) out += tables[b.i].outerHTML; }
+            else out += `<p>${E(b.x).replace(/\n/g, '<br>')}</p>`;
+        });
+        flush();
+        return out;
+    }
+    function blocksOf(root) {
+        const out = [];
+        let ti = 0;
+        const txt = n => (n.innerText || n.textContent || '').replace(/ /g, ' ').replace(/[ \t]+\n/g, '\n').replace(/\n{2,}/g, '\n').trim();
+        root.childNodes.forEach(n => {
+            if (n.nodeType === 3) { const x = n.textContent.trim(); if (x) out.push({ t: 'p', x }); return; }
+            if (n.nodeType !== 1 || n.tagName === 'BR' || n.classList.contains('cl-reset')) return;
+            if (n.tagName === 'TABLE') { out.push({ t: 'keep', i: ti++ }); return; }
+            if (n.tagName === 'OL' || n.tagName === 'UL') { n.querySelectorAll(':scope > li').forEach(li => { const x = txt(li); if (x) out.push({ t: 'li', x }); }); return; }
+            const x = txt(n);
+            if (x) out.push({ t: 'p', x });
+        });
+        return out;
+    }
+    const EDIT = params.get('edit') === '1' && window.parent !== window;
+    let ORIG = {}, SAVED = {}, ready = false;
+    const dirty = new Set(), resets = new Set();
 
     function render(o) {
         const a = o.agreement || {};
@@ -160,6 +197,15 @@
 
         const contact = [p1.phone && `<span>الجوال: <span class="en">${E(p1.phone)}</span></span>`, p1.email && `<span class="en">${E(p1.email)}</span>`, p1.city && `<span>${E(p1.city)}</span>`].filter(Boolean).join('');
 
+        // كل بند بمفتاح ثابت من عنوانه؛ النص المحرَّر يحلّ محل المولَّد، والمولَّد محفوظ لزر «النص الأصلي»
+        SAVED = a.edits || {};
+        ORIG = {};
+        const sec = (head, t, html) => {
+            const k = keyOf(t), ed = SAVED[k] && SAVED[k].blocks;
+            ORIG[k] = html;
+            return `<section class="cl" data-key="${E(k)}"${ed ? ' data-edited="1"' : ''}><h2>${head}</h2><div class="cl-body">${ed ? fromBlocks(ed, html) : html}</div></section>`;
+        };
+
         // الترويسة الكحلية في thead: المتصفح يكرّرها أعلى كل صفحة مطبوعة
         $('#ag-doc').innerHTML = `<table class="ag-frame"><thead><tr><td>
             <header class="ag-head">
@@ -206,11 +252,8 @@
             </div>
             <p class="ag-both">ويُشار إليهما مجتمعَين بـ«الطرفين».</p>
 
-            <section class="cl">
-                <h2><span>التمهيد</span></h2>
-                <p>لمّا كان الطرف الأول جهةً متخصصة في تقديم خدمات التصميم والهوية البصرية والمحتوى الإبداعي، ولمّا رغب الطرف الثاني في الاستعانة بخدماته لتنفيذ «${E(o.title)}»، فقد اتفق الطرفان — وهما بكامل أهليتهما المعتبرة شرعًا ونظامًا — على إبرام هذه الاتفاقية وفق البنود الآتية:</p>
-            </section>
-            ${C.map(([t, html], i) => `<section class="cl"><h2><span>البند ${ORD[i] || i + 1}</span> ${t}</h2>${html}</section>`).join('')}
+            ${sec('<span>التمهيد</span>', 'التمهيد', `<p>لمّا كان الطرف الأول جهةً متخصصة في تقديم خدمات التصميم والهوية البصرية والمحتوى الإبداعي، ولمّا رغب الطرف الثاني في الاستعانة بخدماته لتنفيذ «${E(o.title)}»، فقد اتفق الطرفان — وهما بكامل أهليتهما المعتبرة شرعًا ونظامًا — على إبرام هذه الاتفاقية وفق البنود الآتية:</p>`)}
+            ${C.map(([t, html], i) => sec(`<span>البند ${ORD[i] || i + 1}</span> ${t}`, t, html)).join('')}
 
             <div class="ag-sign">
                 <div class="sig stamped">
@@ -250,6 +293,155 @@
         printBtn.disabled = false;
         printBtn.onclick = () => window.print();
         if (params.get('print') === '1') (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => setTimeout(() => window.print(), 400));
+        if (EDIT) setupEdit(); else if (params.get('print') !== '1') setupRequests(o);
+        ready = true;
+    }
+
+    // ── وضع التحرير: تفتح لوحة الإدارة الاتفاقية في إطار (iframe) وتحفظ ما يُعدَّل هنا عبر collect() ──
+    function setupEdit() {
+        document.documentElement.classList.add('ag-editing');
+        $('.ag-desk').insertAdjacentHTML('afterbegin', `<p class="ag-tip edit no-print">${svg('pen')} انقر على أي فقرة أو بند في الاتفاقية وعدّل صياغته مباشرة، ثم اضغط «حفظ التعديلات» أسفل النافذة.</p>`);
+        $('#ag-doc').querySelectorAll('section.cl').forEach(s => {
+            const k = s.dataset.key, body = s.querySelector('.cl-body');
+            const lock = () => body.querySelectorAll('table').forEach(t => { t.contentEditable = 'false'; });
+            body.contentEditable = 'true';
+            body.spellcheck = false;
+            lock();
+            body.addEventListener('input', () => { dirty.add(k); resets.delete(k); s.dataset.edited = '1'; });
+            body.addEventListener('paste', e => {
+                e.preventDefault();
+                document.execCommand('insertText', false, (e.clipboardData || window.clipboardData).getData('text/plain'));
+            });
+            const rb = document.createElement('button');
+            rb.type = 'button';
+            rb.className = 'cl-reset no-print';
+            rb.textContent = '↺ النص الأصلي';
+            rb.addEventListener('click', () => {
+                body.innerHTML = ORIG[k];
+                lock();
+                dirty.delete(k);
+                resets.add(k);
+                delete s.dataset.edited;
+            });
+            s.querySelector('h2').appendChild(rb);
+        });
+    }
+    function collect() {
+        const out = {};
+        Object.keys(SAVED).forEach(k => { if (!resets.has(k) && !dirty.has(k)) out[k] = SAVED[k]; });
+        dirty.forEach(k => {
+            const s = [...document.querySelectorAll('#ag-doc section.cl')].find(x => x.dataset.key === k);
+            if (s) out[k] = { blocks: blocksOf(s.querySelector('.cl-body')) };
+        });
+        return out;
+    }
+
+    // ── طلبات العميل: يحدّد نصًا في الاتفاقية ويطلب تعديله (offer/<token>/agreementNotes) ──
+    function setupRequests(o) {
+        const doc = $('#ag-doc');
+        $('.ag-desk').insertAdjacentHTML('afterbegin', `<p class="ag-tip no-print">${svg('cursor')} ظلّل أي نص في الاتفاقية لتطلب تعديله، وتصلنا ملاحظتك مباشرة.</p>`);
+        doc.insertAdjacentHTML('afterend', '<section class="ag-reqs no-print" id="ag-reqs" hidden></section>');
+        const fab = document.createElement('button');
+        fab.type = 'button';
+        fab.className = 'ag-ask no-print';
+        fab.hidden = true;
+        fab.innerHTML = `${svg('pen')}<span>اطلب تعديل على النص المحدد</span>`;
+        document.body.appendChild(fab);
+        let picked = null, t = 0;
+        const update = () => {
+            const s = window.getSelection();
+            const txt = s && !s.isCollapsed ? s.toString().replace(/\s+/g, ' ').trim() : '';
+            const node = s && s.rangeCount ? s.getRangeAt(0).commonAncestorContainer : null;
+            if (txt.length < 3 || !node || !doc.contains(node)) { fab.hidden = true; picked = null; return; }
+            const el = node.nodeType === 1 ? node : node.parentElement;
+            const sec = el.closest('section.cl, .party');
+            picked = { quote: txt.slice(0, 600), clause: sec ? (sec.querySelector('h2, h3').textContent || '').replace('↺ النص الأصلي', '').replace(/\s+/g, ' ').trim().slice(0, 120) : '' };
+            const dock = window.matchMedia('(max-width: 760px), (pointer: coarse)').matches;
+            fab.classList.toggle('dock', dock);
+            if (!dock) {
+                const r = s.getRangeAt(0).getBoundingClientRect();
+                fab.style.top = Math.max(64, r.top - 52) + 'px';
+                fab.style.left = Math.min(innerWidth - 280, Math.max(10, r.left + r.width / 2 - 135)) + 'px';
+            }
+            fab.hidden = false;
+        };
+        document.addEventListener('selectionchange', () => { clearTimeout(t); t = setTimeout(update, 160); });
+        window.addEventListener('scroll', () => { if (!fab.hidden) update(); }, { passive: true });
+        fab.addEventListener('mousedown', e => e.preventDefault());
+        fab.addEventListener('click', () => { if (picked) ask(picked, o); });
+        db.ref('offer/' + token + '/agreementNotes').on('value', snap => renderReqs(snap.val() || {}), () => { });
+    }
+
+    function renderReqs(map) {
+        const box = $('#ag-reqs');
+        const list = Object.keys(map).map(k => map[k]).filter(n => n && n.quote).sort((a, b) => String(b.at).localeCompare(String(a.at)));
+        box.hidden = !list.length;
+        box.innerHTML = list.length ? `<h3>${svg('pen')} طلبات التعديل التي أرسلتها <span class="en">(${list.length})</span></h3>
+            ${list.map(n => `<div class="ag-req${n.status === 'done' ? ' done' : ''}">
+                <span class="st">${n.status === 'done' ? `${svg('check')} تم التعديل` : `${svg('clock')} قيد المراجعة`}</span>
+                ${n.clause ? `<small>${E(n.clause)}</small>` : ''}
+                <q>${E(n.quote)}</q>
+                <p>${E(n.note)}</p>
+            </div>`).join('')}` : '';
+    }
+
+    function ask(picked, o) {
+        const old = $('.ag-modal');
+        if (old) old.remove();
+        let name = '';
+        try { name = localStorage.getItem('rn-ag-name') || ''; } catch (e) { }
+        if (!name && o.reply && o.reply.name) name = o.reply.name;
+        const m = document.createElement('div');
+        m.className = 'ag-modal no-print';
+        m.innerHTML = `<div class="ag-scrim" data-x></div>
+            <form class="ag-sheet" role="dialog" aria-modal="true" aria-labelledby="ag-ask-t">
+                <div class="grab"></div>
+                <h3 id="ag-ask-t">طلب تعديل على الاتفاقية</h3>
+                ${picked.clause ? `<p class="where">${E(picked.clause)}</p>` : ''}
+                <blockquote>${E(picked.quote)}</blockquote>
+                <label><span>ما التعديل الذي تطلبه؟</span><textarea name="note" rows="4" maxlength="1500" required placeholder="اكتب الصياغة المقترحة أو ملاحظتك على هذا النص..."></textarea></label>
+                <label><span>اسمك</span><input name="name" maxlength="80" value="${E(name)}" placeholder="الاسم"></label>
+                <p class="err" hidden></p>
+                <div class="btns">
+                    <button type="submit" class="btn primary">${svg('send')}<span>إرسال الطلب</span></button>
+                    <button type="button" class="btn ghost" data-x>إلغاء</button>
+                </div>
+            </form>`;
+        document.body.appendChild(m);
+        requestAnimationFrame(() => requestAnimationFrame(() => m.classList.add('open')));
+        const close = () => { m.classList.remove('open'); setTimeout(() => m.remove(), 300); };
+        m.addEventListener('click', e => { if (e.target.closest('[data-x]')) close(); });
+        const f = m.querySelector('form'), err = m.querySelector('.err'), btn = f.querySelector('[type=submit]');
+        setTimeout(() => f.note.focus(), 320);
+        f.addEventListener('submit', async e => {
+            e.preventDefault();
+            const note = f.note.value.trim(), nm = f.name.value.trim();
+            if (note.length < 2) { err.textContent = 'اكتب التعديل المطلوب'; err.hidden = false; return; }
+            btn.disabled = true;
+            err.hidden = true;
+            try {
+                const rec = { quote: picked.quote, note: note.slice(0, 1500), at: new Date().toISOString() };
+                if (nm) rec.name = nm.slice(0, 80);
+                if (picked.clause) rec.clause = picked.clause;
+                await Promise.race([db.ref('offer/' + token + '/agreementNotes').push(rec), new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 15000))]);
+                try { if (nm) localStorage.setItem('rn-ag-name', nm); } catch (x) { }
+                window.getSelection().removeAllRanges();
+                close();
+                toast('وصل طلبك ✓ سنراجعه ونحدّث الاتفاقية');
+            } catch (x) {
+                btn.disabled = false;
+                err.textContent = 'تعذّر الإرسال، تحقّق من الاتصال وأعد المحاولة.';
+                err.hidden = false;
+            }
+        });
+    }
+    function toast(msg) {
+        let el = $('.ag-toast');
+        if (!el) { el = document.createElement('div'); el.className = 'ag-toast no-print'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+        el.textContent = msg;
+        el.classList.add('show');
+        clearTimeout(toast.t);
+        toast.t = setTimeout(() => el.classList.remove('show'), 3200);
     }
 
     async function init() {
@@ -263,6 +455,6 @@
         render(o);
     }
 
-    window.AgreementPage = { words, moneyWords };
+    window.AgreementPage = { words, moneyWords, collect, get ready() { return ready; } };
     document.addEventListener('DOMContentLoaded', init);
 })();

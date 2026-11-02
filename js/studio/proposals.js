@@ -31,6 +31,9 @@
     const offerUrl = p => RNAN.pageUrl('offer.html', { k: p.token });
     const expired = p => !!p.validUntil && p.validUntil < S.today();
     const offerOf = p => offers[p.token] || {};
+    // طلبات العميل على نص الاتفاقية: يظلّل نصًا في agreement.html ويطلب تعديله (offer/<token>/agreementNotes)
+    const agNotes = p => S.toList(offerOf(p).agreementNotes).filter(n => n.quote).sort((a, b) => String(b.at || '').localeCompare(String(a.at || '')));
+    const agPending = p => agNotes(p).filter(n => n.status !== 'done');
     const projOf = p => p.projectKey && S.projects().find(x => String(x.rowIndex) === String(p.projectKey));
 
     function stage(p) {
@@ -58,13 +61,16 @@
             S.ref().update(u);
             const p = fresh[0], r = offerOf(p).reply;
             S.toast(r.decision === 'approved' ? `🎉 وافق ${r.name} على «${p.title}»` : `✏️ ${r.name} طلب تعديلًا على «${p.title}»`);
+        } else {
+            const asked = list.find(p => agPending(p).length);
+            if (asked) S.toast(`📝 طلب تعديل على اتفاقية «${asked.title}» — افتحها من بطاقة العرض`);
         }
         badge();
     }
     function badge() {
         const el = document.getElementById('proposals-nav-badge');
         if (!el) return;
-        const n = list.filter(p => ['changes', 'approved'].includes(stage(p))).length;
+        const n = list.filter(p => ['changes', 'approved'].includes(stage(p)) || agPending(p).length).length;
         el.textContent = n;
         el.classList.toggle('show', n > 0);
     }
@@ -114,6 +120,8 @@
         }
         if (p.revision > 1) chips.push(`<span class="st-chip">نسخة <span class="st-num">${p.revision}</span></span>`);
         if (p.agreement) chips.push(`<button class="st-chip ok" onclick="Studio.P.agreement('${p.id}')">${ic('contract')} اتفاقية رسمية جاهزة</button>`);
+        const asks = agPending(p).length;
+        if (asks) chips.push(`<button class="st-chip hot" onclick="Studio.P.agreement('${p.id}')">${ic('rate_review')} طلب تعديل على الاتفاقية <span class="st-num">${asks}</span></button>`);
 
         let note = '';
         if (r && r.decision === 'changes' && s === 'changes') note = `<div class="st-note"><b>ملاحظة ${E(r.name)}:</b>\n${E(r.note || '—')}</div>`;
@@ -561,8 +569,19 @@
         const inp = (key, val, ph) => `<input class="form-input-modern" data-ag="${key}" value="${E(val || '')}" placeholder="${E(ph || '')}"${LTR.test(key.split('.')[1]) ? ' dir="ltr"' : ''}>`;
         const date = a.date || (r && r.decision === 'approved' ? S.ymd(r.at) : S.today());
 
+        const notes = agNotes(p);
         S.modal(`${S.mHead('contract', 'الاتفاقية الرسمية', `${p.number} · «${p.title}» — بصيغة الطرف الأول والثاني، تُطبع أو تُحفظ PDF`)}
             <div class="st-m-body">
+                ${notes.length ? `<div class="st-block st-agreq">
+                    <div class="st-block-h"><b>${ic('rate_review')} طلبات تعديل من العميل</b><span class="st-muted text-xs">ظلّلها في الاتفاقية وكتب ملاحظته</span></div>
+                    ${notes.map(n => `<div class="st-agreq-i${n.status === 'done' ? ' done' : ''}">
+                        ${n.clause ? `<small>${E(n.clause)}</small>` : ''}
+                        <q>${E(n.quote)}</q>
+                        <p>${E(n.note || '')}</p>
+                        <div class="meta"><span>${E(n.name || 'العميل')} · ${S.fmtDate(n.at)} ${S.fmtTime(n.at)}</span>
+                            ${n.status === 'done' ? `<span class="st-chip ok">${ic('check')} تم التعديل</span>` : `<button class="st-btn sm ghost" onclick="Studio.P.agNoteDone('${p.id}', '${E(n.id)}', this)">${ic('done_all')} تم التعديل</button>`}</div>
+                    </div>`).join('')}
+                </div>` : ''}
                 <div class="st-block">
                     <div class="st-block-h"><b>${ic('person')} الطرف الثاني — العميل</b></div>
                     <div class="st-seg">
@@ -591,6 +610,11 @@
                     <label class="st-f full"><span>أحكام إضافية <em>(اختياري — سطر لكل بند)</em></span><textarea id="st-ag-extra" class="form-input-modern text-sm" rows="3" placeholder="مثال: يلتزم الطرف الأول بتسليم دليل استخدام الهوية بصيغة PDF.">${E(a.extra || '')}</textarea></label>
                 </div>
                 <p class="st-muted text-xs" style="margin:0;line-height:1.9">البنود الأساسية — النطاق والمدة والدفعات والالتزامات والملكية الفكرية والسرية والإنهاء — تُبنى تلقائيًا من العرض وشروطه، ومبلغه يُكتب بالأرقام والحروف. الحقل الفارغ يظهر في الاتفاقية خطًا منقّطًا للتعبئة باليد.</p>
+                <button type="button" class="st-agedit-btn" onclick="Studio.P.agSave('edit', this)">
+                    <span class="st-ico mint">${ic('edit_document')}</span>
+                    <span><b>تحرير نص البنود</b><small>${a.edits ? `عدّلت صياغة <span class="st-num">${Object.keys(a.edits).length}</span> ${Object.keys(a.edits).length > 1 ? 'بنود' : 'بند'} — افتح لمراجعتها أو تعديل غيرها` : 'افتح الاتفاقية وعدّل صياغة أي بند مباشرة في النص'}</small></span>
+                    ${ic('chevron_left')}
+                </button>
             </div>
             <div class="st-m-foot">
                 <button class="st-btn primary" onclick="Studio.P.agSave('print', this)">${ic('print')} فتح وطباعة PDF</button>
@@ -623,20 +647,22 @@
         const date = document.getElementById('st-ag-date').value || S.today();
         const extra = document.getElementById('st-ag-extra').value.trim();
         // تُفتح النافذة قبل الحفظ كي لا يحجبها المتصفح بعد انتظار قاعدة البيانات
-        const win = mode === 'copy' ? null : window.open('', '_blank');
+        const win = mode === 'copy' || mode === 'edit' ? null : window.open('', '_blank');
         let done = false;
         await S.busy(btn, async () => {
             const now = new Date().toISOString();
-            const upd = { agreement: { party2: p2, date, extra, updatedAt: now }, updatedAt: now };
+            const edits = (p.agreement && p.agreement.edits) || null;
+            const upd = { agreement: { party2: p2, date, extra, edits, updatedAt: now }, updatedAt: now };
             if (mode === 'send' && p.status === 'draft') { upd.status = 'sent'; upd.sentAt = now; }
             await S.ref('settings/agreement').set(Object.assign({}, p1, { showBank }));
             await S.ref('proposals/' + p.id).update(upd);
             Object.assign(p, upd);
             await publish(p);
-            await S.ref('offer/' + p.token + '/agreement').set({ party1: Object.assign({}, p1, showBank && ag.bank ? { bank: ag.bank } : {}), party2: p2, date, extra, updatedAt: now });
+            await S.ref('offer/' + p.token + '/agreement').set({ party1: Object.assign({}, p1, showBank && ag.bank ? { bank: ag.bank } : {}), party2: p2, date, extra, edits, updatedAt: now });
             done = true;
-        }, 'جاري التجهيز...');
+        }, mode === 'edit' ? 'جاري الفتح...' : 'جاري التجهيز...');
         if (!done) { if (win) win.close(); return; }
+        if (mode === 'edit') return agEditor(p);
         S.closeModal();
         render();
         const url = agreementUrl(p);
@@ -655,9 +681,58 @@
         }
     }
 
+    // ── تحرير نص البنود: الاتفاقية نفسها في إطار بوضع التحرير، والحفظ من هنا (للوحة صلاحية الكتابة) ──
+    function agEditor(p) {
+        S.modal(`${S.mHead('edit_document', 'تحرير نص الاتفاقية', `${p.number} · انقر على أي فقرة أو بند وعدّل صياغته مباشرة`)}
+            <div class="st-agedit"><iframe id="st-ag-frame" src="${E(agreementUrl(p))}&edit=1" title="تحرير نص الاتفاقية"></iframe></div>
+            <div class="st-m-foot">
+                <button class="st-btn primary" onclick="Studio.P.agEditSave('${p.id}', this)">${ic('save')} حفظ التعديلات</button>
+                <span class="st-muted text-xs st-agedit-hint">جداول البنود والمراحل تُبنى من العرض نفسه ولا تُحرَّر هنا.</span>
+                <span class="grow" style="flex:1"></span>
+                <button class="st-btn ghost" onclick="Studio.P.agreement('${p.id}')">رجوع</button>
+            </div>`, 'wide');
+    }
+
+    async function agEditSave(id, btn) {
+        const p = byId(id);
+        const f = document.getElementById('st-ag-frame');
+        const A = f && f.contentWindow && f.contentWindow.AgreementPage;
+        if (!p || !A || !A.ready) { S.toast('انتظر حتى تكتمل الاتفاقية ثم احفظ'); return; }
+        const edits = A.collect();
+        const val = Object.keys(edits).length ? edits : null;
+        let done = false;
+        await S.busy(btn, async () => {
+            await S.ref('proposals/' + p.id + '/agreement/edits').set(val);
+            await S.ref('offer/' + p.token + '/agreement/edits').set(val);
+            p.agreement = Object.assign({}, p.agreement);
+            if (val) p.agreement.edits = val; else delete p.agreement.edits;
+            done = true;
+        }, 'جاري الحفظ...');
+        if (!done) return;
+        S.toast(val ? `حُفظت صياغة الاتفاقية (${Object.keys(val).length} ${Object.keys(val).length > 1 ? 'بنود معدّلة' : 'بند معدّل'}) ✓` : 'الاتفاقية بنصّها الأصلي ✓');
+        agreement(id);
+    }
+
+    async function agNoteDone(id, nid, btn) {
+        const p = byId(id);
+        if (!p) return;
+        const at = new Date().toISOString();
+        let done = false;
+        await S.busy(btn, async () => {
+            await S.ref('offer/' + p.token + '/agreementNotes/' + nid).update({ status: 'done', doneAt: at });
+            const o = offerOf(p);
+            if (o.agreementNotes && o.agreementNotes[nid]) Object.assign(o.agreementNotes[nid], { status: 'done', doneAt: at });
+            done = true;
+        }, '...');
+        if (!done) return;
+        render();
+        badge();
+        agreement(id);
+    }
+
     S.register('proposals', { open, boot: async () => { await load(); badge(); } });
     S.P = {
-        edit, save, send, copy, preview, extend, archive, restore, remove, duplicate, convert, doConvert, agreement, agType, agSave,
+        edit, save, send, copy, preview, extend, archive, restore, remove, duplicate, convert, doConvert, agreement, agType, agSave, agEditSave, agNoteDone,
         tab: k => { tab = k; render(); }, kind: setKind, client: setClient, tpl: applyTemplate,
         // يُستدعى من صفحة القوالب لبدء عرض من قالب لعميل محدّد
         fromTemplate: (t, clientKey, startDate) => {
