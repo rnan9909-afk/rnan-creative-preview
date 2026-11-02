@@ -1,0 +1,9 @@
+/* إضافات الموقع العام (js/site-extra.js): «تبدأ من» على بطاقات الخدمات، وقسم آراء العملاء. */
+.svc-from { margin: 12px 0 0; color: var(--muted, #A9B2D8); font-size: 13.5px; }
+.svc-from b { color: var(--mint-3, #7df0c9); font-size: 18px; font-weight: 800; margin: 0 2px; }
+.rv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.rv-card { margin: 0; padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+.rv-stars { color: #fbbf24; font-size: 18px; letter-spacing: 2px; }
+.rv-card blockquote { margin: 0; color: #fff; font-size: 15px; line-height: 1.9; flex: 1; }
+.rv-card figcaption b { display: block; font-size: 14.5px; }
+.rv-card figcaption small { display: block; color: var(--muted, #A9B2D8); font-size: 12.5px; margin-top: 2px; }

@@ -302,7 +302,8 @@ const backendFunctions = {
                     quotation: val.quotation || null,
                     type: val.type || '',
                     proof: val.proof || null,
-                    delivery: val.delivery || null
+                    delivery: val.delivery || null,
+                    brief: val.brief || null
                 });
             });
         }
