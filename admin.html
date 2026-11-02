@@ -885,6 +885,8 @@
     <script defer src="js/pickers.js?v=1"></script>
     <link rel="stylesheet" href="css/projects.css?v=1">
     <script defer src="js/projects-ui.js?v=1"></script>
+    <link rel="stylesheet" href="css/charts.css?v=1">
+    <script defer src="js/charts.js?v=1"></script>
 
     <!-- Firebase SDK & Backend Shim -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -1240,19 +1242,9 @@
                                 <p class="text-3xl font-bold text-white tracking-tight en-num" id="dash-total-revenue">0
                                 </p>
                             </div>
-                            <div class="flex gap-2">
-                                <span class="w-3 h-3 rounded-full bg-primary shadow-glow-primary"></span>
-                                <span class="w-3 h-3 rounded-full bg-accent-green shadow-glow-accent"></span>
-                            </div>
+                            <div class="rc-legend"><span>المحصّل شهريًا</span><span class="g">الهدف الشهري</span></div>
                         </div>
-                        <div id="revenue-chart-container"
-                            class="flex-1 flex items-end justify-between gap-1 sm:gap-3 pt-4 h-56 px-2 overflow-x-auto">
-                            <p class="text-muted text-xs text-center w-full self-center">جاري تحميل البيانات...</p>
-                        </div>
-                        <div
-                            class="flex justify-between mt-4 text-[8px] sm:text-[10px] text-muted font-bold uppercase tracking-wider px-2">
-                            <span>JAN</span><span>FEB</span><span>MAR</span><span>APR</span><span>MAY</span><span>JUN</span><span>JUL</span><span>AUG</span><span>SEP</span><span>OCT</span><span>NOV</span><span>DEC</span>
-                        </div>
+                        <div id="revenue-chart-container" class="rc-host"><p class="text-muted text-xs text-center py-16">جاري تحميل البيانات...</p></div>
                     </div>
                 </div>
 
@@ -1390,15 +1382,11 @@
                         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
                             <div>
                                 <h3 class="text-muted text-sm font-medium mb-1">تحليل الدخل الشهري (المحصل)</h3>
-                                <p class="text-xs text-muted">توزيع الإيرادات المحصلة خلال أشهر العام الحالي</p>
+                                <p class="text-xs text-muted">الإيرادات المحصّلة خلال آخر 12 شهرًا مقارنة بالهدف الشهري</p>
                             </div>
+                            <div class="rc-legend"><span>المحصّل شهريًا</span><span class="g">الهدف الشهري</span></div>
                         </div>
-                        <div id="finance-monthly-chart-container" class="flex-1 flex items-end justify-between gap-1 sm:gap-3 pt-12 h-56 px-2 overflow-x-auto">
-                            <p class="text-muted text-xs text-center w-full self-center">جاري تحميل البيانات...</p>
-                        </div>
-                        <div class="flex justify-between mt-4 text-[8px] sm:text-[10px] text-muted font-bold uppercase tracking-wider px-2">
-                            <span>JAN</span><span>FEB</span><span>MAR</span><span>APR</span><span>MAY</span><span>JUN</span><span>JUL</span><span>AUG</span><span>SEP</span><span>OCT</span><span>NOV</span><span>DEC</span>
-                        </div>
+                        <div id="finance-monthly-chart-container" class="rc-host"><p class="text-muted text-xs text-center py-16">جاري تحميل البيانات...</p></div>
                     </div>
 
                     <!-- توزيع المشاريع حسب العملاء -->
@@ -4300,44 +4288,10 @@ ${link}
             }
 
             let months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-            let monthlyRevenue = new Array(12).fill(0);
-            invoicesData.forEach(inv => {
-                if (inv.status === 'مدفوعة' && inv.date) {
-                    let d = new Date(inv.date);
-                    if (!isNaN(d.getTime())) {
-                        monthlyRevenue[d.getMonth()] += parseFloat(inv.amount) || 0;
-                    }
-                }
-            });
-
-            let chartContainer = document.getElementById('revenue-chart-container');
-
-            chartContainer.classList.remove('h-56', 'pt-4');
-            chartContainer.classList.add('h-72', 'pt-16');
-
-            chartContainer.innerHTML = '';
-            let monthlyGoal = 4000;
-            monthlyRevenue.forEach((rev, idx) => {
-                let percent = Math.min((rev / monthlyGoal) * 100, 100);
-                let colorClass = 'bg-accent-green shadow-glow-accent';
-                let tooltipHTML = formatCurrency(rev);
-
-                let barHTML = `
-            <div class="flex-1 flex flex-col items-center gap-3 group relative h-full justify-end cursor-pointer min-w-[20px]" onclick="updateMonthlyAchievement(${rev}, '${months[idx]}')">
-                 <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-white text-slate-900 text-sm font-bold px-4 py-2 rounded-xl opacity-0 group-hover:opacity-100 transition-all shadow-2xl whitespace-nowrap z-50 pointer-events-none border-2 border-slate-200 flex items-center justify-center min-w-[80px]">
-                    ${tooltipHTML}
-                    <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 border-8 border-transparent border-t-white"></div>
-                 </div>
-                 <div class="w-full bg-white/5 rounded-t-lg relative group transition-all h-full flex items-end overflow-hidden hover:bg-white/10">
-                    <div class="w-full ${colorClass} transition-all duration-1000 ease-out hover:brightness-110" style="height: ${Math.max(percent, 2)}%"></div>
-                 </div>
-            </div>`;
-                chartContainer.insertAdjacentHTML('beforeend', barHTML);
-            });
-
-            // Set default achievement to current month
-            let currentMonthIdx = new Date().getMonth();
-            updateMonthlyAchievement(monthlyRevenue[currentMonthIdx], months[currentMonthIdx]);
+            // آخر 12 شهرًا بمقياس نسبي وخط الهدف (js/charts.js)؛ النقر على شهر يحدّث بطاقة الإنجاز
+            let chartData = window.RevenueChart ? RevenueChart.render(document.getElementById('revenue-chart-container'), { invoices: invoicesData, goal: 4000, onPick: d => updateMonthlyAchievement(d.v, months[d.m]) }) : [];
+            let curMonth = chartData[chartData.length - 1];
+            if (curMonth) updateMonthlyAchievement(curMonth.v, months[curMonth.m]);
         }
 
         function updateFinancePage() {
@@ -4364,38 +4318,7 @@ ${link}
 
             // 2. Render Monthly Income Chart
             let months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-            let monthlyCollected = new Array(12).fill(0);
-            invoicesData.forEach(inv => {
-                if (inv.status === 'مدفوعة' && inv.date) {
-                    let d = new Date(inv.date);
-                    if (!isNaN(d.getTime())) {
-                        monthlyCollected[d.getMonth()] += parseFloat(inv.amount) || 0;
-                    }
-                }
-            });
-
-            let chartContainer = document.getElementById('finance-monthly-chart-container');
-            if (chartContainer) {
-                chartContainer.innerHTML = '';
-                let monthlyGoal = 4000;
-                monthlyCollected.forEach((rev, idx) => {
-                    let percent = Math.min((rev / monthlyGoal) * 100, 100);
-                    let colorClass = 'bg-accent-green shadow-glow-accent';
-                    let tooltipHTML = formatCurrency(rev);
-
-                    let barHTML = `
-                <div class="flex-1 flex flex-col items-center gap-3 group relative h-full justify-end cursor-pointer min-w-[20px]">
-                     <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-white text-slate-900 text-sm font-bold px-4 py-2 rounded-xl opacity-0 group-hover:opacity-100 transition-all shadow-2xl whitespace-nowrap z-50 pointer-events-none border-2 border-slate-200 flex items-center justify-center min-w-[80px]">
-                        ${months[idx]}: ${tooltipHTML}
-                        <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 border-8 border-transparent border-t-white"></div>
-                     </div>
-                     <div class="w-full bg-white/5 rounded-t-lg relative group transition-all h-full flex items-end overflow-hidden hover:bg-white/10">
-                        <div class="w-full ${colorClass} transition-all duration-1000 ease-out hover:brightness-110" style="height: ${Math.max(percent, 2)}%"></div>
-                     </div>
-                </div>`;
-                    chartContainer.insertAdjacentHTML('beforeend', barHTML);
-                });
-            }
+            if (window.RevenueChart) RevenueChart.render(document.getElementById('finance-monthly-chart-container'), { invoices: invoicesData, goal: 4000 });
 
             // 3. Render Project Distribution by Client
             let clientProjects = {};
