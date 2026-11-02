@@ -25,7 +25,8 @@
     const ref = p => window.db.ref(p);
     const P = () => (typeof projectsData !== 'undefined' ? projectsData : []);
     const C = () => (typeof clientsData !== 'undefined' ? clientsData : []);
-    const link = t => (window.RNAN ? RNAN.pageUrl('review.html', { k: t }) : 'review.html?k=' + t);
+    const link = t => (window.RNAN && RNAN.reviewUrl ? RNAN.reviewUrl(t) : 'review.html?k=' + t);
+    const previewLink = t => (window.RNAN ? RNAN.pageUrl('review.html', { k: t, preview: 1 }) : 'review.html?preview=1&k=' + t);
 
     // ── كل المراجعات مباشرة من القاعدة ──
     let all = {}, ready = false, cleaned = false, listening = false;
@@ -40,6 +41,14 @@
     }
     const expired = r => r.filesDeleted || (r.expiresAt && Date.parse(r.expiresAt) < Date.now());
     const openNotes = r => list(r).filter(c => c.by !== 'admin' && c.v === r.current && !c.done);
+    const openNotesAll = r => list(r).filter(c => c.by !== 'admin' && !c.done);
+    // كل تصميم عليه تعديلات لم تُنفَّذ بعد (يختفي حين تُعلَّم «تم التعديل» أو يعتمد العميل)
+    function pending() {
+        return Object.entries(all).map(([t, r]) => Object.assign({ token: t }, r))
+            .filter(r => r.versions && !r.approval && !expired(r) && openNotesAll(r).length)
+            .map(r => ({ r, n: openNotesAll(r).length, fresh: unseen(r).length, last: openNotesAll(r).slice(-1)[0].at }))
+            .sort((a, b) => String(b.last).localeCompare(String(a.last)));
+    }
     const unseen = r => list(r).filter(c => c.by !== 'admin' && !c.done && (!r.seenAt || String(c.at) > String(r.seenAt)));
     const approvalUnseen = r => !!r.approval && (!r.seenAt || String(r.approval.at) > String(r.seenAt));
 
@@ -48,14 +57,78 @@
         if (!window.AdminBell) return;
         const items = [];
         Object.values(all).forEach(r => {
-            if (!r || !r.versions) return;
-            const ns = unseen(r);
-            if (approvalUnseen(r)) items.push({ at: r.approval.at, html: `<div class="nb-item ok" data-nb-proj="${esc(r.project)}" role="button">${ic('verified')}<div><b>اعتمد ${esc(r.approval.name || r.client || 'العميل')} تصميم «${esc(r.title || '')}»</b><small>${ago(r.approval.at)} · افتح المشروع لتسليمه</small></div></div>` });
-            else if (ns.length && !expired(r)) items.push({ at: ns[ns.length - 1].at, html: `<div class="nb-item" data-nb-proj="${esc(r.project)}" role="button">${ic('rate_review')}<div><b>${plural(ns.length, 'ملاحظة جديدة', 'ملاحظتان جديدتان', 'ملاحظات جديدة', 'ملاحظة جديدة')} على «${esc(r.title || 'التصميم')}»</b><small>${esc(r.client || '')} · ${ago(ns[ns.length - 1].at)}</small></div></div>` });
+            if (r && r.versions && approvalUnseen(r)) items.push({ at: r.approval.at, html: `<div class="nb-item ok" data-nb-proj="${esc(r.project)}" role="button">${ic('verified')}<div><b>اعتمد ${esc(r.approval.name || r.client || 'العميل')} تصميم «${esc(r.title || '')}»</b><small>${ago(r.approval.at)} · افتح المشروع لتسليمه</small></div></div>` });
         });
+        // التعديلات غير المنفّذة تبقى في الجرس حتى تُعلَّم «تم التعديل»
+        pending().forEach(({ r, n, fresh, last }) => items.push({ at: last, html: `<div class="nb-item" data-nb-proj="${esc(r.project)}" role="button">${ic('rate_review')}<div><b>${plural(n, 'تعديل مطلوب', 'تعديلان مطلوبان', 'تعديلات مطلوبة', 'تعديلًا مطلوبًا')} على «${esc(r.title || 'التصميم')}»${fresh ? ' <em class="nb-new">جديد</em>' : ''}</b><small>${esc(r.client || '')} · آخرها ${ago(last)} · لم تُنفَّذ بعد</small></div></div>` }));
         items.sort((a, b) => String(b.at).localeCompare(String(a.at)));
         AdminBell.set('proofs', items.map(x => x.html).join(''), items.length);
     }
+
+    function openProject(rowIndex) {
+        const i = P().findIndex(p => p.rowIndex === rowIndex);
+        if (i > -1) window.openProjectModal('edit', i, { focus: 'proof' });
+    }
+    // تنبيهات ثابتة ما دامت هناك تعديلات لم تُنفَّذ: شريط أعلى اللوحة، شارة «المشاريع»، ولوحة في صفحة المشاريع
+    function notices() {
+        const items = pending(), total = items.reduce((a, x) => a + x.n, 0);
+        const main = document.querySelector('main');
+        let strip = document.getElementById('ra-strip');
+        if (!strip && main) { main.insertAdjacentHTML('afterbegin', '<div id="ra-strip" class="ra-strip no-print" role="status" hidden></div>'); strip = document.getElementById('ra-strip'); }
+        if (strip) {
+            strip.hidden = !items.length;
+            if (items.length) {
+                const one = items.length === 1 ? items[0] : null;
+                strip.innerHTML = `<span class="ra-ic">${ic('rate_review')}${items.some(x => x.fresh) ? '<i></i>' : ''}</span>
+                    <span class="ra-t"><b>${plural(total, 'تعديل مطلوب', 'تعديلان مطلوبان', 'تعديلات مطلوبة', 'تعديلًا مطلوبًا')} من العملاء لم يُنفَّذ</b>
+                    <small>${one ? `«${esc(one.r.title || 'التصميم')}» — ${esc(one.r.client || '')}` : `على ${plural(items.length, 'تصميم واحد', 'تصميمين', 'تصاميم', 'تصميمًا')}: ${items.slice(0, 2).map(x => '«' + esc(x.r.title || '') + '»').join('، ')}${items.length > 2 ? '…' : ''}`}</small></span>
+                    <button type="button" class="ra-go" data-ra="${one ? esc(one.r.project) : ''}">${one ? 'افتح التصميم' : 'عرض الكل'} ${ic('arrow_back')}</button>`;
+            }
+        }
+        // تنتقل الشارة تلقائيًا إلى «المزيد» في شريط تطبيق الجوال
+        const nav = document.getElementById('nav-projects');
+        if (nav) {
+            let b = document.getElementById('nav-projects-badge');
+            if (!b) { nav.insertAdjacentHTML('beforeend', '<span id="nav-projects-badge" class="ra-nav-badge en-num"></span>'); b = document.getElementById('nav-projects-badge'); }
+            b.textContent = total || '';
+            b.style.display = total ? '' : 'none';
+        }
+        const head = document.querySelector('#projects-page .pp-head');
+        let fix = document.getElementById('pp-fix');
+        if (!fix && head) { head.insertAdjacentHTML('afterend', '<section id="pp-fix" class="pp-fix no-print" hidden></section>'); fix = document.getElementById('pp-fix'); }
+        if (fix) {
+            fix.hidden = !items.length;
+            fix.innerHTML = items.length ? `<h3>${ic('rate_review')} تعديلات مطلوبة من العملاء <em class="en-num">${total}</em></h3>
+                <p>تبقى هنا حتى تعلّمها «تم التعديل» أو ترفع النسخة المعدّلة.</p>
+                <div class="pp-fix-list">${items.map(({ r, n, fresh, last }) => `<button type="button" class="pp-fix-row" data-ra="${esc(r.project)}">
+                    <span class="n en-num">${n}</span>
+                    <span class="t"><b>${esc(r.title || 'التصميم')}${fresh ? ' <em class="nb-new">جديد</em>' : ''}</b><small>${esc(r.client || '')} · آخر ملاحظة ${ago(last)}</small></span>
+                    <span class="go">افتح ${ic('arrow_back')}</span></button>`).join('')}</div>` : '';
+        }
+    }
+    document.addEventListener('click', e => {
+        const b = e.target.closest('[data-ra]');
+        if (!b) return;
+        if (b.dataset.ra) return openProject(b.dataset.ra);
+        if (typeof switchPage === 'function') switchPage('projects');
+        setTimeout(() => { const fix = document.getElementById('pp-fix'); if (fix) fix.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 150);
+    });
+    // «رابط التصميم» في رأس نافذة المشروع
+    function designChip(r) {
+        const sub = document.querySelector('#projectModal .pe-head-sub');
+        if (!sub) return;
+        let chip = document.getElementById('pe-design-chip');
+        if (!chip) { sub.insertAdjacentHTML('beforeend', `<button type="button" id="pe-design-chip" class="pe-code design" title="نسخ رابط التصميم للعميل">${ic('palette')}<span>رابط التصميم</span></button>`); chip = document.getElementById('pe-design-chip'); }
+        chip.hidden = !(r && r.versions && !expired(r));
+        chip.dataset.token = r ? r.token : '';
+    }
+    function copy(token) {
+        if (!token) return;
+        const url = link(token);
+        if (typeof copyText === 'function') copyText(url, null); else if (navigator.clipboard) navigator.clipboard.writeText(url);
+        toast('نُسخ رابط التصميم — يفتح للعميل صفحة التصميم مباشرة');
+    }
+    document.addEventListener('click', e => { const c = e.target.closest('#pe-design-chip'); if (c) copy(c.dataset.token); });
 
     // حالة المراجعة على بطاقة المشروع
     function state(p) {
@@ -63,8 +136,8 @@
         if (!r || !r.versions) return null;
         if (r.approval) return { cls: 'ok', ic: 'verified', text: 'اعتمده العميل' };
         if (expired(r)) return null;
-        const n = openNotes(r).length;
-        if (n) return { cls: 'notes', ic: 'rate_review', text: plural(n, 'ملاحظة من العميل', 'ملاحظتان من العميل', 'ملاحظات من العميل', 'ملاحظة من العميل'), fresh: unseen(r).length > 0 };
+        const n = openNotesAll(r).length;
+        if (n) return { cls: 'notes', ic: 'rate_review', text: plural(n, 'تعديل مطلوب', 'تعديلان مطلوبان', 'تعديلات مطلوبة', 'تعديلًا مطلوبًا'), fresh: unseen(r).length > 0 };
         const seen = r.clientSeen && r.clientSeen.v === r.current;
         const since = Date.parse(r.sentAt || (r.versions[r.current] || {}).at || r.updatedAt);
         const stale = Date.now() - since > 2 * 864e5;
@@ -77,6 +150,7 @@
         tick = setTimeout(() => {
             if (window.ProjectsPage) ProjectsPage.render();
             bell();
+            notices();
             // اللوحة تُحدَّث فقط ونافذة المشروع مفتوحة، فلا تُعلَّم الملاحظات مقروءة قبل أن تراها
             if (cur && !busy && modalOpen() && !(box() && box().querySelector('.pf-up.open'))) panel(cur);
         }, 120);
@@ -239,7 +313,6 @@
         p.proof = sum;
         return token;
     }
-    const openNotesAll = r => list(r).filter(c => c.by !== 'admin' && !c.done);
 
     // ── رسائل الواتساب ──
     function phoneOf(name) { return (C().find(c => c.company === name || c.name === name) || {}).phone || ''; }
@@ -262,6 +335,7 @@
         listen();
         if (!p || !p.rowIndex) { el.innerHTML = `<p class="pf-empty">${ic('save')} احفظ المشروع أولًا، ثم ارفع التصميم ليراجعه العميل.</p>`; return; }
         const r = forProject(p.rowIndex);
+        designChip(r);
         if (!r || !r.versions) { upOpen = true; el.innerHTML = uploader(null); return; }
         if (modalOpen() && (unseen(r).length || approvalUnseen(r))) ref('proofs/' + r.token + '/seenAt').set(now()).catch(() => null);
         el.innerHTML = view(r) + (upOpen ? uploader(r) : '');
@@ -305,15 +379,15 @@
         const fs = filesOf(r, r.current);
         const byVer = vs.map((x, i) => ({ x, i, ns: notes.filter(c => c.v === x.k) })).filter(g => g.ns.length);
         return `<div class="pf-state ${st[0]}">${ic(st[1])}<div><b>${st[2]}</b><small>${st[3]}</small></div></div>
-            ${!ex && fs.length ? `<div class="pf-thumbs" data-pf-thumbs>${fs.slice(0, 8).map(f => `<a href="${esc(link(r.token))}&preview=1" target="_blank" rel="noopener" data-thumb="${esc(f.id)}" title="${esc(f.name)}"><span class="pf-ph"></span></a>`).join('')}${fs.length > 8 ? `<span class="pf-more en-num">+${fs.length - 8}</span>` : ''}</div>` : ''}
+            ${!ex && fs.length ? `<div class="pf-thumbs" data-pf-thumbs>${fs.slice(0, 8).map(f => `<a href="${esc(previewLink(r.token))}" target="_blank" rel="noopener" data-thumb="${esc(f.id)}" title="${esc(f.name)}"><span class="pf-ph"></span></a>`).join('')}${fs.length > 8 ? `<span class="pf-more en-num">+${fs.length - 8}</span>` : ''}</div>` : ''}
             <div class="pf-acts">
                 ${r.approval ? `<button type="button" class="pf-btn main" data-pf="deliver">${ic('task_alt')} تعليم المشروع مكتملًا</button>` : ''}
                 ${!r.approval && !ex && sendUrl ? `<a class="pf-btn ${r.sentAt ? '' : 'main'} wa" href="${esc(sendUrl)}" target="_blank" rel="noopener" data-pf="sent">${ic('send')} ${r.sentAt ? 'إعادة الإرسال' : 'إرسال للعميل'}</a>` : ''}
                 ${!r.approval && !ex && remindUrl && r.sentAt && !open.length ? `<a class="pf-btn main wa" href="${esc(remindUrl)}" target="_blank" rel="noopener" data-pf="reminded">${ic('notifications_active')} تذكير العميل</a>` : ''}
                 ${!r.approval && !ex && !sendUrl ? `<span class="pf-hint">${ic('info')} لا يوجد جوال للعميل — انسخ الرابط وأرسله</span>` : ''}
                 ${!upOpen ? `<button type="button" class="pf-btn ${open.length ? 'main' : ''}" data-pf="upload">${ic('upload_file')} ${ex ? 'رفع التصميم من جديد' : 'رفع نسخة معدّلة'}</button>` : ''}
-                ${!ex ? `<button type="button" class="pf-btn" data-pf="copy">${ic('link')} نسخ الرابط</button>
-                <a class="pf-btn" href="${esc(link(r.token))}&preview=1" target="_blank" rel="noopener">${ic('open_in_new')} معاينة</a>` : ''}
+                ${!ex ? `<button type="button" class="pf-btn" data-pf="copy">${ic('link')} نسخ رابط التصميم</button>
+                <a class="pf-btn" href="${esc(previewLink(r.token))}" target="_blank" rel="noopener">${ic('open_in_new')} معاينة</a>` : ''}
             </div>
             ${byVer.length ? `<div class="pf-notes">${byVer.reverse().map(g => {
                 const isCur = g.x.k === r.current;
@@ -390,7 +464,7 @@
         if (act === 'sent' || act === 'reminded') { ref('proofs/' + r.token).update({ [act === 'sent' ? 'sentAt' : 'remindedAt']: now() }); return; }
         if (act === 'copy') {
             if (typeof copyText === 'function') copyText(link(r.token), null); else if (navigator.clipboard) navigator.clipboard.writeText(link(r.token));
-            return toast('نُسخ رابط مراجعة التصميم');
+            return toast('نُسخ رابط التصميم — يفتح للعميل صفحة التصميم مباشرة');
         }
         if (act === 'deliver') { if (window.ProjectEdit) ProjectEdit.setStatus('مكتمل'); return toast('اضغط «حفظ المشروع» لتأكيد التسليم'); }
         if (act === 'extend') {
@@ -445,5 +519,5 @@
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hook); else hook();
 
-    window.ProofsUI = { panel, state, listen, forProject, link, get busy() { return busy; } };
+    window.ProofsUI = { panel, state, listen, forProject, link, copy, pending, waSend: r => wa(r, 'send'), get busy() { return busy; } };
 })();

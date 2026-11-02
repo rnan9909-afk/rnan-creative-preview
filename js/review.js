@@ -6,7 +6,7 @@
     const E = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const icon = n => `<svg class="icon"><use href="#i-${n}"/></svg>`;
     const params = new URLSearchParams(location.search);
-    const K = (params.get('k') || '').replace(/[^\w-]/g, '');
+    const K = (params.get('k') || (location.pathname.match(/\/d\/([\w-]+)/) || [])[1] || '').replace(/[^\w-]/g, '');
     const PREVIEW = params.get('preview') === '1';
     const MONTHS = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
     const date = iso => { const d = new Date(iso); return isNaN(d) ? '' : d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear(); };

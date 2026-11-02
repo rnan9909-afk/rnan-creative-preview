@@ -143,6 +143,8 @@
     function portalUrl(token) { return pageUrl('client.html', { k: token }); }
     function referralUrl(refCode) { return pageUrl('index.html', { ref: refCode }) + '#request'; }
     function trackUrl(code) { return pageUrl('track.html', { c: code }); }
+    // رابط التصميم المباشر: قصير على الاستضافة الرسمية (يُعاد توجيهه إلى review.html)، وكامل في غيرها
+    function reviewUrl(token) { return /(\.web\.app|\.firebaseapp\.com)$/.test(location.hostname) ? location.origin + '/d/' + token : pageUrl('review.html', { k: token }); }
 
     function intlPhone(phone) {
         let p = String(phone || '').replace(/[^\d+]/g, '').replace(/^\+/, '');
@@ -214,7 +216,7 @@
         SERVICES, PORTFOLIO_CATEGORIES, DEFAULT_PORTFOLIO, REWARDS, REFERRAL_BONUS, STAGES,
         tierOf, newToken, newRefCode, newTrackCode, normalizeCode,
         trackFromRequest, trackFromProject, serviceTitles,
-        pageUrl, portalUrl, referralUrl, trackUrl, intlPhone, waLink,
+        pageUrl, portalUrl, referralUrl, trackUrl, reviewUrl, intlPhone, waLink,
         esc, safeJSON, fmtNum, fmtDate, daysUntil, inDays, resizeImage
     };
 })();

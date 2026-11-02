@@ -299,3 +299,30 @@ html.light-mode #projects-page .riyal-logo, html.light-mode .pn-box .riyal-logo 
 
 @media print { .pp-toast { display: none !important; } }
 @media (prefers-reduced-motion: reduce) { .pp-bar i, .pp-check i, .pp-toast { transition: none; } }
+
+/* تعديلات مطلوبة من العملاء: لوحة ثابتة أعلى صفحة المشاريع (js/proofs.js) */
+.pp-fix { padding: 14px; border-radius: 22px; background: linear-gradient(135deg, rgba(244, 63, 94, .14), rgba(244, 63, 94, .04)); border: 1px solid rgba(251, 113, 133, .45); }
+.pp-fix[hidden] { display: none; }
+.pp-fix h3 { margin: 0; display: flex; align-items: center; gap: 8px; color: #fff; font-size: 16px; font-weight: 800; }
+.pp-fix h3 .material-symbols-rounded { color: #fb7185; }
+.pp-fix h3 em { min-width: 24px; height: 24px; padding: 0 8px; border-radius: 999px; display: inline-grid; place-items: center; font-style: normal; font-size: 12.5px; background: #f43f5e; color: #fff; }
+.pp-fix > p { margin: 4px 0 12px; color: #fecdd3; font-size: 12.5px; }
+.pp-fix-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
+.pp-fix-row { min-width: 0; padding: 10px 12px; border-radius: 16px; border: 1px solid rgba(251, 113, 133, .3); background: rgba(2, 8, 58, .4); color: #fff; font-family: inherit; text-align: start;
+    display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background .2s, border-color .2s; }
+.pp-fix-row:hover { background: rgba(244, 63, 94, .12); border-color: rgba(251, 113, 133, .6); }
+.pp-fix-row .n { width: 34px; height: 34px; flex-shrink: 0; border-radius: 11px; display: grid; place-items: center; background: #f43f5e; color: #fff; font-weight: 800; }
+.pp-fix-row .t { flex: 1; min-width: 0; line-height: 1.45; }
+.pp-fix-row .t b { display: block; font-size: 14px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pp-fix-row .t small { display: block; color: #C9CFEA; font-size: 12px; }
+.pp-fix-row .go { flex-shrink: 0; display: inline-flex; align-items: center; gap: 2px; color: #fda4af; font-size: 13px; font-weight: 800; }
+.pp-fix-row .go .material-symbols-rounded { font-size: 18px; }
+.pp-ib.design { color: #c4b5fd; }
+.pp-ib.design:hover { background: rgba(167, 139, 250, .14); }
+html.light-mode .pp-fix { background: #FFF1F2; border-color: rgba(225, 29, 72, .3); }
+html.light-mode .pp-fix h3 { color: #881337; }
+html.light-mode .pp-fix > p { color: #9F1239; }
+html.light-mode .pp-fix-row { background: #fff; color: #101965; border-color: rgba(225, 29, 72, .2); }
+html.light-mode .pp-fix-row .t small { color: #5A628F; }
+html.light-mode .pp-fix-row .go { color: #BE123C; }
+html.light-mode .pp-ib.design { color: #6D28D9; }

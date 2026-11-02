@@ -78,6 +78,11 @@
         return `<div class="pp-next"><button type="button" class="pp-check" data-act="step" title="تمّت هذه المهمة" aria-label="تمّت المهمة: ${esc(x.steps[x.next].text)}"><i></i></button>
             <span class="pp-next-t"><small>المهمة التالية · <span class="en-num">${x.done}/${x.total}</span></small><b>${esc(x.steps[x.next].text)}</b></span></div>`;
     }
+    // تصميم مرفوع وما زال متاحًا للعميل (js/proofs.js)
+    function hasDesign(p) {
+        const r = window.ProofsUI && p.rowIndex ? ProofsUI.forProject(p.rowIndex) : null;
+        return r && r.versions && !r.filesDeleted && !(r.expiresAt && Date.parse(r.expiresAt) < Date.now()) ? r : null;
+    }
     // حالة مراجعة التصميم مع العميل (js/proofs.js)
     function proofChip(p, preview) {
         const s = !preview && window.ProofsUI ? ProofsUI.state(p) : null;
@@ -100,6 +105,7 @@
                 ${preview ? '' : `<span class="pp-acts">
                     ${x.phone ? `<button type="button" class="pp-ib wa" data-act="wa" title="إرسال تحديث للعميل" aria-label="إرسال تحديث للعميل">${WA}</button>` : ''}
                     ${p.code ? `<button type="button" class="pp-ib" data-act="track" title="نسخ رابط التتبع" aria-label="نسخ رابط التتبع">${ic('qr_code_2')}</button>` : ''}
+                    ${hasDesign(p) ? `<button type="button" class="pp-ib design" data-act="design" title="نسخ رابط التصميم للعميل" aria-label="نسخ رابط التصميم">${ic('palette')}</button>` : ''}
                 </span>`}
             </footer>
         </article>`;
@@ -322,9 +328,11 @@
             text = `نشكركم لاختياركم رنان لخدمات التصميم، ويسعدنا إبلاغكم بأنه تم تسليم مشروع «${p.name}» بنجاح.\n\nنأمل منكم التكرم بتقييم العمل وإضافة ملاحظاتكم من صفحتكم الخاصة:\n${portal || trackUrl(p)}\n\nرأيكم يهمنا،\nرنان لخدمات التصميم`;
         } else {
             const stage = x.next >= 0 ? x.steps[x.next].text : (x.total ? 'جاهز للتسليم' : '');
+            const design = hasDesign(p);
             text = `مرحبًا 👋\nتحديث مشروعكم «${p.name}»\n\nنسبة الإنجاز: ${x.pr}%`
                 + (stage ? `\nالمرحلة الحالية: ${stage}` : '')
                 + (p.deadline ? `\nموعد التسليم: ${short(p.deadline)}` : '')
+                + (design && !design.approval ? `\n\nالتصميم جاهز لمراجعتكم، شاهدوه واكتبوا ملاحظاتكم:\n${ProofsUI.link(design.token)}` : '')
                 + (p.code ? `\n\nتابعوا سير العمل مباشرة:\n${trackUrl(p)}` : portal ? `\n\nصفحتكم الخاصة:\n${portal}` : '')
                 + `\n\nرنان لخدمات التصميم`;
         }
@@ -376,6 +384,7 @@
             <button type="button" role="menuitem" data-do="open">${ic('edit_square')} فتح المشروع وتعديله</button>
             <button type="button" role="menuitem" data-do="proof">${ic('preview')} ${window.ProofsUI && ProofsUI.forProject(p.rowIndex) ? 'مراجعة التصميم مع العميل' : 'رفع التصميم للعميل'}</button>
             ${x.phone ? `<button type="button" role="menuitem" data-do="wa">${ic('chat')} إرسال تحديث للعميل</button>` : ''}
+            ${hasDesign(p) ? `<button type="button" role="menuitem" data-do="design">${ic('palette')} نسخ رابط التصميم</button>` : ''}
             ${p.code ? `<button type="button" role="menuitem" data-do="track">${ic('qr_code_2')} نسخ رابط التتبع</button>` : ''}
             <button type="button" role="menuitem" data-do="hold">${x.hold ? ic('play_circle') + ' استئناف العمل' : ic('pause_circle') + ' إيقاف مؤقت'}</button>
             <button type="button" role="menuitem" data-do="deliver">${ic('task_alt')} تم التسليم</button>
@@ -417,6 +426,7 @@
         if (act === 'proof') return window.openProjectModal('edit', i, { focus: 'proof' });
         if (act === 'wa') return window.open(waUrl(p, 'update'), '_blank', 'noopener');
         if (act === 'track') return copyTrack(i);
+        if (act === 'design') { const r = hasDesign(p); return r && ProofsUI.copy(r.token); }
         if (act === 'step') return step(i);
         if (act === 'deliver') return deliver(i);
         if (act === 'hold') return hold(i);

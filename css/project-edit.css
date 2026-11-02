@@ -302,3 +302,10 @@ html.light-mode .pf-err { background: #FEF2F2; color: #DC2626; }
 html.light-mode #projectModal .riyal-logo { filter: brightness(0); }
 
 @media (prefers-reduced-motion: reduce) { .pe-box, .pf-ph, .pe-bar i, .pf-bar i { animation: none !important; transition: none !important; } }
+
+/* «رابط التصميم» في رأس نافذة المشروع */
+.pe-code.design { border-color: rgba(167, 139, 250, .45); background: rgba(167, 139, 250, .12); }
+.pe-code.design .material-symbols-rounded { color: #c4b5fd; }
+.pe-code.design[hidden] { display: none; }
+html.light-mode .pe-code.design { background: #F1ECFF; color: #4C1D95; }
+html.light-mode .pe-code.design .material-symbols-rounded { color: #6D28D9; }
