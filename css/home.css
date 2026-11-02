@@ -1,0 +1,261 @@
+/* الرئيسية (js/home.js): شبكة من 12 عمودًا على الشاشات الكبيرة وعمود واحد مرتّب بالأهمية على الجوال.
+   الأصناف تبدأ بـ hm- ولا تستخدم فئات Tailwind الملوّنة حتى لا تلتقطها قواعد admin-site.css العامة. */
+:root {
+    --hm-mint: #47E0AC;
+    --hm-teal: #43D9C4;
+    --hm-night: #02083A;
+    --hm-mist: #A9B2D8;
+    --hm-card: rgba(255, 255, 255, .032);
+    --hm-line: rgba(255, 255, 255, .08);
+}
+#dashboard-page.hm.hidden { display: none; }
+.hm-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.hm-hero { grid-column: span 8; }
+.hm-goal { grid-column: span 4; }
+.hm-kpis { grid-column: 1 / -1; }
+.hm-focus { grid-column: span 7; }
+.hm-active { grid-column: span 5; }
+.hm-week { grid-column: 1 / -1; }
+.hm-chart { grid-column: span 8; }
+.hm-clients { grid-column: span 4; }
+.hm-time { grid-column: span 5; }
+.hm-pulse { grid-column: span 7; }
+.hm-grid.intro > *, .hm-grid.intro .hm-kpi { animation: hmIn .65s cubic-bezier(.2, .9, .25, 1) both; animation-delay: calc(var(--i, 0) * 55ms); }
+.hm-grid.intro > .hm-kpis { animation: none; }
+@keyframes hmIn { from { opacity: 0; transform: translateY(14px); } }
+
+/* ── الترحيب ── */
+.hm-hero { position: relative; min-height: 100%; padding: 28px 28px 24px; border-radius: 30px; overflow: hidden; color: #fff; isolation: isolate;
+    background: linear-gradient(135deg, #131c7a 0%, #0b1258 45%, #060c44 100%); border: 1px solid rgba(255, 255, 255, .12); box-shadow: 0 30px 70px -40px rgba(71, 224, 172, .55); }
+.hm-aurora { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+.hm-aurora i { position: absolute; width: 380px; height: 380px; border-radius: 50%; filter: blur(70px); opacity: .55; animation: hmFloat 16s ease-in-out infinite alternate; }
+.hm-aurora i:nth-child(1) { background: #47E0AC; top: -170px; inset-inline-start: -90px; }
+.hm-aurora i:nth-child(2) { background: #6366f1; bottom: -220px; inset-inline-end: 8%; animation-duration: 20s; opacity: .45; }
+.hm-aurora i:nth-child(3) { background: #43D9C4; top: 30%; inset-inline-end: -160px; width: 280px; height: 280px; animation-duration: 13s; opacity: .3; }
+.hm-hero::after { content: ''; position: absolute; inset: 0; z-index: -1; opacity: .5;
+    background-image: linear-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .05) 1px, transparent 1px); background-size: 34px 34px;
+    -webkit-mask-image: radial-gradient(circle at 80% 0%, #000, transparent 70%); mask-image: radial-gradient(circle at 80% 0%, #000, transparent 70%); }
+@keyframes hmFloat { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(60px, 30px) scale(1.12); } 100% { transform: translate(-30px, 50px) scale(.95); } }
+.hm-date { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .1); color: #D5DAF0; font-size: 12.5px; font-weight: 600; }
+.hm-date .material-symbols-rounded { font-size: 17px; color: #fde68a; }
+.hm-hero h1 { margin: 14px 0 6px; font-size: 38px; font-weight: 900; line-height: 1.25; color: #fff; }
+.hm-hero h1 span { background: linear-gradient(100deg, #7df0c9, #47E0AC 45%, #43D9C4); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hm-brief { margin: 0; max-width: 620px; color: #D5DAF0; font-size: 15.5px; line-height: 1.9; }
+.hm-brief b { color: #fff; font-weight: 800; }
+.hm-brief b.r { color: #fda4af; }
+.hm-quick { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 8px; }
+.hm-q { height: 46px; padding: 0 16px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, .14); background: rgba(255, 255, 255, .07); color: #fff; font-family: inherit; font-size: 14px; font-weight: 800;
+    display: inline-flex; align-items: center; gap: 7px; cursor: pointer; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: transform .15s, background .2s, box-shadow .2s; }
+.hm-q .material-symbols-rounded { font-size: 20px; }
+.hm-q:hover { background: rgba(255, 255, 255, .13); transform: translateY(-2px); }
+.hm-q.main { border-color: transparent; background: linear-gradient(135deg, var(--hm-mint), var(--hm-teal)); color: var(--hm-night); box-shadow: 0 14px 30px -14px rgba(71, 224, 172, .9); }
+.hm-q.icon { width: 46px; padding: 0; justify-content: center; }
+
+/* ── البطاقات ── */
+.hm-card { min-width: 0; padding: 18px; border-radius: 24px; background: var(--hm-card); border: 1px solid var(--hm-line); color: #fff; }
+.hm-card > header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.hm-card h3 { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 800; color: #fff; }
+.hm-card h3 > .material-symbols-rounded { font-size: 21px; color: var(--hm-mint); }
+.hm-card h3 em { min-width: 24px; height: 24px; padding: 0 8px; border-radius: 999px; display: inline-grid; place-items: center; font-style: normal; font-size: 12.5px; background: rgba(71, 224, 172, .15); color: var(--hm-mint); }
+.hm-card > header > small, .hm-card > header small { color: var(--hm-mist); font-size: 12.5px; }
+.hm-card > header small b { color: #fff; }
+.hm-card > header small b > div { display: inline-flex !important; }
+.hm-link { border: 0; background: none; padding: 4px 6px; border-radius: 8px; color: var(--hm-mint); font-family: inherit; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 2px; cursor: pointer; }
+.hm-link .material-symbols-rounded { font-size: 17px; }
+.hm-link:hover { background: rgba(71, 224, 172, .1); }
+.hm-ib { width: 34px; height: 34px; border-radius: 11px; border: 1px solid var(--hm-line); background: rgba(255, 255, 255, .05); color: var(--hm-mist); display: grid; place-items: center; cursor: pointer; }
+.hm-ib .material-symbols-rounded { font-size: 18px; }
+.hm-btn { height: 40px; padding: 0 14px; border-radius: 12px; border: 0; background: linear-gradient(135deg, var(--hm-mint), var(--hm-teal)); color: var(--hm-night); font-family: inherit; font-size: 13px; font-weight: 800;
+    display: inline-flex; align-items: center; gap: 5px; cursor: pointer; white-space: nowrap; text-decoration: none; }
+.hm-btn.sm { height: 34px; padding: 0 12px; font-size: 12.5px; border-radius: 11px; }
+.hm-btn.ghost { background: rgba(255, 255, 255, .07); color: #fff; border: 1px solid var(--hm-line); }
+.hm-btn.wa { background: #25D366; color: #052e16; }
+.hm-btn .material-symbols-rounded { font-size: 17px; }
+.hm-empty { margin: 0; padding: 22px 0; display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--hm-mist); font-size: 13px; }
+.hm-skel { display: inline-block; width: 110px; height: 22px; border-radius: 8px; background: linear-gradient(100deg, rgba(255, 255, 255, .05) 30%, rgba(255, 255, 255, .12) 50%, rgba(255, 255, 255, .05) 70%); background-size: 200% 100%; animation: hmShim 1.2s linear infinite; }
+.hm-skel.big { display: block; width: 100%; height: 150px; border-radius: 16px; }
+@keyframes hmShim { to { background-position: -200% 0; } }
+
+/* ── هدف الشهر ── */
+.hm-goal { position: relative; overflow: hidden; display: flex; flex-direction: column; min-height: 100%; background: radial-gradient(400px 260px at 50% 0%, rgba(71, 224, 172, .1), transparent 70%), var(--hm-card); }
+.hm-ring-wrap { position: relative; width: 168px; height: 168px; margin: 0 auto; }
+.hm-ring { width: 100%; height: 100%; transform: rotate(-90deg); }
+.hm-ring circle { fill: none; stroke-width: 12; }
+.hm-ring .track { stroke: rgba(255, 255, 255, .07); }
+.hm-ring .bar { stroke-linecap: round; transition: stroke-dashoffset 1.3s cubic-bezier(.2, .9, .25, 1); filter: drop-shadow(0 0 8px rgba(71, 224, 172, .55)); }
+.hm-ring-t { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.hm-ring-t b { font-size: 44px; font-weight: 900; line-height: 1; color: #fff; }
+.hm-ring-t small { margin-top: 4px; color: var(--hm-mist); font-size: 12px; font-weight: 600; }
+.hm-goal-nums { margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.hm-goal-nums > div { padding: 10px 12px; border-radius: 14px; background: rgba(255, 255, 255, .04); border: 1px solid var(--hm-line); text-align: center; }
+.hm-goal-nums small { display: block; color: var(--hm-mist); font-size: 11.5px; }
+.hm-goal-nums b { display: block; font-size: 16px; font-weight: 800; }
+.hm-goal-nums b > div, .hm-kpi-v > div, .hm-cl-v b > div { justify-content: center !important; }
+.hm-goal-tip { margin: 12px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; color: #C9CFEA; font-size: 12.5px; line-height: 1.8; }
+.hm-goal-tip .material-symbols-rounded { font-size: 17px; color: #fbbf24; }
+.hm-goal-tip.ok .material-symbols-rounded { color: var(--hm-mint); }
+.hm-goal-tip b { color: #fff; }
+.hm-goal-edit { margin-top: 10px; display: flex; gap: 6px; }
+.hm-goal-edit[hidden] { display: none; }
+.hm-goal-edit input { flex: 1; min-width: 0; }
+
+/* ── الأرقام ── */
+.hm-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.hm-kpi { position: relative; overflow: hidden; min-width: 0; padding: 16px 16px 14px; border-radius: 22px; background: var(--hm-card); border: 1px solid var(--hm-line); color: #fff; --c: var(--hm-mint); }
+.hm-kpi.amber { --c: #fbbf24; } .hm-kpi.violet { --c: #a78bfa; } .hm-kpi.blue { --c: #60a5fa; }
+.hm-kpi::before { content: ''; position: absolute; top: -40px; inset-inline-end: -40px; width: 120px; height: 120px; border-radius: 50%; background: var(--c); opacity: .09; filter: blur(10px); }
+.hm-kpi-top { display: flex; align-items: center; gap: 8px; }
+.hm-kpi-ic { width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; color: var(--c); background: color-mix(in srgb, var(--c) 15%, transparent); }
+.hm-kpi-ic .material-symbols-rounded { font-size: 20px; }
+.hm-kpi-top small { color: var(--hm-mist); font-size: 12.5px; font-weight: 700; }
+.hm-kpi-v { display: block; margin-top: 10px; font-size: 24px; font-weight: 900; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hm-kpi-v > div { justify-content: flex-start !important; }
+.hm-kpi p { margin: 4px 0 0; color: var(--hm-mist); font-size: 12px; line-height: 1.6; }
+.hm-kpi p em { font-style: normal; font-weight: 800; }
+.hm-kpi em.up { color: var(--hm-mint); } .hm-kpi em.down { color: #fda4af; } .hm-kpi em.flat { color: var(--hm-mist); }
+.hm-spark { display: block; width: 100%; height: 34px; margin-top: 8px; color: var(--c); }
+.hm-split { margin-top: 12px; height: 8px; border-radius: 999px; overflow: hidden; display: flex; gap: 2px; background: rgba(255, 255, 255, .06); }
+.hm-split i { display: block; height: 100%; min-width: 0; }
+.hm-split i.ok { background: linear-gradient(90deg, #a78bfa, #c4b5fd); } .hm-split i.late { background: #f87171; } .hm-split i.hold { background: var(--hm-mist); opacity: .6; }
+
+/* ── مركز اليوم ── */
+.hm-focus { background: linear-gradient(180deg, rgba(71, 224, 172, .05), transparent 40%), var(--hm-card); }
+.hm-flist { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.hm-f { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 16px; background: rgba(255, 255, 255, .035); border: 1px solid var(--hm-line); --c: var(--hm-mint); overflow: hidden; }
+.hm-f::before { content: ''; position: absolute; inset-inline-start: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 3px; background: var(--c); }
+.hm-f.red { --c: #f87171; } .hm-f.rose { --c: #fb7185; } .hm-f.amber { --c: #fbbf24; } .hm-f.blue { --c: #60a5fa; } .hm-f.mint { --c: var(--hm-mint); }
+.hm-f-ic { width: 38px; height: 38px; flex-shrink: 0; border-radius: 12px; display: grid; place-items: center; color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); }
+.hm-f-ic .material-symbols-rounded { font-size: 20px; }
+.hm-f-t { flex: 1; min-width: 0; line-height: 1.5; }
+.hm-f-t b { display: block; font-size: 14px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hm-f-t small { display: block; color: var(--hm-mist); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hm-more { margin: 8px 0 0; text-align: center; color: var(--hm-mist); font-size: 12.5px; }
+.hm-calm { padding: 26px 12px; text-align: center; color: var(--hm-mist); }
+.hm-calm > .material-symbols-rounded { font-size: 46px; color: var(--hm-mint); animation: hmBreath 3.5s ease-in-out infinite; }
+.hm-calm b { display: block; margin-top: 6px; color: #fff; font-size: 16px; }
+.hm-calm p { margin: 4px 0 0; font-size: 13px; }
+.hm-calm .hm-btn { margin-top: 12px; }
+.hm-calm.small { padding: 14px 8px; }
+.hm-calm.small > .material-symbols-rounded { font-size: 36px; }
+@keyframes hmBreath { 50% { transform: scale(1.12); opacity: .75; } }
+
+/* ── الأيام السبعة ── */
+.hm-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+.hm-day { min-width: 0; min-height: 118px; padding: 10px 8px; border-radius: 16px; background: rgba(255, 255, 255, .025); border: 1px solid var(--hm-line); display: flex; flex-direction: column; gap: 8px; }
+.hm-day.today { border-color: rgba(71, 224, 172, .5); background: rgba(71, 224, 172, .06); box-shadow: inset 0 0 0 1px rgba(71, 224, 172, .2); }
+.hm-day-h { display: flex; align-items: baseline; justify-content: space-between; gap: 4px; }
+.hm-day-h small { color: var(--hm-mist); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.hm-day.today .hm-day-h small { color: var(--hm-mint); }
+.hm-day-h b { font-size: 20px; font-weight: 900; color: #fff; }
+.hm-day-b { display: flex; flex-direction: column; gap: 5px; }
+.hm-wchip { min-width: 0; padding: 5px 7px; border: 0; border-radius: 9px; display: flex; align-items: center; gap: 4px; font-family: inherit; font-size: 11.5px; font-weight: 700; text-align: start; cursor: pointer;
+    color: hsl(var(--hue) 75% 78%); background: hsl(var(--hue) 70% 60% / .15); }
+.hm-wchip .material-symbols-rounded { font-size: 14px; flex-shrink: 0; }
+.hm-wchip span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hm-wchip.late { color: #fecaca; background: rgba(248, 113, 113, .2); }
+.hm-wchip.hold { opacity: .6; }
+.hm-free { color: rgba(169, 178, 216, .35); font-size: 13px; text-align: center; padding-top: 10px; }
+
+/* ── العملاء والوقت والنبض ── */
+.hm-clist { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.hm-clist li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 14px; background: rgba(255, 255, 255, .03); }
+.hm-rank { width: 20px; flex-shrink: 0; color: var(--hm-mist); font-size: 12px; font-weight: 800; text-align: center; }
+.hm-clist li:first-child .hm-rank { color: #fbbf24; }
+.hm-av { width: 36px; height: 36px; flex-shrink: 0; border-radius: 12px; display: grid; place-items: center; font-weight: 800; color: hsl(var(--hue) 75% 72%); background: hsl(var(--hue) 70% 60% / .14); }
+.hm-cl-t { flex: 1; min-width: 0; }
+.hm-cl-t b { display: block; font-size: 13.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hm-bar { display: block; margin-top: 6px; height: 6px; border-radius: 999px; background: rgba(255, 255, 255, .06); overflow: hidden; }
+.hm-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, hsl(var(--hue) 70% 55%), hsl(var(--hue) 75% 70%)); }
+.hm-cl-v { flex-shrink: 0; text-align: left; line-height: 1.35; }
+.hm-cl-v b { display: block; font-size: 13px; font-weight: 800; }
+.hm-cl-v b > div { justify-content: flex-end !important; }
+.hm-cl-v small { color: var(--hm-mist); font-size: 11px; }
+.hm-time-top b { font-size: 34px; font-weight: 900; line-height: 1.1; }
+.hm-time-top small { display: block; color: var(--hm-mist); font-size: 12.5px; margin-top: 2px; }
+.hm-bars { margin-top: 14px; height: 140px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; align-items: end; }
+.hm-bars > div { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; }
+.hm-bars i { display: block; width: 100%; max-width: 34px; border-radius: 9px 9px 4px 4px; background: linear-gradient(180deg, #a78bfa, rgba(167, 139, 250, .35)); }
+.hm-bars .today i { background: linear-gradient(180deg, var(--hm-mint), rgba(71, 224, 172, .35)); box-shadow: 0 0 18px -4px rgba(71, 224, 172, .7); }
+.hm-bars small { color: var(--hm-mist); font-size: 11px; }
+.hm-bars .v { color: #D5DAF0; font-size: 10.5px; font-weight: 700; min-height: 14px; }
+.hm-ins { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.hm-ins > div { min-width: 0; padding: 14px; border-radius: 18px; background: rgba(255, 255, 255, .035); border: 1px solid var(--hm-line); }
+.hm-ins-ic { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; color: #93c5fd; background: rgba(96, 165, 250, .13); margin-bottom: 8px; }
+.hm-ins > div:nth-child(2) .hm-ins-ic { color: var(--hm-mint); background: rgba(71, 224, 172, .12); }
+.hm-ins > div:nth-child(3) .hm-ins-ic { color: #fbbf24; background: rgba(251, 191, 36, .13); }
+.hm-ins > div:nth-child(4) .hm-ins-ic { color: #c4b5fd; background: rgba(167, 139, 250, .14); }
+.hm-ins-ic .material-symbols-rounded { font-size: 19px; }
+.hm-ins small { display: block; color: var(--hm-mist); font-size: 12px; }
+.hm-ins b { display: block; margin-top: 2px; font-size: 18px; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hm-ins b > div { justify-content: flex-start !important; }
+.hm-ins p { margin: 2px 0 0; color: var(--hm-mist); font-size: 11.5px; }
+
+/* ── الشاشات المتوسطة والجوال ── */
+@media (max-width: 1180px) {
+    .hm-hero { grid-column: span 7; }
+    .hm-goal { grid-column: span 5; }
+    .hm-focus, .hm-active, .hm-chart, .hm-clients { grid-column: 1 / -1; }
+    .hm-time { grid-column: span 6; }
+    .hm-pulse { grid-column: span 6; }
+}
+@media (max-width: 900px) {
+    .hm-grid { gap: 12px; }
+    .hm-grid > * { grid-column: 1 / -1 !important; }
+    .hm-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    /* الجوال: الأهم أولًا */
+    .hm-hero { order: 1; } .hm-focus { order: 2; } .hm-kpis { order: 3; } .hm-goal { order: 4; } .hm-week { order: 5; } .hm-active { order: 6; }
+    .hm-chart { order: 7; } .hm-clients { order: 8; } .hm-time { order: 9; } .hm-pulse { order: 10; }
+}
+@media (max-width: 767.98px) {
+    .hm-hero { padding: 20px 16px 18px; border-radius: 24px; }
+    .hm-hero h1 { font-size: 28px; margin-top: 12px; }
+    .hm-brief { font-size: 14px; }
+    .hm-date { font-size: 11.5px; padding: 5px 10px; }
+    .hm-quick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) 46px; gap: 6px; }
+    .hm-q { height: 58px; padding: 0 4px; flex-direction: column; justify-content: center; gap: 2px; font-size: 11.5px; border-radius: 15px; }
+    .hm-q .material-symbols-rounded { font-size: 21px; }
+    .hm-q.icon { width: auto; height: 58px; }
+    .hm-card { padding: 14px; border-radius: 20px; }
+    .hm-kpi { padding: 12px; border-radius: 18px; }
+    .hm-kpi-v { font-size: 19px; }
+    .hm-kpi-top small { font-size: 11.5px; }
+    /* الجوال: العنوان كاملًا والزر تحته */
+    .hm-f { display: grid; grid-template-columns: 38px minmax(0, 1fr); align-items: start; padding: 10px; gap: 6px 10px; }
+    .hm-f-t b, .hm-f-t small { white-space: normal; }
+    .hm-f .hm-btn { grid-column: 2; justify-self: start; }
+    .hm-days { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 8px; margin: 0 -14px; padding: 0 14px 4px; scrollbar-width: none; }
+    .hm-days::-webkit-scrollbar { display: none; }
+    .hm-day { flex: 0 0 42%; scroll-snap-align: start; min-height: 110px; }
+    .hm-ins { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .hm-ins b { font-size: 15px; }
+    .hm-ring-wrap { width: 150px; height: 150px; }
+}
+
+/* ── الوضع الفاتح ── */
+html.light-mode .hm-card, html.light-mode .hm-kpi { background: #fff; border-color: rgba(16, 25, 101, .08); color: #101965; }
+html.light-mode .hm-card h3, html.light-mode .hm-day-h b, html.light-mode .hm-ring-t b, html.light-mode .hm-calm b, html.light-mode .hm-card > header small b, html.light-mode .hm-goal-tip b { color: #101965; }
+html.light-mode .hm-card > header small, html.light-mode .hm-kpi p, html.light-mode .hm-kpi-top small, html.light-mode .hm-f-t small, html.light-mode .hm-goal-nums small, html.light-mode .hm-ring-t small,
+html.light-mode .hm-goal-tip, html.light-mode .hm-day-h small, html.light-mode .hm-cl-v small, html.light-mode .hm-bars small, html.light-mode .hm-ins small, html.light-mode .hm-ins p,
+html.light-mode .hm-time-top small, html.light-mode .hm-calm, html.light-mode .hm-more, html.light-mode .hm-rank { color: #5A628F; }
+html.light-mode .hm-f, html.light-mode .hm-goal-nums > div, html.light-mode .hm-day, html.light-mode .hm-clist li, html.light-mode .hm-ins > div { background: #F7F9FF; border-color: rgba(16, 25, 101, .07); }
+html.light-mode .hm-day.today { background: #E8F9F2; border-color: rgba(11, 138, 100, .35); }
+html.light-mode .hm-day.today .hm-day-h small, html.light-mode .hm-link, html.light-mode .hm-card h3 > .material-symbols-rounded { color: #0B8A64; }
+html.light-mode .hm-card h3 em { background: #E8F9F2; color: #0B8A64; }
+html.light-mode .hm-ring .track, html.light-mode .hm-bar, html.light-mode .hm-split { stroke: #E8EBF5; background: #E8EBF5; }
+html.light-mode .hm-wchip { color: hsl(var(--hue) 60% 32%); background: hsl(var(--hue) 70% 50% / .13); }
+html.light-mode .hm-wchip.late { color: #B91C1C; background: #FEE2E2; }
+html.light-mode .hm-ib, html.light-mode .hm-btn.ghost { background: #F3F5FC; border-color: rgba(16, 25, 101, .1); color: #101965; }
+html.light-mode .hm-bars .v { color: #3B4373; }
+html.light-mode .hm-kpi em.up { color: #0B8A64; }
+html.light-mode .hm-kpi em.down { color: #DC2626; }
+html.light-mode .hm-focus { background: linear-gradient(180deg, #F0FBF6, #fff 40%); }
+html.light-mode .hm-goal { background: radial-gradient(400px 260px at 50% 0%, rgba(71, 224, 172, .14), transparent 70%), #fff; }
+html.light-mode #dashboard-page .riyal-logo { filter: brightness(0); }
+html.light-mode #dashboard-page .hm-hero .riyal-logo { filter: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .hm-aurora i, .hm-calm > .material-symbols-rounded, .hm-skel { animation: none; }
+    .hm-grid.intro > *, .hm-grid.intro .hm-kpi { animation: none; }
+    .hm-ring .bar { transition: none; }
+}
+@media print { .hm-aurora { display: none; } }

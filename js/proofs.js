@@ -151,6 +151,7 @@
             if (window.ProjectsPage) ProjectsPage.render();
             bell();
             notices();
+            if (window.HomeUI) HomeUI.soft();
             // اللوحة تُحدَّث فقط ونافذة المشروع مفتوحة، فلا تُعلَّم الملاحظات مقروءة قبل أن تراها
             if (cur && !busy && modalOpen()) {
                 const v = box() && box().querySelector('.pf-view');

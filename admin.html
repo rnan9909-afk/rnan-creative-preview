@@ -892,10 +892,12 @@
     <link rel="stylesheet" href="css/projects-page.css?v=3">
     <script defer src="js/projects-page.js?v=3"></script>
     <link rel="stylesheet" href="css/project-edit.css?v=2">
-    <script defer src="js/proofs.js?v=4"></script>
+    <script defer src="js/proofs.js?v=5"></script>
     <script defer src="js/project-edit.js?v=1"></script>
     <link rel="stylesheet" href="css/bell.css?v=2">
     <script defer src="js/bell.js?v=1"></script>
+    <link rel="stylesheet" href="css/home.css?v=1">
+    <script defer src="js/home.js?v=1"></script>
 
     <!-- Firebase SDK & Backend Shim -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -1176,143 +1178,9 @@
                 </button>
             </div>
 
-            <div id="dashboard-page" class="hidden space-y-10 max-w-[1400px] mx-auto animate-fadeIn pb-20">
-                <header class="flex flex-col lg:flex-row lg:items-end justify-between mb-8 gap-4">
-                    <div>
-                        <h2
-                            class="text-3xl lg:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 mb-2">
-                            لوحة القيادة</h2>
-                        <p class="text-muted text-sm lg:text-base">نظرة عامة على الأداء والمشاريع.</p>
-                    </div>
-                    <div class="flex flex-wrap gap-3 items-center admin-only">
-                        <div
-                            class="glass-panel px-4 py-2 rounded-lg text-sm font-bold text-muted border border-border-glass w-fit">
-                            أهداف الشهر الحالي
-                        </div>
-                        <button onclick="openBankSettingsModal()"
-                            class="glass-panel px-4 py-2 rounded-lg text-sm font-bold text-white hover:text-primary hover:border-primary/45 bg-primary/10 hover:bg-primary/20 border border-border-glass flex items-center gap-1.5 transition">
-                            <span class="material-symbols-rounded text-base text-primary">settings</span>
-                            <span>الحساب البنكي</span>
-                        </button>
-                    </div>
-                </header>
-
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div
-                        class="glass-panel rounded-3xl p-8 flex flex-col items-center justify-center relative overflow-hidden group">
-                        <div
-                            class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent opacity-50">
-                        </div>
-                        <div
-                            class="absolute -bottom-10 -right-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl group-hover:bg-primary/30 transition-all">
-                        </div>
-
-                        <h3 class="text-muted text-sm font-medium mb-8 self-start flex items-center gap-2" id="dash-achievement-title">
-                            <span class="w-2 h-2 rounded-full bg-primary box-shadow-glow-primary"></span> الإنجاز العام
-                        </h3>
-
-                        <div class="relative flex items-center justify-center">
-                            <svg class="w-48 h-48 lg:w-56 lg:h-56 transform -rotate-90">
-                                <circle class="text-slate-800" cx="50%" cy="50%" fill="transparent" r="45%"
-                                    stroke="currentColor" stroke-width="12"></circle>
-                                <circle id="progress-ring"
-                                    class="text-primary progress-ring-circle drop-shadow-[0_0_10px_rgba(59,130,246,0.6)]"
-                                    cx="50%" cy="50%" fill="transparent" r="45%" stroke="currentColor"
-                                    stroke-dasharray="0" stroke-dashoffset="0" stroke-linecap="round" stroke-width="12">
-                                </circle>
-                            </svg>
-                            <div class="absolute text-center">
-                                <p class="text-4xl lg:text-5xl font-black tracking-tighter en-num drop-shadow-lg"
-                                    id="dash-progress-percent">0%</p>
-                                <p class="text-xs text-muted uppercase tracking-widest mt-2 font-bold">مكتمل</p>
-                            </div>
-                        </div>
-
-                        <div class="mt-10 grid grid-cols-2 gap-4 w-full admin-only">
-                            <div class="bg-black/20 border border-white/5 p-4 rounded-2xl text-center">
-                                <p class="text-xs text-muted mb-1">الهدف</p>
-                                <p class="text-lg font-bold text-white en-num" id="dash-goal">4,000</p>
-                            </div>
-                            <div class="bg-black/20 border border-white/5 p-4 rounded-2xl text-center">
-                                <p class="text-xs text-muted mb-1">المحقق</p>
-                                <p class="text-lg font-bold text-accent-green en-num drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-                                    id="dash-achieved">0</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="lg:col-span-2 glass-panel rounded-3xl p-8 flex flex-col relative overflow-hidden">
-                        <div
-                            class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-secondary to-transparent opacity-50">
-                        </div>
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
-                            <div>
-                                <h3 class="text-muted text-sm font-medium mb-1">البيانات المالية</h3>
-                                <p class="text-3xl font-bold text-white tracking-tight en-num" id="dash-total-revenue">0
-                                </p>
-                            </div>
-                            <div class="rc-legend"><span>المحصّل شهريًا</span><span class="g">الهدف الشهري</span></div>
-                        </div>
-                        <div id="revenue-chart-container" class="rc-host"><p class="text-muted text-xs text-center py-16">جاري تحميل البيانات...</p></div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <!-- Column 1 (VIP Clients) -->
-                    <div class="lg:col-span-1 glass-panel rounded-3xl border border-border-glass flex flex-col admin-only">
-                        <div class="p-6 border-b border-border-glass flex items-center justify-between">
-                            <h3 class="text-sm font-bold flex items-center gap-2"><span
-                                    class="material-symbols-rounded text-amber-400">star</span> العملاء المميزون</h3>
-                        </div>
-                        <div class="p-4 space-y-2 flex-1 overflow-y-auto custom-scrollbar pr-1" id="dash-top-clients" style="scrollbar-width: thin;"></div>
-                    </div>
-
-                    <!-- Column 2 (Recent Activities, Stats Box, Active Projects) -->
-                    <div class="lg:col-span-2 flex flex-col gap-8 w-full">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <!-- Stats Box -->
-                            <div class="glass-panel rounded-3xl p-6 border border-border-glass">
-                                <h3 class="text-lg font-bold text-white mb-6">المشاريع النشطة</h3>
-                                <div class="space-y-4">
-                                    <div class="flex justify-between items-center pb-3 border-b border-white/5">
-                                        <span class="text-muted text-sm">إجمالي المشاريع</span>
-                                        <span class="text-white font-bold en-num" id="dash-total-projects">0</span>
-                                    </div>
-                                    <div class="flex justify-between items-center pb-3 border-b border-white/5">
-                                        <span class="text-muted text-sm">إجمالي الفواتير</span>
-                                        <span class="text-white font-bold en-num" id="dash-total-invoices">0</span>
-                                    </div>
-                                    <div class="flex justify-between items-center pb-3 border-b border-white/5">
-                                        <span class="text-accent-green text-sm">الفواتير المدفوعة</span>
-                                        <span class="text-accent-green font-bold en-num" id="dash-paid-invoices-count">0</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-red-400 text-sm">الفواتير قيد الانتظار</span>
-                                        <span class="text-red-400 font-bold en-num" id="dash-unpaid-invoices-count">0</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Activities Box -->
-                            <div class="glass-panel rounded-3xl p-6 border border-border-glass">
-                                <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
-                                    <span class="material-symbols-rounded text-amber-400">notifications_active</span> النشاطات الأخيرة
-                                </h3>
-                                <div class="space-y-3 max-h-[320px] overflow-y-auto custom-scrollbar pr-1" id="dash-recent-activities" style="scrollbar-width: thin;">
-                                    <p class="text-sm text-muted text-center py-4">جاري التحميل...</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Active Projects List -->
-                        <div class="glass-panel rounded-3xl p-6 border border-border-glass">
-                            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                                <span class="material-symbols-rounded text-primary">rocket_launch</span> قائمة المشاريع النشطة
-                            </h3>
-                            <div id="dash-active-projects-list" class="dp-list"><p class="dp-empty">جاري التحميل...</p></div>
-                        </div>
-                    </div>
-                </div>
+            <div id="dashboard-page" class="hidden hm max-w-[1400px] mx-auto animate-fadeIn pb-20">
+                <!-- الرئيسية تُبنى في js/home.js: الترحيب، الهدف، الأرقام، مركز اليوم، الأيام السبعة، المشاريع، الإيرادات، العملاء، الوقت، النبض -->
+                <div id="hm-root"></div>
             </div>
 
             
@@ -3905,6 +3773,7 @@ ${link}
         }
 
         function updateDashboard() {
+            if (window.HomeUI) { HomeUI.render(); return; } // الرئيسية الجديدة في js/home.js
             let totalRevenue = invoicesData.filter(i => i.status === 'مدفوعة').reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
             document.getElementById('dash-total-revenue').innerHTML = formatCurrency(totalRevenue);
 
@@ -4112,7 +3981,7 @@ ${link}
 
             // 2. Render Monthly Income Chart
             let months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-            if (window.RevenueChart) RevenueChart.render(document.getElementById('finance-monthly-chart-container'), { invoices: invoicesData, goal: 4000 });
+            if (window.RevenueChart) RevenueChart.render(document.getElementById('finance-monthly-chart-container'), { invoices: invoicesData, goal: window.HomeUI ? HomeUI.goal() : 4000 });
 
             // 3. Render Project Distribution by Client
             let clientProjects = {};
