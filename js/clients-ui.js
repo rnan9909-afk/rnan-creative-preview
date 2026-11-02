@@ -148,13 +148,8 @@
         if (act === 'link') return openClientLink(idx);
         if (act === 'edit') return openClientModal('edit', idx);
         if (act === 'project') {
+            if (window.ProjectsUI && ProjectsUI.compose) return ProjectsUI.compose({ client: c.company || c.name });
             if (typeof openProjectModal === 'function') openProjectModal('new');
-            setTimeout(() => {
-                const v = c.company || c.name;
-                const pq = document.getElementById('pq-client'), full = document.getElementById('proj-client');
-                if (pq && !document.querySelector('.pq-wrap[hidden]')) { pq.value = v; pq.dispatchEvent(new Event('change', { bubbles: true })); }
-                if (full && document.getElementById('projectModal').classList.contains('open')) full.value = v;
-            }, 80);
             return;
         }
         if (act === 'delete') {

@@ -279,7 +279,8 @@ const backendFunctions = {
                     notes: val.notes || '',
                     rating: val.rating || 0,
                     review: val.review || '',
-                    quotation: val.quotation || null
+                    quotation: val.quotation || null,
+                    type: val.type || ''
                 });
             });
         }
@@ -302,6 +303,7 @@ const backendFunctions = {
             notes: data.notes || ''
         };
         if (data.quotation) projData.quotation = data.quotation;
+        if (data.type) projData.type = data.type; // نوع العمل من نافذة «مشروع جديد»
 
         if (data.rowIndex) {
             let oldSnap = await window.db.ref('projects/' + data.rowIndex).once('value');
