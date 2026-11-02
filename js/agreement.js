@@ -63,13 +63,6 @@
     const ol = lines => `<ol>${lines.filter(Boolean).map(l => `<li>${l}</li>`).join('')}</ol>`;
     const lines = t => String(t || '').split('\n').map(x => x.trim()).filter(Boolean);
 
-    const WAVE = `<svg class="ag-wave" viewBox="0 0 150 150" aria-hidden="true">
-        <circle cx="34" cy="34" r="30" fill="none" stroke="#47E0AC" stroke-opacity=".55" stroke-width="1.2"/>
-        <circle cx="34" cy="34" r="54" fill="none" stroke="#47E0AC" stroke-opacity=".35" stroke-width="1.1"/>
-        <circle cx="34" cy="34" r="80" fill="none" stroke="#43D9C4" stroke-opacity=".22" stroke-width="1"/>
-        <circle cx="34" cy="34" r="108" fill="none" stroke="#101965" stroke-opacity=".1" stroke-width="1"/>
-        <circle cx="34" cy="34" r="11" fill="#47E0AC"/></svg>`;
-
     function render(o) {
         const a = o.agreement || {};
         const p1 = Object.assign({ name: 'رنان لخدمات التصميم' }, a.party1 || {});
@@ -167,17 +160,21 @@
 
         const contact = [p1.phone && `<span>الجوال: <span class="en">${E(p1.phone)}</span></span>`, p1.email && `<span class="en">${E(p1.email)}</span>`, p1.city && `<span>${E(p1.city)}</span>`].filter(Boolean).join('');
 
-        $('#ag-doc').innerHTML = `
-            ${WAVE}
+        // الترويسة الكحلية في thead: المتصفح يكرّرها أعلى كل صفحة مطبوعة
+        $('#ag-doc').innerHTML = `<table class="ag-frame"><thead><tr><td>
             <header class="ag-head">
-                <div class="ag-brand"><img src="images/ranan-logo-dark.svg" alt="رنان"><div><b>${E(p1.name)}</b><small>${p1.cr ? `السجل / الوثيقة: <span class="en">${E(p1.cr)}</span>` : 'هوية بصرية · تصميم · محتوى إبداعي'}${p1.vat ? ` · الرقم الضريبي: <span class="en">${E(p1.vat)}</span>` : ''}</small></div></div>
-                <dl class="ag-meta">
-                    <dt>رقم الاتفاقية</dt><dd class="en">${E(o.number || '—')}</dd>
-                    <dt>التاريخ</dt><dd>${greg(date)}</dd>
-                    <dt>الموافق</dt><dd>${hijri(date)}</dd>
-                </dl>
+                <img src="images/invoice-wave.svg" alt="" class="ag-wave">
+                <div class="ag-brand"><img src="images/ranan-logo.svg" alt="رنان"><div><b>${E(p1.name)}</b><small>${p1.cr ? `السجل / الوثيقة: <span class="en">${E(p1.cr)}</span>` : 'هوية بصرية · تصميم · محتوى إبداعي'}${p1.vat ? ` · الرقم الضريبي: <span class="en">${E(p1.vat)}</span>` : ''}</small></div></div>
+                <div class="ag-doc">
+                    <span class="ag-kind">اتفاقية تقديم خدمات تصميم</span>
+                    <dl class="ag-meta">
+                        <dt>رقم الاتفاقية</dt><dd class="en">${E(o.number || '—')}</dd>
+                        <dt>التاريخ</dt><dd>${greg(date)}</dd>
+                        <dt>الموافق</dt><dd>${hijri(date)}</dd>
+                    </dl>
+                </div>
             </header>
-            <div class="ag-rule"></div>
+            </td></tr></thead><tbody><tr><td>
             <h1 class="ag-title">اتفاقية تقديم خدمات تصميم</h1>
             <p class="ag-sub">«${E(o.title)}»${o.revision > 1 ? `<span class="ref">النسخة <span class="en">${E(o.revision)}</span></span>` : ''}</p>
 
@@ -234,7 +231,8 @@
                 </div>
             </div>
             ${reply ? `<div class="ag-annex"><b>الاعتماد الإلكتروني:</b> اعتمد الطرف الثاني ${kind} رقم (<span class="en">${E(o.number || '')}</span>) المرتبط بهذه الاتفاقية إلكترونيًا عبر رابطه الخاص بتاريخ ${greg(reply.at)} الساعة ${time(reply.at)} باسم «<b>${E(reply.name)}</b>»، مع إقراره بقراءة نطاق العمل والتسعير والشروط والموافقة عليها.</div>` : ''}
-            <footer class="ag-foot"><span>${E(p1.name)}</span>${contact}</footer>`;
+            <footer class="ag-foot"><span>${E(p1.name)}</span>${contact}</footer>
+            </td></tr></tbody></table>`;
 
         // ترقيم الصفحات وتذييلها عند الطباعة (هوامش الصفحة)
         const css = s => String(s).replace(/["\\]/g, '\\$&');

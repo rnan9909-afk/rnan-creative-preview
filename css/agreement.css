@@ -40,18 +40,25 @@ body { margin: 0; font-family: var(--font); color: var(--ink); background: #E6E9
 .sheet { position: relative; width: 100%; max-width: 210mm; min-height: 297mm; margin: 0 auto; padding: 16mm 16mm 14mm; background: #fff; border-radius: 4px; box-shadow: 0 20px 50px -20px rgba(16, 25, 101, .35), 0 2px 6px rgba(16, 25, 101, .08); overflow: hidden; font-size: 10.6pt; line-height: 1.95; }
 .ag-empty { margin: 80px 0; text-align: center; color: var(--ink-3); font-size: 15px; }
 
-/* الترويسة */
-.ag-head { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding-bottom: 14px; }
-.ag-brand { display: flex; align-items: center; gap: 14px; position: relative; z-index: 1; }
-.ag-brand img { height: 58px; width: auto; }
-.ag-brand div { border-inline-start: 1px solid var(--line); padding-inline-start: 14px; line-height: 1.6; }
-.ag-brand b { display: block; font: 700 13.5pt var(--head); color: var(--navy); }
-.ag-brand small { display: block; color: var(--ink-3); font-size: 8.6pt; }
-.ag-meta { position: relative; z-index: 1; margin: 0; display: grid; grid-template-columns: auto auto; gap: 2px 12px; font-size: 8.8pt; line-height: 1.75; }
-.ag-meta dt { color: var(--ink-3); }
-.ag-meta dd { margin: 0; color: var(--navy); font-weight: 700; }
-.ag-wave { position: absolute; top: -16mm; left: -16mm; width: 150px; height: 150px; opacity: .9; pointer-events: none; }
-.ag-rule { height: 4px; border-radius: 4px; background: linear-gradient(90deg, var(--mint), var(--teal) 30%, var(--navy) 75%); margin-bottom: 20px; }
+/* الإطار: الترويسة في thead فتتكرّر أعلى كل صفحة عند الطباعة، والمحتوى في tbody */
+.ag-frame { width: 100%; border-collapse: collapse; }
+.ag-frame > thead > tr > td, .ag-frame > tbody > tr > td { padding: 0; vertical-align: top; }
+.ag-frame > thead > tr > td { padding-bottom: 7mm; }
+
+/* الترويسة الكحلية (بلغة ترويسة الفاتورة): الشعار وبيانات الطرف الأول يمينًا، ورقم الاتفاقية وتاريخها يسارًا فوق «الموجة» */
+.ag-head { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 18px; min-height: 30mm; padding: 5mm 7mm; border-radius: 14px;
+    background: linear-gradient(120deg, var(--navy) 0%, #0a1250 55%, var(--night) 100%); color: #fff; break-inside: avoid; }
+.ag-wave { position: absolute; left: 0; top: 0; height: 100%; width: auto; pointer-events: none; }
+.ag-brand { display: flex; align-items: center; gap: 14px; position: relative; z-index: 1; min-width: 0; }
+.ag-brand img { height: 54px; width: auto; flex-shrink: 0; }
+.ag-brand div { border-inline-start: 1px solid rgba(255, 255, 255, .2); padding-inline-start: 14px; line-height: 1.6; min-width: 0; }
+.ag-brand b { display: block; font: 700 13pt var(--head); color: #fff; }
+.ag-brand small { display: block; color: var(--mist); font-size: 8.4pt; }
+.ag-doc { position: relative; z-index: 1; flex-shrink: 0; margin-inline-end: 22mm; }
+.ag-kind { display: block; margin-bottom: 3px; font: 600 10.4pt var(--head); color: var(--mint); }
+.ag-meta { margin: 0; display: grid; grid-template-columns: auto auto; gap: 1px 12px; font-size: 8.6pt; line-height: 1.75; }
+.ag-meta dt { color: var(--mist); }
+.ag-meta dd { margin: 0; color: #fff; font-weight: 700; }
 
 .ag-title { margin: 0; text-align: center; font: 700 19pt/1.5 var(--head); color: var(--navy); }
 .ag-sub { margin: 4px 0 18px; text-align: center; color: var(--ink-2); font-size: 11.5pt; font-weight: 600; }
@@ -111,9 +118,11 @@ body { margin: 0; font-family: var(--font); color: var(--ink); background: #E6E9
     .ag-bar .hint { display: none; }
     .ag-desk { padding: 14px 10px 40px; }
     .sheet { min-height: 0; padding: 22px 18px; font-size: 14px; }
-    .ag-head { flex-direction: column; align-items: flex-start; }
-    .ag-brand img { height: 46px; }
-    .ag-wave { top: -22px; left: -22px; width: 110px; height: 110px; }
+    .ag-frame > thead > tr > td { padding-bottom: 20px; }
+    .ag-head { flex-direction: column; align-items: flex-start; gap: 14px; padding: 18px; }
+    .ag-brand img { height: 42px; }
+    .ag-doc { margin-inline-end: 0; }
+    .ag-wave { top: auto; bottom: 0; left: -40px; height: 110px; opacity: .6; }
     .ag-title { font-size: 22px; }
     .ag-parties, .ag-sign { grid-template-columns: 1fr; }
     .ag-table { font-size: 12.5px; }
@@ -122,7 +131,7 @@ body { margin: 0; font-family: var(--font); color: var(--ink); background: #E6E9
 
 @page {
     size: A4;
-    margin: 14mm 15mm 16mm;
+    margin: 10mm 15mm 16mm;
 }
 
 @media print {
@@ -130,8 +139,11 @@ body { margin: 0; font-family: var(--font); color: var(--ink); background: #E6E9
     .ag-bar { display: none !important; }
     .ag-desk { padding: 0; }
     .sheet { max-width: none; min-height: 0; padding: 0; border-radius: 0; box-shadow: none; overflow: visible; font-size: 10.4pt; }
-    .ag-wave { top: -14mm; left: -15mm; }
     .ag-parties, .ag-sign { grid-template-columns: 1fr 1fr; }
-    .ag-head { flex-direction: row; align-items: center; }
+    .ag-frame > thead > tr > td { padding-bottom: 7mm; }
+    .ag-head { flex-direction: row; align-items: center; gap: 18px; padding: 5mm 7mm; }
+    .ag-brand img { height: 54px; }
+    .ag-doc { margin-inline-end: 22mm; }
+    .ag-wave { top: 0; bottom: auto; left: 0; height: 100%; opacity: 1; }
     a { color: inherit; text-decoration: none; }
 }
