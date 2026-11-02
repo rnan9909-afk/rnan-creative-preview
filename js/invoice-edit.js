@@ -296,6 +296,10 @@
             toast('✅ صدرت الفاتورة ' + inv.number + ' — أرسلها للعميل من الزر أعلاها');
         }
         busy(false);
+        // الدفعات الجزئية: المدفوع والمتبقي تحت الإجمالي في الورقة المطبوعة
+        document.querySelectorAll('#invoice-preview-template .inv-paid-row').forEach(x => x.remove());
+        const paidSoFar = inv && window.InvoiceMoney && inv.status !== PAID ? InvoiceMoney.paid(inv) : 0, grand = document.querySelector('#invoice-preview-template .inv-totals .grand');
+        if (paidSoFar > 0.009 && grand) grand.insertAdjacentHTML('afterend', `<div class="row inv-paid-row"><span>المدفوع</span><b>${formatCurrency(paidSoFar)}</b></div><div class="row inv-paid-row"><span>المتبقي</span><b>${formatCurrency(InvoiceMoney.remaining(inv))}</b></div>`);
         const due = $('prev-due'), d = inv ? parse(inv.dueDate) : null;
         if (due) {
             due.hidden = !d || inv.status === PAID;

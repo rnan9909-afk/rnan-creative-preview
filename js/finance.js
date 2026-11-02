@@ -28,6 +28,9 @@
     const C = () => (typeof clientsData !== 'undefined' ? clientsData : []);
     const amt = x => parseFloat(x.amount) || 0;
     const live = i => !CANCELLED.includes(i.status);
+    // المتبقي من الفاتورة بعد الدفعات الجزئية (js/invoices.js)
+    const rem = i => (window.InvoiceMoney ? InvoiceMoney.remaining(i) : amt(i));
+    const partIn = (y, m) => I().filter(i => i.status !== PAID && live(i)).reduce((a, i) => a + (window.InvoiceMoney ? InvoiceMoney.payments(i).filter(p => (p.at && !isNaN(Date.parse(p.at)) ? inMonth(ymd(new Date(p.at)), y, m) : false)).reduce((s, p) => s + (+p.amount || 0), 0) : 0), 0);
     const typeOf = p => (window.ProjectsUI && ProjectsUI.typeOf ? ProjectsUI.typeOf(p) : { t: 'مشروع', ic: 'folder', hue: 200 });
     const toast = m => (window.ProjectsPage && ProjectsPage.toast ? ProjectsPage.toast(m) : window.showAdminToast ? showAdminToast(m) : null);
     const list = o => Object.entries(o || {}).map(([id, v]) => Object.assign({ id }, v));
@@ -52,7 +55,7 @@
     // ── الحسابات ──
     const ym = (y, m) => y + '-' + pad(m + 1);
     const inMonth = (s, y, m) => String(s || '').startsWith(ym(y, m));
-    const income = (y, m) => I().filter(i => i.status === PAID && inMonth(i.date, y, m)).reduce((a, i) => a + amt(i), 0);
+    const income = (y, m) => I().filter(i => i.status === PAID && inMonth(i.date, y, m)).reduce((a, i) => a + amt(i), 0) + partIn(y, m);
     const spend = (y, m) => D.expenses.filter(x => inMonth(x.date, y, m)).reduce((a, x) => a + amt(x), 0);
     function months(n, endY, endM) {
         const out = [];
@@ -66,11 +69,11 @@
     const phoneOf = name => (C().find(c => c.company === name || c.name === name) || {}).phone || '';
 
     function health() {
-        const t = today(), paid = I().filter(i => i.status === PAID).reduce((a, i) => a + amt(i), 0), pend = pendingAll().reduce((a, i) => a + amt(i), 0);
+        const t = today(), paid = I().filter(i => i.status === PAID).reduce((a, i) => a + amt(i), 0), pend = pendingAll().reduce((a, i) => a + rem(i), 0);
         const last6 = months(6, t.getFullYear(), t.getMonth() - 1), recent = last6.slice(3), prev = last6.slice(0, 3);
         const sum = (arr, k) => arr.reduce((a, x) => a + x[k], 0);
         const avgInc = sum(last6, 'inc') / 6 || 1;
-        const overdue = pendingAll().filter(i => ageOf(i) > 30).reduce((a, i) => a + amt(i), 0);
+        const overdue = pendingAll().filter(i => ageOf(i) > 30).reduce((a, i) => a + rem(i), 0);
         const rInc = sum(recent, 'inc'), rExp = sum(recent, 'exp'), pInc = sum(prev, 'inc');
         const margin = rInc ? (rInc - rExp) / rInc : 0, growth = pInc ? rInc / pInc : (rInc ? 1.3 : 0.7);
         const clamp = v => Math.max(0, Math.min(1, v));
@@ -87,7 +90,7 @@
     function forecast(days) {
         const t = today(), end = new Date(t); end.setDate(t.getDate() + days);
         const inn = [], out = [];
-        pendingAll().forEach(i => inn.push({ when: null, label: `فاتورة ${i.client || ''}`, sub: `${i.number}${ageOf(i) > 0 ? ' · منذ ' + plural(ageOf(i), 'يوم', 'يومين', 'أيام', 'يومًا') : ''}`, v: amt(i), ic: 'receipt_long' }));
+        pendingAll().forEach(i => inn.push({ when: null, label: `فاتورة ${i.client || ''}`, sub: `${i.number}${ageOf(i) > 0 ? ' · منذ ' + plural(ageOf(i), 'يوم', 'يومين', 'أيام', 'يومًا') : ''}`, v: rem(i), ic: 'receipt_long' }));
         const RP = window.RecurringPeriods;
         D.recurring.filter(r => r.active !== false).forEach(r => {
             if (!RP || !RP.nextDue) return;
@@ -187,7 +190,7 @@
         let ytd = 0, last = 0;
         for (let k = 0; k <= m; k++) { ytd += income(y, k); last += k < m ? income(y - 1, k) : I().filter(i => i.status === PAID && inMonth(i.date, y - 1, k) && (parse(i.date) || t).getDate() <= t.getDate()).reduce((a, i) => a + amt(i), 0); }
         const d = last ? Math.round((ytd - last) / last * 100) : null;
-        const pend = pendingAll(), pendSum = pend.reduce((a, i) => a + amt(i), 0), late = pend.filter(i => ageOf(i) > 15);
+        const pend = pendingAll(), pendSum = pend.reduce((a, i) => a + rem(i), 0), late = pend.filter(i => ageOf(i) > 15);
         const avg3 = months(3, y, m - 1).reduce((a, x) => a + x.inc, 0) / 3;
         const proj = ytd + Math.max(0, avg3 - income(y, m)) + avg3 * (11 - m);
         const hr = hourly();
@@ -244,15 +247,15 @@
     function agingCard() {
         const pend = pendingAll().map(i => ({ i, a: ageOf(i), idx: I().indexOf(i) })).sort((x, y) => y.a - x.a);
         const B = [['0–15 يومًا', 0, 15, 'ok'], ['16–30 يومًا', 16, 30, 'mid'], ['31–60 يومًا', 31, 60, 'late'], ['أكثر من 60', 61, 1e9, 'bad']];
-        const sums = B.map(b => pend.filter(x => x.a >= b[1] && x.a <= b[2]).reduce((s, x) => s + amt(x.i), 0)), tot = sums.reduce((a, v) => a + v, 0);
-        const remind = x => { const ph = phoneOf(x.i.client); return ph && window.RNAN ? RNAN.waLink(ph, `مرحبًا، نذكّركم بلطف بالفاتورة رقم ${x.i.number} بقيمة ${num(amt(x.i))} ر.س الصادرة بتاريخ ${x.i.date}.\nشاكرين لكم سرعة السداد، ويسعدنا خدمتكم دائمًا.\nرنان لخدمات التصميم`) : ''; };
+        const sums = B.map(b => pend.filter(x => x.a >= b[1] && x.a <= b[2]).reduce((s, x) => s + rem(x.i), 0)), tot = sums.reduce((a, v) => a + v, 0);
+        const remind = x => { const ph = phoneOf(x.i.client); return ph && window.RNAN ? RNAN.waLink(ph, `مرحبًا، نذكّركم بلطف بالفاتورة رقم ${x.i.number} بقيمة ${num(rem(x.i))} ر.س الصادرة بتاريخ ${x.i.date}.\nشاكرين لكم سرعة السداد، ويسعدنا خدمتكم دائمًا.\nرنان لخدمات التصميم`) : ''; };
         return `<section class="fn-card fn-aging" style="--i:9">
             <header><div><h3>${ic('history_toggle_off')} أعمار المستحقات</h3><small>كم مضى على كل فاتورة لم تُحصّل</small></div><button type="button" class="fn-link" data-fn="page" data-page="invoices">الفواتير ${ic('arrow_back')}</button></header>
             ${tot ? `<div class="fn-age-bar">${B.map((b, k) => sums[k] ? `<i class="${b[3]}" style="flex:${sums[k]}" title="${b[0]}"></i>` : '').join('')}</div>
             <div class="fn-age-lg">${B.map((b, k) => `<div class="${b[3]}"><i></i><small>${b[0]}</small><b>${money(sums[k])}</b></div>`).join('')}</div>
             <ol class="fn-age-list">${pend.slice(0, 5).map(x => { const w = remind(x); return `<li class="${x.a > 60 ? 'bad' : x.a > 30 ? 'late' : x.a > 15 ? 'mid' : 'ok'}">
                 <div><b>${esc(x.i.client || '')}</b><small><span class="en-num">${esc(x.i.number)}</span> · ${x.a ? 'منذ ' + plural(x.a, 'يوم', 'يومين', 'أيام', 'يومًا') : 'اليوم'}</small></div>
-                <b class="v">${money(amt(x.i))}</b>
+                <b class="v">${money(rem(x.i))}</b>
                 <span class="fn-acts">${w ? `<a class="fn-ib wa" href="${esc(w)}" target="_blank" rel="noopener" title="تذكير واتساب" aria-label="تذكير واتساب">${ic('chat')}</a>` : ''}<button type="button" class="fn-ib ok" data-fn="pay" data-i="${x.idx}" title="اعتماد السداد" aria-label="اعتماد السداد">${ic('task_alt')}</button></span></li>`; }).join('')}</ol>`
                 : `<div class="fn-calm">${ic('verified')}<b>لا مستحقات معلّقة</b><p>كل فواتيرك محصّلة 👏</p></div>`}
         </section>`;
@@ -313,8 +316,8 @@
         </section>`;
     }
     function tips() {
-        const out = [], t = today(), pend = pendingAll(), pendSum = pend.reduce((a, i) => a + amt(i), 0);
-        const late = pend.filter(i => ageOf(i) > 15), lateSum = late.reduce((a, i) => a + amt(i), 0);
+        const out = [], t = today(), pend = pendingAll(), pendSum = pend.reduce((a, i) => a + rem(i), 0);
+        const late = pend.filter(i => ageOf(i) > 15), lateSum = late.reduce((a, i) => a + rem(i), 0);
         if (late.length) out.push(['payments', 'red', `حصّل ${plural(late.length, 'فاتورة متأخرة', 'فاتورتين متأخرتين', 'فواتير متأخرة', 'فاتورة متأخرة')} بقيمة <b>${moneyText(lateSum)}</b> — هذا يرفع دخل الشهر إلى <b class="en-num">${pct(income(t.getFullYear(), t.getMonth()) + lateSum, D.goal)}%</b> من هدفك.`]);
         const subsY = D.subs.filter(s => s.active !== false).reduce((a, s) => a + subMonthly(s) * 12, 0);
         if (subsY) { const top = D.subs.filter(s => s.active !== false).sort((a, b) => subMonthly(b) - subMonthly(a))[0]; out.push(['autorenew', 'blue', `اشتراكاتك تكلّفك <b>${moneyText(subsY)}</b> سنويًا؛ أعلاها «${esc(top.name)}». راجع ما لا تستخدمه، والخطط السنوية غالبًا أوفر.`]); }

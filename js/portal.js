@@ -77,7 +77,7 @@
     function renderStats() {
         $('#st-active').textContent = state.projects.filter(p => p.status !== 'مكتمل').length;
         $('#st-done').textContent = state.projects.filter(p => p.status === 'مكتمل').length;
-        const due = state.invoices.filter(i => !isPaid(i) && !isVoid(i)).reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
+        const due = state.invoices.filter(i => !isPaid(i) && !isVoid(i)).reduce((s, i) => s + (window.PortalPay ? PortalPay.remaining(i) : (parseFloat(i.amount) || 0)), 0);
         $('#st-due').textContent = sar(due);
         $('#st-due-card').classList.toggle('warn', due > 0);
     }
@@ -162,6 +162,7 @@
                     ${dl}
                 </div>
                 ${reviewLink(p)}
+                ${window.PortalPay ? PortalPay.delivery(p) : ''}
                 ${steps.length ? `<details ${done ? '' : 'open'}><summary>مراحل العمل (${steps.filter(s => s.done).length}/${steps.length}) ${icon('chevron-down')}</summary>
                     <ul class="substeps">${steps.map(s => `<li class="${s.done ? 'done' : ''}"><span class="ck">${s.done ? icon('check') : ''}</span>${E(s.text)}</li>`).join('')}</ul></details>` : ''}
                 ${rate}
@@ -179,11 +180,13 @@
         }
         $('#invoices').innerHTML = list.map(i => {
             const cls = isPaid(i) ? 'paid' : (isVoid(i) ? 'void' : 'due');
-            const txt = isPaid(i) ? 'مدفوعة' : (isVoid(i) ? 'ملغاة' : 'بانتظار السداد');
+            // دفعة جزئية: js/portal-pay.js
+            const part = !isPaid(i) && !isVoid(i) && window.PortalPay && PortalPay.remaining(i) < (parseFloat(i.amount) || 0) - 0.009;
+            const txt = isPaid(i) ? 'مدفوعة' : (isVoid(i) ? 'ملغاة' : part ? 'مدفوعة جزئيًا' : 'بانتظار السداد');
             return `
             <button class="card inv" data-invoice="${E(i.id)}" style="text-align:start;width:100%">
                 <span class="inv-icon">${icon('receipt')}</span>
-                <span><b><span class="en">#${E(i.number)}</span></b><small>${RNAN.fmtDate(i.date)}</small></span>
+                <span><b><span class="en">#${E(i.number)}</span></b><small>${RNAN.fmtDate(i.date)}</small>${window.PortalPay ? PortalPay.row(i) : ''}</span>
                 <span class="amount"><span class="en">${sar(i.amount)}</span> <small>ريال</small></span>
                 <span class="pill ${cls}">${txt}</span>
             </button>`;
@@ -234,10 +237,12 @@
                         <div class="row"><span>المجموع الفرعي</span><b class="num">${sar(sub)} ريال</b></div>
                         ${disc > 0.009 ? `<div class="row discount"><span>الخصم</span><b class="num">- ${sar(disc)} ريال</b></div>` : ''}
                         <div class="grand"><span>الإجمالي المستحق</span><b class="num">${sar(total)} SAR</b></div>
+                        ${window.PortalPay ? PortalPay.totals(inv) : ''}
                     </div>
                 </div>
             </div>
             <div class="pv-foot"><b>شكرًا لثقتكم</b><span>${E(state.settings.agency_name || 'رنان لخدمات التصميم')}</span></div>`;
+        if (window.PortalPay) PortalPay.modal(inv, $('#invoice-paper'));
         openModal('#invoice-modal');
     }
 

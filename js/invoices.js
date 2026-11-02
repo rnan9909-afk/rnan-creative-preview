@@ -109,101 +109,133 @@
         setTimeout(() => { if (!dlg.classList.contains('open')) dlg.hidden = true; }, 320);
     }
 
-    function pay(idx) {
+    // ── المبالغ: الدفعات الجزئية في invoices/<id>/payments، والفاتورة تصير «مدفوعة» عند اكتمال المبلغ ──
+    const amtOf = i => parseFloat(i && i.amount) || 0;
+    const payList = i => Object.entries((i && i.payments) || {}).map(([id, p]) => Object.assign({ id }, p)).filter(p => p && (+p.amount || 0) > 0).sort((a, b) => String(a.at || '').localeCompare(String(b.at || '')));
+    const paidSum = i => !i ? 0 : i.status === PAID ? amtOf(i) : Math.min(amtOf(i), payList(i).reduce((s, p) => s + (+p.amount || 0), 0));
+    const remaining = i => !i || ['ملغي', 'ملغاة'].includes(i.status) ? 0 : Math.max(0, Math.round((amtOf(i) - paidSum(i)) * 100) / 100);
+    const n2 = v => (parseFloat(v) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const latin = v => String(v == null ? '' : v).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[٬,،]/g, '').replace(/٫/g, '.');
+    const sync = client => { if (typeof backendFunctions !== 'undefined' && backendFunctions.syncClientPortal) backendFunctions.syncClientPortal(client).catch(() => null); };
+
+    // preset: تعبئة من إشعار تحويل العميل { amount, day, method, claim: { token, id } }
+    function pay(idx, preset) {
         const inv = invoicesData[idx];
         if (!payable(inv)) return;
-        const num = inv.number;
+        const num = inv.number, rest = remaining(inv), done = paidSum(inv), ps = preset || {};
+        const method = METHODS.includes(ps.method) ? ps.method : lastMethod();
+        const start = ps.amount ? Math.min(+ps.amount, rest) : rest;
+        const full0 = start >= rest - 0.009;
         openDlg(`<div class="inv-grab"></div>
             <div class="inv-dlg-ic">${ic('payments')}</div>
-            <h3 id="inv-dlg-title">تأكيد سداد الفاتورة</h3>
-            <p class="inv-dlg-q">هل أنت متأكد من تحويل هذه الفاتورة إلى <b>مدفوعة</b>؟</p>
+            <h3 id="inv-dlg-title">${ps.claim ? 'اعتماد تحويل العميل' : 'تسجيل السداد'}</h3>
+            <p class="inv-dlg-q">${ps.claim ? 'راجع المبلغ والتاريخ كما أبلغ العميل، ثم اعتمده.' : 'سجّل المبلغ المستلم كاملًا أو دفعة منه؛ تصير الفاتورة <b>مدفوعة</b> عند اكتمال المبلغ.'}</p>
             <dl class="inv-dlg-sum">
                 <div><dt>الجهة</dt><dd>${esc(inv.client)}</dd></div>
                 <div><dt>رقم الفاتورة</dt><dd dir="ltr">#${esc(num)}</dd></div>
-                <div><dt>التاريخ</dt><dd class="en-num">${esc(inv.date || '-')}</dd></div>
-                <div class="amt"><dt>المبلغ</dt><dd>${money(inv.amount)}</dd></div>
+                <div><dt>قيمة الفاتورة</dt><dd>${money(inv.amount)}</dd></div>
+                ${done > 0.009 ? `<div><dt>دُفع سابقًا</dt><dd>${money(done)}</dd></div>` : ''}
+                <div class="amt"><dt>المتبقي</dt><dd>${money(rest)}</dd></div>
             </dl>
+            <label class="inv-dlg-date"><small>المبلغ المستلم</small><input class="inv-dlg-in inv-dlg-amt en-num" inputmode="decimal" dir="ltr" value="${start}" autocomplete="off">
+                <span class="inv-dlg-chips"><button type="button" data-amt="${rest}">كامل المتبقي</button><button type="button" data-amt="${Math.round(rest / 2 * 100) / 100}">النصف</button></span></label>
             <div class="inv-dlg-pm"><small>طريقة الدفع</small>
-                <div role="radiogroup" aria-label="طريقة الدفع">${METHODS.map(m => `<button type="button" role="radio" data-pm="${m}" class="${m === lastMethod() ? 'on' : ''}" aria-checked="${m === lastMethod()}">${m}</button>`).join('')}</div></div>
-            <label class="inv-dlg-date"><small>تاريخ السداد</small><input type="date" class="inv-dlg-in" value="${ymd(new Date())}"></label>
-            <p class="inv-dlg-note">${ic('info')} تُضاف نقاط الولاء لحساب العميل ويصله إشعار بالسداد في صفحته.</p>
+                <div role="radiogroup" aria-label="طريقة الدفع">${METHODS.map(m => `<button type="button" role="radio" data-pm="${m}" class="${m === method ? 'on' : ''}" aria-checked="${m === method}">${m}</button>`).join('')}</div></div>
+            <label class="inv-dlg-date"><small>تاريخ السداد</small><input type="date" class="inv-dlg-in inv-dlg-day" value="${ps.day || ymd(new Date())}"></label>
+            <p class="inv-dlg-note">${ic('info')} <span class="inv-dlg-kind">${full0 ? 'سداد كامل: تُضاف نقاط الولاء ويصل العميل إشعار بالسداد.' : 'دفعة جزئية: تبقى الفاتورة بانتظار السداد بالمتبقي.'}</span></p>
             <p class="inv-dlg-err" hidden></p>
             <div class="inv-dlg-btns">
-                <button type="button" class="inv-ok" data-ok>${ic('check_circle')} نعم، اعتماد السداد</button>
+                <button type="button" class="inv-ok" data-ok>${ic('check_circle')} ${full0 ? 'اعتماد السداد' : 'تسجيل الدفعة'}</button>
                 <button type="button" class="inv-no" data-no>إلغاء</button>
             </div>`);
+        const amtIn = dlg.querySelector('.inv-dlg-amt'), okBtn = dlg.querySelector('[data-ok]'), kind = dlg.querySelector('.inv-dlg-kind');
+        const refresh = () => {
+            const v = parseFloat(latin(amtIn.value)) || 0, full = v >= rest - 0.009;
+            okBtn.innerHTML = `${ic('check_circle')} ${full ? 'اعتماد السداد' : 'تسجيل الدفعة'}`;
+            kind.textContent = full ? 'سداد كامل: تُضاف نقاط الولاء ويصل العميل إشعار بالسداد.' : `دفعة جزئية: يبقى ${n2(rest - v)} ر.س بانتظار السداد.`;
+        };
+        amtIn.addEventListener('input', refresh);
+        dlg.querySelectorAll('[data-amt]').forEach(b => b.addEventListener('click', () => { amtIn.value = b.dataset.amt; refresh(); }));
         dlg.querySelectorAll('[data-pm]').forEach(b => b.addEventListener('click', () => {
             dlg.querySelectorAll('[data-pm]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-checked', x === b); });
         }));
-        dlg.querySelector('[data-ok]').addEventListener('click', () => confirmPay(num));
+        okBtn.addEventListener('click', () => confirmPay(num, ps));
     }
 
-    function confirmPay(num) {
+    function confirmPay(num, ps) {
         const idx = indexOf(num);
         const inv = invoicesData[idx];
         if (busy || !inv) return;
-        busy = true;
         const ok = dlg.querySelector('[data-ok]'), err = dlg.querySelector('.inv-dlg-err');
-        if (navigator.onLine === false) {
-            busy = false;
-            err.textContent = 'لا يوجد اتصال بالإنترنت، أعد المحاولة بعد عودة الاتصال.';
-            err.hidden = false;
-            return;
-        }
+        const fail = m => { busy = false; err.textContent = m; err.hidden = false; };
+        busy = true;
+        if (navigator.onLine === false) return fail('لا يوجد اتصال بالإنترنت، أعد المحاولة بعد عودة الاتصال.');
         const pm = (dlg.querySelector('[data-pm].on') || {}).dataset;
         const method = pm ? pm.pm : '';
-        const day = (dlg.querySelector('.inv-dlg-in') || {}).value || '';
-        if (day && day > ymd(new Date())) {
-            busy = false;
-            err.textContent = 'تاريخ السداد لا يكون في المستقبل.';
-            err.hidden = false;
-            return;
-        }
+        const day = (dlg.querySelector('.inv-dlg-day') || {}).value || '';
+        const rest = remaining(inv), value = Math.round((parseFloat(latin((dlg.querySelector('.inv-dlg-amt') || {}).value)) || 0) * 100) / 100;
+        if (day && day > ymd(new Date())) return fail('تاريخ السداد لا يكون في المستقبل.');
+        if (!(value > 0)) return fail('أدخل المبلغ المستلم.');
+        if (value > rest + 0.009) return fail(`المبلغ أكبر من المتبقي (${n2(rest)} ر.س).`);
         // سداد اليوم بوقته الفعلي، وسداد يوم سابق عند منتصف نهاره
         const paidAt = !day || day === ymd(new Date()) ? new Date().toISOString() : new Date(day + 'T12:00:00').toISOString();
+        const full = value >= rest - 0.009;
         try { if (method) localStorage.setItem('rnan.payMethod', method); } catch (e) { /* تخزين المتصفح غير متاح */ }
         ok.disabled = true;
-        ok.innerHTML = `<span class="inv-spin"></span> جارٍ الاعتماد...`;
+        ok.innerHTML = `<span class="inv-spin"></span> جارٍ الحفظ...`;
         err.hidden = true;
-        google.script.run.withSuccessHandler(() => {
+        const entry = { amount: value, at: paidAt, method: method || '' };
+        if (ps && ps.claim) entry.claim = ps.claim.id;
+        const ref = inv.id && window.db ? window.db.ref('invoices/' + inv.id + '/payments').push() : null;
+        const record = () => ref ? ref.set(entry).then(() => { inv.payments = Object.assign({}, inv.payments, { [ref.key]: entry }); }) : Promise.resolve();
+        const markClaim = () => {
+            if (!(ps && ps.claim && window.db)) return;
+            window.db.ref(`payClaims/${ps.claim.token}/${ps.claim.id}`).update({ status: 'approved', reviewedAt: new Date().toISOString(), payment: ref ? ref.key : '' }).then(() => window.PayClaims && PayClaims.refresh()).catch(() => null);
+        };
+        const success = () => {
             busy = false;
-            inv.status = PAID;
-            inv.paidAt = paidAt;
-            if (method) inv.payMethod = method;
+            markClaim();
             if (typeof filterInvoices === 'function') filterInvoices();
             if (typeof loadAllData === 'function') loadAllData();
+            const left = remaining(inv);
             openDlg(`<div class="inv-grab"></div>
                 <div class="inv-dlg-ic ok">${ic('check')}</div>
-                <h3 id="inv-dlg-title">تم اعتماد السداد</h3>
-                <p class="inv-dlg-q">الفاتورة <b dir="ltr">#${esc(num)}</b> لـ${esc(inv.client)} أصبحت <b>مدفوعة</b>${method ? ' · ' + esc(method) : ''}.</p>
+                <h3 id="inv-dlg-title">${full ? 'تم اعتماد السداد' : 'سُجّلت الدفعة'}</h3>
+                <p class="inv-dlg-q">${full ? `الفاتورة <b dir="ltr">#${esc(num)}</b> لـ${esc(inv.client)} أصبحت <b>مدفوعة</b>${method ? ' · ' + esc(method) : ''}.`
+                    : `استُلم <b>${n2(value)} ر.س</b> من الفاتورة <b dir="ltr">#${esc(num)}</b>، والمتبقي <b>${n2(left)} ر.س</b>.`}</p>
                 <div class="inv-dlg-btns">
-                    <button type="button" class="inv-ok wa" data-wa>${WA} إرسال تأكيد السداد للعميل</button>
+                    <button type="button" class="inv-ok wa" data-wa>${WA} ${full ? 'إرسال تأكيد السداد للعميل' : 'إرسال إيصال الدفعة للعميل'}</button>
                     <button type="button" class="inv-no" data-no>تم</button>
                 </div>`);
             dlg.querySelector('[data-wa]').addEventListener('click', () => {
                 const i = indexOf(num);
-                if (i > -1) { invoicesData[i].status = PAID; sendInvoiceWhatsApp(i); }
+                if (i > -1 && full) { invoicesData[i].status = PAID; sendInvoiceWhatsApp(i); }
+                else if (i > -1) receipt(invoicesData[i], value, left);
                 closeDlg();
             });
-        }).withFailureHandler(e => {
-            busy = false;
-            ok.disabled = false;
-            ok.innerHTML = `${ic('check_circle')} نعم، اعتماد السداد`;
-            err.textContent = 'تعذّر اعتماد السداد: ' + ((e && e.message) || e || 'تحقّق من الاتصال');
-            err.hidden = false;
-        }).saveInvoiceToSheet({
-            invoiceNumber: inv.number,
-            clientSelect: inv.client,
-            issueDate: inv.date,
-            status: PAID,
-            totalAmount: inv.amount,
-            items: inv.items,
-            notes: inv.notes,
-            footerText: inv.footerText,
-            paidAt: paidAt,
-            payMethod: method
-        });
+        };
+        const failed = e => { ok.disabled = false; ok.innerHTML = `${ic('check_circle')} ${full ? 'اعتماد السداد' : 'تسجيل الدفعة'}`; fail('تعذّر الحفظ: ' + ((e && e.message) || e || 'تحقّق من الاتصال')); };
+        record().then(() => {
+            if (!full) { sync(inv.client); success(); return; }
+            google.script.run.withSuccessHandler(() => {
+                inv.status = PAID;
+                inv.paidAt = paidAt;
+                if (method) inv.payMethod = method;
+                success();
+            }).withFailureHandler(failed).saveInvoiceToSheet({
+                invoiceNumber: inv.number, clientSelect: inv.client, issueDate: inv.date, status: PAID, totalAmount: inv.amount,
+                items: inv.items, notes: inv.notes, footerText: inv.footerText, paidAt: paidAt, payMethod: method
+            });
+        }).catch(failed);
+    }
+    // إيصال دفعة جزئية للعميل بواتساب
+    function receipt(inv, value, left) {
+        const c = (typeof clientsData !== 'undefined' ? clientsData : []).find(x => x.company === inv.client || x.name === inv.client);
+        if (!c || !c.phone) return rnAlert('⚠️ لا يوجد رقم جوال مسجّل لهذا العميل');
+        const link = c.token ? RNAN.portalUrl(c.token) : '';
+        window.open(RNAN.waLink(c.phone, `السلام عليكم ${c.name || c.company} 👋\n\nاستلمنا دفعة بمبلغ ${n2(value)} ريال من الفاتورة رقم ${inv.number} — شكرًا لكم ✅\n💰 المتبقي: ${n2(left)} ريال\n${link ? '\nتفاصيل الفاتورة والدفعات في صفحتكم الخاصة:\n' + link + '\n' : ''}\nرنان لخدمات التصميم`), '_blank');
     }
 
+    window.InvoiceMoney = { payments: payList, paid: paidSum, remaining };
     window.InvoicesUI = { fillClients, cards, actions, pay, payable };
 })();

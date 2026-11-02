@@ -164,7 +164,7 @@ const backendFunctions = {
                     notes: val.notes || '',
                     footerText: val.footerText || '',
                     dueDate: val.dueDate || '', sentAt: val.sentAt || '', remindedAt: val.remindedAt || '', reminders: val.reminders || 0,
-                    paidAt: val.paidAt || '', payMethod: val.payMethod || '', voidedAt: val.voidedAt || '', recurringId: val.recurringId || '',
+                    paidAt: val.paidAt || '', payMethod: val.payMethod || '', voidedAt: val.voidedAt || '', recurringId: val.recurringId || '', payments: val.payments || null,
                     id: child.key
                 });
             });
@@ -301,7 +301,8 @@ const backendFunctions = {
                     review: val.review || '',
                     quotation: val.quotation || null,
                     type: val.type || '',
-                    proof: val.proof || null
+                    proof: val.proof || null,
+                    delivery: val.delivery || null
                 });
             });
         }

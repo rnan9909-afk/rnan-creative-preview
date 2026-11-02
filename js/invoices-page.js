@@ -30,6 +30,11 @@
     const C = () => (typeof clientsData !== 'undefined' ? clientsData : []);
     const amt = i => parseFloat(i.amount) || 0;
     const sum = a => a.reduce((s, i) => s + amt(i), 0);
+    // الدفعات الجزئية (js/invoices.js): المتبقي والمدفوع من كل فاتورة
+    const left = i => (window.InvoiceMoney ? InvoiceMoney.remaining(i) : amt(i));
+    const paidOf = i => (window.InvoiceMoney ? InvoiceMoney.paid(i) : (i.status === 'مدفوعة' ? amt(i) : 0));
+    const sumLeft = a => a.reduce((s, i) => s + left(i), 0);
+    const claimsOf = i => (window.PayClaims ? PayClaims.forInvoice(i) : []);
     const isVoid = i => VOID.includes(i.status);
     const isPaid = i => i.status === PAID;
     const isOpen = i => !isPaid(i) && !isVoid(i);
@@ -155,7 +160,7 @@
         const late = n === 1 ? 'واحدة متأخرة' : n === 2 ? 'اثنتان متأخرتان' : n + ' متأخرة';
         el.innerHTML = !I().length ? 'أصدر فاتورتك الأولى وتابع تحصيلها من هنا'
             : !open.length ? 'كل فواتيرك محصّلة — لا مستحقات معلّقة 👏'
-            : `${invN(open.length)} بانتظار السداد بقيمة <b>${moneyText(sum(open))}</b>${n ? ` · <span class="late">${late}</span>` : ''}`;
+            : `${invN(open.length)} بانتظار السداد بقيمة <b>${moneyText(sumLeft(open))}</b>${n ? ` · <span class="late">${late}</span>` : ''}`;
     }
 
     // ── لوحة التحصيل ──
@@ -163,7 +168,7 @@
         const el = document.getElementById('iv-hero');
         if (!el) return;
         const open = I().filter(isOpen), late = open.filter(i => state(i) === 'late'), soon = open.filter(i => state(i) === 'soon');
-        const tot = sum(open), lateS = sum(late), soonS = sum(soon), okS = Math.max(0, tot - lateS - soonS);
+        const tot = sumLeft(open), lateS = sumLeft(late), soonS = sumLeft(soon), okS = Math.max(0, tot - lateS - soonS);
         const who = new Set(open.map(i => i.client)).size;
         const t = today(), y = t.getFullYear(), m = t.getMonth(), pm = new Date(y, m - 1, 1);
         const paidIn_ = (yy, mm) => I().filter(i => isPaid(i) && inMonthD(paidDay(i), yy, mm)).reduce((s, i) => s + amt(i), 0);
@@ -211,6 +216,7 @@
             else if (s === 'soon') out.push({ i, k: 'soon', w: 50 - (recent ? 40 : 0), why: dueLabel(i), act: 'remind', t: 'تذكير ودّي' });
             else if (!i.sentAt && !i.remindedAt && age <= 7) out.push({ i, k: 'new', w: 30, why: 'لم تُرسل للعميل بعد', act: 'send', t: 'إرسال' });
         });
+        if (window.PayClaims) PayClaims.pending().forEach(c => { const i = PayClaims.invoiceOf(c); if (i) out.push({ i, k: 'claim', w: 1000, why: `أبلغ بتحويل ${num(c.amount)} ر.س · ${ago(c.createdAt)}`, act: 'claim', t: 'مراجعة الإيصال', c }); });
         return out.sort((a, b) => b.w - a.w);
     }
     function focus() {
@@ -225,8 +231,8 @@
             <div class="iv-fc-list">${show.map(f => `<article class="iv-fc ${f.k}" data-n="${esc(f.i.number)}">
                 <div class="iv-fc-top">${av(f.i.client)}<div><b>${esc(f.i.client)}</b><small class="en-num" dir="ltr">#${esc(f.i.number)}</small></div></div>
                 <div class="iv-fc-amt">${money(f.i.amount)}</div>
-                <p class="iv-fc-why">${ic(f.k === 'late' ? 'running_with_errors' : f.k === 'soon' ? 'hourglass_top' : 'outgoing_mail')}${esc(f.why)}</p>
-                <button type="button" class="iv-fc-btn" data-iv="${f.act}">${WA}<span>${f.t}</span></button>
+                <p class="iv-fc-why">${ic(f.k === 'claim' ? 'payments' : f.k === 'late' ? 'running_with_errors' : f.k === 'soon' ? 'hourglass_top' : 'outgoing_mail')}${esc(f.why)}</p>
+                <button type="button" class="iv-fc-btn${f.c ? ' claim' : ''}" data-iv="${f.act}"${f.c ? ` data-pc="${esc(f.c.token)}/${esc(f.c.id)}"` : ''}>${f.c ? ic('receipt_long') : WA}<span>${f.t}</span></button>
             </article>`).join('')}</div>
             ${all.length > show.length ? `<button type="button" class="iv-link" data-iv="tab-late">${ic('arrow_back')} عرض كل المتأخرة والمستحقة (${all.length})</button>` : ''}`;
     }
@@ -270,7 +276,7 @@
             <div class="iv-c-what">${what(i)}</div>
             <div class="iv-c-date">${ic('event')}<span class="en-num">${esc(i.date || '—')}</span></div>
             <div class="iv-c-due">${chip(i)}</div>
-            <div class="iv-c-amt">${money(i.amount)}</div>
+            <div class="iv-c-amt">${money(i.amount)}${isOpen(i) && paidOf(i) > 0.009 ? `<small class="iv-part">متبقٍ ${moneyText(left(i))}</small>` : ''}${claimsOf(i).length ? `<small class="iv-claim">${ic('payments')} أبلغ بالسداد</small>` : ''}</div>
             <div class="iv-c-acts">${rowActs(i)}</div>
         </article>`;
     }
@@ -347,14 +353,16 @@
         it.forEach(x => { const v = (parseFloat(x.qty) || 0) * (parseFloat(x.price) || 0); if (v < 0) disc -= v; else subT += v; });
         if (subT - amt(i) > disc + 0.009) disc = subT - amt(i);
         const due = parse(i.dueDate);
-        const amtNote = s === 'paid' ? `سُدّدت ${i.paidAt ? fmt(dayOf(i.paidAt)) : ''}${i.payMethod ? ' · ' + esc(i.payMethod) : ''}`
+        const part = isOpen(i) && paidOf(i) > 0.009, pays = window.InvoiceMoney ? InvoiceMoney.payments(i) : [], cl = claimsOf(i);
+        const amtNote = (part ? `دُفع ${moneyText(paidOf(i))} من ${moneyText(amt(i))} · ` : '') + (s === 'paid' ? `سُدّدت ${i.paidAt ? fmt(dayOf(i.paidAt)) : ''}${i.payMethod ? ' · ' + esc(i.payMethod) : ''}`
             : s === 'void' ? `أُلغيت ${i.voidedAt ? fmt(dayOf(i.voidedAt)) : ''}`
             : s === 'late' ? (due ? `كان موعد سدادها ${fmt(due)}` : `صدرت قبل ${days(diff(today(), parse(i.date) || today()))} بلا موعد استحقاق`)
-            : due ? `موعد السداد ${fmt(due)}` : 'بلا موعد استحقاق محدد';
+            : due ? `موعد السداد ${fmt(due)}` : 'بلا موعد استحقاق محدد');
         const rem = parseInt(i.reminders) || (i.remindedAt ? 1 : 0);
         const tl = [
             ['receipt_long', 'أُصدرت الفاتورة', fmt(parse(i.date)), 'done'],
             ['outgoing_mail', i.sentAt ? 'أُرسلت للعميل' : 'لم تُرسل للعميل بعد', i.sentAt ? ago(i.sentAt) : (admin && isOpen(i) ? '<button type="button" class="iv-link sm" data-iv="send">إرسال الآن</button>' : ''), i.sentAt ? 'done' : 'todo'],
+            ...pays.map(p => ['payments', `استُلمت دفعة ${moneyText(p.amount)}`, fmt(dayOf(p.at)) + (p.method ? ' · ' + esc(p.method) : ''), 'done']),
             rem ? ['notifications_active', 'ذُكّر العميل ' + (rem === 1 ? 'مرة واحدة' : rem === 2 ? 'مرتين' : rem + ' مرات'), 'آخرها ' + ago(i.remindedAt), 'done'] : null,
             s === 'void' ? ['block', 'أُلغيت الفاتورة', i.voidedAt ? ago(i.voidedAt) : '', 'void']
                 : ['task_alt', isPaid(i) ? 'سُدّدت' : 'بانتظار السداد', isPaid(i) ? (i.paidAt ? fmt(dayOf(i.paidAt)) + (paidIn(i) !== null ? ' · بعد ' + days(paidIn(i)) : '') : '') : dueLabel(i), isPaid(i) ? 'done' : s === 'late' ? 'late' : 'todo']
@@ -368,8 +376,8 @@
                 <button type="button" class="iv-x" data-iv="close" aria-label="إغلاق">${ic('close')}</button>
             </header>
             <div class="iv-dw-body">
-                <section class="iv-dw-amt st-${s}"><small>${s === 'paid' ? 'المبلغ المدفوع' : s === 'void' ? 'مبلغ الفاتورة الملغاة' : 'المبلغ المستحق'}</small>
-                    <div class="iv-dw-n">${money(i.amount)}</div><p>${amtNote}</p></section>
+                <section class="iv-dw-amt st-${s}"><small>${s === 'paid' ? 'المبلغ المدفوع' : s === 'void' ? 'مبلغ الفاتورة الملغاة' : part ? 'المتبقي من الفاتورة' : 'المبلغ المستحق'}</small>
+                    <div class="iv-dw-n">${money(part ? left(i) : i.amount)}</div><p>${amtNote}</p></section>
                 <section class="iv-dw-client">${av(i.client, 'lg')}<div><b>${esc(i.client || 'بدون عميل')}</b>
                     <small>${c.phone ? `<span class="en-num" dir="ltr">${esc(c.phone)}</span>` : 'لا يوجد رقم جوال'}${owed.length > 1 || (owed.length === 1 && owed[0] !== i) ? ` · عليه ${moneyText(sum(owed))}` : ''}</small></div>
                     <button type="button" class="iv-link" data-iv="client-all">${invN(mine.length)} ${ic('chevron_left')}</button></section>
@@ -379,6 +387,9 @@
                     ${isPaid(i) ? `<div><dt>طريقة الدفع</dt><dd>${esc(i.payMethod || '—')}</dd></div><div><dt>مدة السداد</dt><dd>${paidIn(i) === null ? '—' : paidIn(i) === 0 ? 'في اليوم نفسه' : days(paidIn(i))}</dd></div>` : ''}
                     ${i.recurringId ? `<div class="wide"><dt>التكرار</dt><dd>${ic('autorenew')} تصدر تلقائيًا آخر كل شهر</dd></div>` : ''}
                 </dl>
+                ${cl.map(c => `<section class="iv-dw-claim"><div class="iv-dw-claim-t">${ic('payments')}<div><b>أبلغ العميل بتحويل ${moneyText(c.amount)}</b><small>${ago(c.createdAt)}${c.method ? ' · ' + esc(c.method) : ''}${c.day ? ' · بتاريخ ' + esc(c.day) : ''}</small></div></div>
+                    ${c.note ? `<p>«${esc(c.note)}»</p>` : ''}${c.img ? `<img src="${c.img}" alt="إيصال التحويل" data-pc-img="${esc(c.token)}/${esc(c.id)}">` : '<p class="iv-mute">بدون صورة إيصال</p>'}
+                    <div class="iv-dw-claim-acts"><button type="button" class="iv-btn main sm" data-iv="claim-ok" data-pc="${esc(c.token)}/${esc(c.id)}">${ic('task_alt')}<span>اعتماد</span></button><button type="button" class="iv-btn ghost sm" data-iv="claim-no" data-pc="${esc(c.token)}/${esc(c.id)}">${ic('close')}<span>لم تصل</span></button></div></section>`).join('')}
                 <section class="iv-dw-items"><h4>البنود</h4>
                     <ul>${it.filter(x => (parseFloat(x.qty) || 0) * (parseFloat(x.price) || 0) >= 0).map(x => `<li><span>${esc(x.desc || 'بند')}</span>
                         ${(parseFloat(x.qty) || 0) !== 1 ? `<em class="en-num">${esc(x.qty)} × ${num2(x.price)}</em>` : ''}<b class="en-num">${num2((parseFloat(x.qty) || 0) * (parseFloat(x.price) || 0))}</b></li>`).join('') || '<li class="iv-mute">لا بنود</li>'}</ul>
@@ -390,7 +401,7 @@
             </div>
             <footer class="iv-dw-foot">
                 <div class="iv-dw-main">
-                    ${admin && isOpen(i) ? `<button type="button" class="iv-btn main" data-iv="pay">${ic('task_alt')}<span>اعتماد السداد</span></button>` : ''}
+                    ${admin && isOpen(i) ? `<button type="button" class="iv-btn main" data-iv="pay">${ic('task_alt')}<span>${part ? 'تسجيل دفعة' : 'تسجيل السداد'}</span></button>` : ''}
                     ${admin && waBtn ? `<button type="button" class="iv-btn wa" data-iv="${waBtn[0]}">${WA}<span>${waBtn[1]}</span></button>` : ''}
                     <button type="button" class="iv-btn ghost" data-iv="print">${ic('print')}<span>طباعة / PDF</span></button>
                 </div>
@@ -415,7 +426,7 @@
     function reminderText(i) {
         const c = clientOf(i.client) || {}, name = c.name || c.company || i.client || '';
         const link = c.token ? RNAN.portalUrl(c.token) : RNAN.pageUrl('index.html', {});
-        const a = num2(amt(i)), l = lateBy(i), due = parse(i.dueDate);
+        const a = num2(left(i)), l = lateBy(i), due = parse(i.dueDate);
         if (l <= 0) return `السلام عليكم ${name} 👋\n\nتذكير ودّي بفاتورتكم لدى رنان لخدمات التصميم:\n🧾 رقم الفاتورة: ${i.number}\n💰 المبلغ: ${a} ريال\n📅 ${l === 0 ? 'تستحق اليوم' : 'تستحق في ' + fmtPlain(due || dueOf(i))}\n\nلمعاينة الفاتورة وتحميلها PDF:\n${link}\n\nشاكرين لكم،\nرنان لخدمات التصميم`;
         if (l <= 14) return `السلام عليكم ${name} 👋\n\nنذكّركم بلطف بأن الفاتورة رقم ${i.number} بمبلغ ${a} ريال تجاوزت موعد سدادها بـ${days(l)}.\nإن كان السداد قد تم فنرجو إعلامنا لتحديث السجل، ولكم جزيل الشكر.\n\nتفاصيل الفاتورة:\n${link}\n\nرنان لخدمات التصميم`;
         return `السلام عليكم ${name}،\n\nنأمل التكرم بسداد الفاتورة رقم ${i.number} بمبلغ ${a} ريال، والتي مضى على موعد استحقاقها ${days(l)}.\nيسعدنا ترتيب السداد بما يناسبكم إن احتجتم لذلك — فقط أخبرونا.\n\nتفاصيل الفاتورة:\n${link}\n\nمع خالص التقدير،\nرنان لخدمات التصميم`;
@@ -468,8 +479,8 @@
         function fallback() { const t = document.createElement('textarea'); t.value = text; t.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); ok(); } catch (e) { toast(text); } t.remove(); }
     }
     function exportCsv() {
-        const rows = [['رقم الفاتورة', 'العميل', 'تاريخ الإصدار', 'تاريخ الاستحقاق', 'الحالة', 'المبلغ', 'تاريخ السداد', 'طريقة الدفع', 'البنود']];
-        sorted(base().filter(i => tabOk(i, S.tab))).forEach(i => rows.push([i.number, i.client, i.date, i.dueDate || '', ST_NAME[state(i)], amt(i).toFixed(2),
+        const rows = [['رقم الفاتورة', 'العميل', 'تاريخ الإصدار', 'تاريخ الاستحقاق', 'الحالة', 'المبلغ', 'المدفوع', 'المتبقي', 'تاريخ السداد', 'طريقة الدفع', 'البنود']];
+        sorted(base().filter(i => tabOk(i, S.tab))).forEach(i => rows.push([i.number, i.client, i.date, i.dueDate || '', ST_NAME[state(i)], amt(i).toFixed(2), paidOf(i).toFixed(2), left(i).toFixed(2),
             i.paidAt ? ymd(dayOf(i.paidAt)) : '', i.payMethod || '', (i.items || []).map(x => `${x.desc} (${x.qty}×${x.price})`).join(' | ')]));
         const csv = '﻿' + rows.map(r => r.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
         const a = document.createElement('a');
@@ -496,7 +507,7 @@
         stClient = name;
         const c = clientOf(name) || {};
         const list = I().filter(i => i.client === name && !isVoid(i)).sort((a, b) => String(a.date).localeCompare(String(b.date)));
-        const tot = sum(list), paid = sum(list.filter(isPaid)), due = tot - paid;
+        const tot = sum(list), paid = list.reduce((s, i) => s + paidOf(i), 0), due = Math.max(0, tot - paid);
         const first = list.length ? parse(list[0].date) : null, last = list.length ? parse(list[list.length - 1].date) : null;
         const bank = typeof DEFAULT_BANK_INFO !== 'undefined' ? DEFAULT_BANK_INFO : '';
         if (!st) {
@@ -523,7 +534,7 @@
         }
         const rowsHtml = list.map((i, k) => `<tr><td class="en-num">${k + 1}</td><td class="en-num" dir="ltr">${esc(i.number)}</td><td class="en-num">${esc(i.date || '')}</td>
             <td class="en-num">${esc(i.dueDate || '—')}</td><td><span class="s ${state(i)}">${ST_NAME[state(i)]}</span></td><td class="en-num">${num2(amt(i))}</td>
-            <td class="en-num">${isPaid(i) ? num2(amt(i)) : '0.00'}</td></tr>`).join('');
+            <td class="en-num">${num2(paidOf(i))}</td></tr>`).join('');
         st.querySelector('#iv-statement').innerHTML = `
             <header class="sd-head"><img src="images/ranan-logo.svg" alt="رنان لخدمات التصميم"><div><h1>كشف حساب</h1><p>STATEMENT OF ACCOUNT</p></div></header>
             <div class="sd-meta">
@@ -550,9 +561,9 @@
         if (!c || !c.phone) return toast('⚠️ لا يوجد رقم جوال لهذا العميل');
         const open = I().filter(i => i.client === name && isOpen(i));
         const link = c.token ? RNAN.portalUrl(c.token) : RNAN.pageUrl('index.html', {});
-        const lines = open.map(i => `• ${i.number} — ${num2(amt(i))} ريال (${dueLabel(i)})`).join('\n');
+        const lines = open.map(i => `• ${i.number} — ${num2(left(i))} ريال (${dueLabel(i)})`).join('\n');
         const msg = open.length
-            ? `السلام عليكم ${c.name || c.company} 👋\n\nملخص حسابكم لدى رنان لخدمات التصميم:\n🧾 فواتير مستحقة: ${open.length}\n${lines}\n💰 الإجمالي المستحق: ${num2(sum(open))} ريال\n\nتفاصيل الفواتير وتحميلها PDF من صفحتكم الخاصة:\n${link}\n\nرنان لخدمات التصميم`
+            ? `السلام عليكم ${c.name || c.company} 👋\n\nملخص حسابكم لدى رنان لخدمات التصميم:\n🧾 فواتير مستحقة: ${open.length}\n${lines}\n💰 الإجمالي المستحق: ${num2(sumLeft(open))} ريال\n\nتفاصيل الفواتير وتحميلها PDF من صفحتكم الخاصة:\n${link}\n\nرنان لخدمات التصميم`
             : `السلام عليكم ${c.name || c.company} 👋\n\nحسابكم لدى رنان لخدمات التصميم مسدّد بالكامل ✅ — شكرًا لثقتكم.\nسجل فواتيركم في صفحتكم الخاصة:\n${link}\n\nرنان لخدمات التصميم`;
         window.open(RNAN.waLink(c.phone, msg), '_blank');
     }
@@ -578,6 +589,7 @@
         }
         if (a === 'tab-late') { S.tab = 'open'; S.sort = 'due'; const so = document.getElementById('iv-sort'); if (so) so.value = 'due'; tabs(); list(); document.getElementById('iv-tabs').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
         if (!i) return;
+        if (a === 'claim' || a === 'claim-ok' || a === 'claim-no') { const [t, id] = String(b.dataset.pc || '').split('/'); if (window.PayClaims) { if (a === 'claim') PayClaims.review(t, id); else if (a === 'claim-ok') { closeDrawer(); PayClaims.approve(t, id); } else PayClaims.reject(t, id); } return; }
         if (a === 'pay') return window.InvoicesUI && InvoicesUI.pay(idxOf(i));
         if (a === 'remind') return remind(i);
         if (a === 'send') return send(i);

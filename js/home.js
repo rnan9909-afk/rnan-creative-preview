@@ -53,6 +53,8 @@
         return out;
     }
     const pendingInv = () => I().filter(i => i.status === PENDING);
+    // المتبقي بعد الدفعات الجزئية (js/invoices.js)
+    const rem = i => (window.InvoiceMoney ? InvoiceMoney.remaining(i) : amount(i));
     const ageOf = i => { const d = parse(i.date); return d ? Math.round((today() - d) / 864e5) : 0; };
     const openProjects = () => P().filter(p => p.status !== DONE);
     function offerStage(p) {
@@ -82,8 +84,8 @@
             add(fresh ? 1.5 : 2.5, 'rose', 'rate_review', `${plural(n, 'تعديل مطلوب', 'تعديلان مطلوبان', 'تعديلات مطلوبة', 'تعديلًا مطلوبًا')} على «${r.title || 'التصميم'}»`, `${r.client || ''} · ${fresh ? 'ملاحظات جديدة لم تفتحها' : 'لم تُنفَّذ بعد'}`, { t: 'افتح التصميم', do: 'proof', k: r.project }));
         pendingInv().filter(i => ageOf(i) >= 10).forEach(i => {
             const ph = phoneOf(i.client);
-            const text = `مرحبًا، نذكّركم بلطف بالفاتورة رقم ${i.number} بقيمة ${num(amount(i))} ر.س الصادرة بتاريخ ${i.date}.\nشاكرين لكم سرعة السداد، ويسعدنا خدمتكم دائمًا.\nرنان لخدمات التصميم`;
-            add(2.2, 'red', 'receipt_long', `فاتورة ${i.client || ''} متأخرة ${ageOf(i)} يومًا`, `${i.number} · ${num(amount(i))} ر.س`, ph && window.RNAN ? { t: 'تذكير واتساب', wa: RNAN.waLink(ph, text) } : { t: 'الفواتير', do: 'page', page: 'invoices' });
+            const text = `مرحبًا، نذكّركم بلطف بالفاتورة رقم ${i.number} بقيمة ${num(rem(i))} ر.س الصادرة بتاريخ ${i.date}.\nشاكرين لكم سرعة السداد، ويسعدنا خدمتكم دائمًا.\nرنان لخدمات التصميم`;
+            add(2.2, 'red', 'receipt_long', `فاتورة ${i.client || ''} متأخرة ${ageOf(i)} يومًا`, `${i.number} · ${num(rem(i))} ر.س`, ph && window.RNAN ? { t: 'تذكير واتساب', wa: RNAN.waLink(ph, text) } : { t: 'الفواتير', do: 'page', page: 'invoices' });
         });
         extra.proposals.forEach(p => {
             const s = offerStage(p);
@@ -147,7 +149,7 @@
         const ser = series(7).map(x => x.v);
         const cur = monthPaid(y, m), prevSame = monthPaid(m ? y : y - 1, m ? m - 1 : 11, d);
         const delta = prevSame ? Math.round((cur - prevSame) / prevSame * 100) : (cur ? 100 : 0);
-        const pend = pendingInv(), pendSum = pend.reduce((s, i) => s + amount(i), 0), overdue = pend.filter(i => ageOf(i) >= 10).length;
+        const pend = pendingInv(), pendSum = pend.reduce((s, i) => s + rem(i), 0), overdue = pend.filter(i => ageOf(i) >= 10).length;
         const op = openProjects(), act = op.filter(p => p.status === ACTIVE);
         const late = act.filter(p => { const x = daysTo(p.deadline); return x !== null && x < 0; }).length;
         const week = act.filter(p => { const x = daysTo(p.deadline); return x !== null && x >= 0 && x <= 7; }).length;
@@ -281,7 +283,7 @@
         all.forEach(p => { const t = typeOf(p).t; types[t] = (types[t] || 0) + 1; });
         const topT = Object.entries(types).sort((a, b) => b[1] - a[1])[0];
         const vals = all.map(p => parseFloat(p.value) || 0).filter(Boolean), avg = vals.length ? vals.reduce((a, v) => a + v, 0) / vals.length : 0;
-        const paid = I().filter(i => i.status === PAID).reduce((s, i) => s + amount(i), 0), pend = pendingInv().reduce((s, i) => s + amount(i), 0);
+        const paid = I().filter(i => i.status === PAID).reduce((s, i) => s + amount(i), 0), pend = pendingInv().reduce((s, i) => s + rem(i), 0);
         const rate = paid + pend ? Math.round(paid / (paid + pend) * 100) : 0;
         const durs = all.map(p => { const a = parse(p.startDate), b = parse(p.deadline); return a && b && b >= a ? Math.round((b - a) / 864e5) : null; }).filter(x => x !== null);
         const dur = durs.length ? Math.round(durs.reduce((a, x) => a + x, 0) / durs.length) : 0;
