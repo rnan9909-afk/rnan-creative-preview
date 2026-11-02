@@ -192,7 +192,7 @@
     }
     async function remove(id) {
         const s = subs.find(x => x.id === id);
-        if (!confirm(`حذف اشتراك «${s.name}»؟ المصروفات المسجّلة سابقًا تبقى.`)) return;
+        if (!await rnConfirm(`حذف اشتراك «${s.name}»؟ المصروفات المسجّلة سابقًا تبقى.`)) return;
         await S.ref('subscriptions/' + id).remove();
         await load(); render(); badge();
     }
@@ -218,7 +218,7 @@
         });
     }
     async function delExpense(id) {
-        if (!confirm('حذف هذا المصروف؟')) return;
+        if (!await rnConfirm('حذف هذا المصروف؟')) return;
         await S.ref('expenses/' + id).remove();
         await load(); render();
     }

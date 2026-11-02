@@ -88,3 +88,26 @@ html.light-mode .bk-x, html.light-mode .bk-btn.ghost { background: #F3F5FC; colo
 html.light-mode .bk-preview { background: #fff; }
 html.light-mode .bk-word input { background: #fff; color: #101965; }
 @media print { .bk-wrap { display: none !important; } }
+
+/* ── العملاء المكررون (js/clients-dup.js) ── */
+.cd-banner { display: flex; align-items: center; gap: 12px; margin: 0 0 16px; padding: 12px 14px; border-radius: 18px; background: rgba(251, 191, 36, .08); border: 1px solid rgba(251, 191, 36, .35); color: #fff; }
+.cd-banner > div { flex: 1; min-width: 0; }
+.cd-banner b { display: block; font-size: 14px; }
+.cd-banner small { display: block; color: #fcd34d; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cd-ic { width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center; background: rgba(251, 191, 36, .16); color: #fcd34d; flex-shrink: 0; }
+.cd-btn { flex-shrink: 0; height: 40px; padding: 0 14px; border-radius: 12px; border: 0; background: #fbbf24; color: #2a1a00; font-family: inherit; font-size: 13px; font-weight: 800; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+.cd-dlg { max-width: 600px; }
+.cd-group h4 em { font-style: normal; min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px; background: rgba(251, 191, 36, .18); color: #fcd34d; font-size: 12px; display: inline-grid; place-items: center; }
+.cd-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: rgba(2, 8, 58, .4); border: 1px solid transparent; cursor: pointer; }
+.cd-row:has(input:checked) { border-color: rgba(71, 224, 172, .5); background: rgba(71, 224, 172, .08); }
+.cd-row input { width: 18px; height: 18px; accent-color: #47E0AC; flex-shrink: 0; }
+.cd-row span { min-width: 0; }
+.cd-row b { display: block; font-size: 14px; }
+.cd-row small { display: block; color: #A9B2D8; font-size: 12px; }
+.cd-note { display: flex; gap: 6px; align-items: flex-start; color: #A9B2D8 !important; font-size: 12px !important; }
+.cd-note .material-symbols-rounded { font-size: 16px; }
+@media (max-width: 767.98px) { .cd-banner { flex-wrap: wrap; } .cd-btn { width: 100%; justify-content: center; } }
+html.light-mode .cd-banner { background: #FFFBEB; border-color: #FCD34D; color: #101965; }
+html.light-mode .cd-banner small { color: #B45309; }
+html.light-mode .cd-row { background: #fff; }
+html.light-mode .cd-row small { color: #5A628F; }

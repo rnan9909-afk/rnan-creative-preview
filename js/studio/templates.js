@@ -168,7 +168,7 @@
 
     async function remove(id) {
         const t = mine.find(x => x.id === id);
-        if (!confirm(`حذف القالب «${t.name}»؟ العروض والمشاريع التي أُنشئت منه لا تتأثر.`)) return;
+        if (!await rnConfirm(`حذف القالب «${t.name}»؟ العروض والمشاريع التي أُنشئت منه لا تتأثر.`)) return;
         await S.ref('templates/' + id).remove();
         mine = mine.filter(x => x.id !== id);
         render();

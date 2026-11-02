@@ -239,13 +239,13 @@
             + `<optgroup label="المكتبة الجاهزة">${StudioData.LIBRARY.map(t => opt(t.id, t.name)).join('')}</optgroup>`;
     }
 
-    function applyTemplate(id) {
+    async function applyTemplate(id) {
         if (!id) return;
         const t = S.modules.templates.find(id);
         if (!t) return;
         const ed = S.edState();
         const hasContent = ed.items.some(i => i.desc || +i.price);
-        if (hasContent && !confirm('سيُستبدل محتوى البنود والمراحل والمهام بمحتوى القالب. متابعة؟')) { document.getElementById('st-p-tpl').value = ''; return; }
+        if (hasContent && !await rnConfirm('سيُستبدل محتوى البنود والمراحل والمهام بمحتوى القالب. متابعة؟')) { document.getElementById('st-p-tpl').value = ''; return; }
         Object.assign(ed, { items: t.items || [], phases: t.phases || [], tasks: t.tasks || [], deposit: t.deposit != null ? t.deposit : 50, templateId: t.id });
         S.edStart(ed, onEdChange);
         if (!ed.title) { ed.title = t.name; document.getElementById('st-p-title').value = t.name; }
@@ -445,7 +445,7 @@
     }
     async function remove(id) {
         const p = byId(id);
-        if (!confirm(`حذف «${p.title}» نهائيًا؟ سيتوقف رابطه عند العميل.`)) return;
+        if (!await rnConfirm(`حذف «${p.title}» نهائيًا؟ سيتوقف رابطه عند العميل.`)) return;
         await S.ref().update({ ['proposals/' + id]: null, ['offer/' + p.token]: null });
         list = list.filter(x => x.id !== id);
         render();

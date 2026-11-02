@@ -67,7 +67,7 @@
         if (S.page('time') && !S.page('time').classList.contains('hidden')) render();
     }
     async function discard() {
-        if (!confirm('إلغاء المؤقت بدون حفظ الجلسة؟')) return;
+        if (!await rnConfirm('إلغاء المؤقت بدون حفظ الجلسة؟')) return;
         await S.ref('timer/active').remove();
     }
     // نهاية العد التنازلي أو فترة البومودورو
@@ -371,7 +371,7 @@
 
     // ── الجلسات ──
     async function delLog(id) {
-        if (!confirm('حذف هذه الجلسة من السجل؟')) return;
+        if (!await rnConfirm('حذف هذه الجلسة من السجل؟')) return;
         await S.ref('timeLogs/' + id).remove();
         logs = logs.filter(l => l.id !== id);
         render();
