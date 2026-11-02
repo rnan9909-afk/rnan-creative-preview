@@ -152,7 +152,12 @@
             bell();
             notices();
             // اللوحة تُحدَّث فقط ونافذة المشروع مفتوحة، فلا تُعلَّم الملاحظات مقروءة قبل أن تراها
-            if (cur && !busy && modalOpen() && !(box() && box().querySelector('.pf-up.open'))) panel(cur);
+            if (cur && !busy && modalOpen()) {
+                const v = box() && box().querySelector('.pf-view');
+                // نموذج الرفع مفتوح: تُحدَّث الحالة والملاحظات فقط ويبقى ما اخترته للرفع
+                if (v && box().querySelector('.pf-up.open')) { const r = forProject(cur.rowIndex); if (r && r.versions) { v.innerHTML = view(r); thumbs(r); } }
+                else if (!(box() && box().querySelector('.pf-up.open'))) panel(cur);
+            }
         }, 120);
     }
     function listen() {
@@ -338,7 +343,7 @@
         designChip(r);
         if (!r || !r.versions) { upOpen = true; el.innerHTML = uploader(null); return; }
         if (modalOpen() && (unseen(r).length || approvalUnseen(r))) ref('proofs/' + r.token + '/seenAt').set(now()).catch(() => null);
-        el.innerHTML = view(r) + (upOpen ? uploader(r) : '');
+        el.innerHTML = `<div class="pf-view">${view(r)}</div>` + (upOpen ? uploader(r) : '');
         thumbs(r);
     }
     function uploader(r) {
@@ -403,13 +408,15 @@
             ${!ex ? `<div class="pf-foot">${ic('auto_delete')}<span>تُحذف الملفات تلقائيًا ${daysLeft(r.expiresAt) ? 'بعد ' + plural(daysLeft(r.expiresAt), 'يوم', 'يومين', 'أيام', 'يومًا') + ' (' + date(r.expiresAt) + ')' : 'اليوم'}</span>
                 <button type="button" data-pf="extend">تمديد 7 أيام</button><button type="button" class="danger" data-pf="purge">حذف الملفات الآن</button></div>` : ''}`;
     }
+    const thumbCache = {};
     async function thumbs(r) {
         const el = box();
         if (!el) return;
         for (const a of el.querySelectorAll('[data-thumb]')) {
+            const key = r.token + '/' + a.dataset.thumb;
             try {
-                const snap = await ref('proofFiles/' + r.token + '/' + a.dataset.thumb).once('value');
-                if (snap.val() && a.isConnected) a.innerHTML = `<img src="${snap.val()}" alt="">`;
+                if (!thumbCache[key]) thumbCache[key] = (await ref('proofFiles/' + key).once('value')).val();
+                if (thumbCache[key] && a.isConnected) a.innerHTML = `<img src="${thumbCache[key]}" alt="">`;
             } catch (e) { /* تبقى الخانة فارغة */ }
         }
     }
@@ -450,8 +457,29 @@
         const done = e.target.closest('[data-pf-done]');
         const r = cur && forProject(cur.rowIndex);
         if (done && r) {
-            const c = (r.comments || {})[done.dataset.pfDone];
-            if (c) ref('proofs/' + r.token + '/comments/' + done.dataset.pfDone).update(c.done ? { done: null, doneAt: null } : { done: true, doneAt: now() });
+            const id = done.dataset.pfDone, c = (r.comments || {})[id];
+            if (!c) return;
+            const on = !c.done, at = now(), before = { done: c.done, doneAt: c.doneAt };
+            const apply = v => {
+                if (v) { c.done = true; c.doneAt = at; } else { delete c.done; delete c.doneAt; }
+                document.querySelectorAll(`#pe-proof [data-pf-done="${id}"]`).forEach(btn => {
+                    btn.classList.toggle('on', v);
+                    btn.title = v ? 'إلغاء' : 'تم التعديل';
+                    btn.innerHTML = `${ic(v ? 'check_circle' : 'radio_button_unchecked')}<span>${v ? 'تم' : 'تم التعديل'}</span>`;
+                    const li = btn.closest('li');
+                    if (li) { li.classList.toggle('done', v); if (v) li.classList.remove('fresh'); }
+                });
+                bell();
+                notices();
+                if (window.ProjectsPage) ProjectsPage.render();
+            };
+            apply(on);
+            if (navigator.vibrate) navigator.vibrate(8);
+            ref('proofs/' + r.token + '/comments/' + id).update(on ? { done: true, doneAt: at } : { done: null, doneAt: null }).catch(err => {
+                if (before.done) { c.done = before.done; c.doneAt = before.doneAt; }
+                apply(!!before.done);
+                toast('تعذّر حفظ «تم التعديل»: ' + ((err && err.message) || 'تحقّق من الاتصال'));
+            });
             return;
         }
         const b = e.target.closest('[data-pf]');
