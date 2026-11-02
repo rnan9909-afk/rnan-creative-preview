@@ -873,14 +873,14 @@
     <link rel="stylesheet" href="css/studio.css?v=2">
     <link rel="stylesheet" href="css/prices.css?v=1">
     <script defer src="js/studio/data.js?v=1"></script>
-    <script defer src="js/studio/core.js?v=2"></script>
+    <script defer src="js/studio/core.js?v=3"></script>
     <script defer src="js/studio/proposals.js?v=4"></script>
     <script defer src="js/studio/templates.js?v=1"></script>
-    <script defer src="js/studio/prices.js?v=1"></script>
+    <script defer src="js/studio/prices.js?v=2"></script>
     <script defer src="js/studio/subs.js?v=1"></script>
     <script defer src="js/studio/time.js?v=1"></script>
     <link rel="stylesheet" href="css/pwa.css?v=2">
-    <script defer src="js/pwa.js?v=3"></script>
+    <script defer src="js/pwa.js?v=4"></script>
     <link rel="stylesheet" href="css/invoices.css?v=4">
     <script defer src="js/invoices.js?v=4"></script>
     <link rel="stylesheet" href="css/invoices-page.css?v=1">
@@ -888,6 +888,7 @@
     <script defer src="js/invoices-page.js?v=1"></script>
     <script defer src="js/invoice-edit.js?v=2"></script>
     <link rel="stylesheet" href="css/pickers.css?v=1">
+    <script defer src="js/digits.js?v=1"></script>
     <script defer src="js/pickers.js?v=1"></script>
     <link rel="stylesheet" href="css/projects.css?v=3">
     <script defer src="js/projects-ui.js?v=3"></script>
@@ -898,9 +899,11 @@
     <link rel="stylesheet" href="css/projects-page.css?v=3">
     <script defer src="js/projects-page.js?v=3"></script>
     <link rel="stylesheet" href="css/project-edit.css?v=2">
-    <script defer src="js/proofs.js?v=5"></script>
+    <script defer src="js/proofs.js?v=6"></script>
     <script defer src="js/project-edit.js?v=1"></script>
     <link rel="stylesheet" href="css/bell.css?v=2">
+    <link rel="stylesheet" href="css/polish.css?v=1">
+    <script defer src="js/backup.js?v=1"></script>
     <script defer src="js/bell.js?v=1"></script>
     <link rel="stylesheet" href="css/home.css?v=2">
     <script defer src="js/home.js?v=2"></script>
@@ -968,7 +971,7 @@
             </div>
         </div>
         <p class="mt-8 text-xs text-slate-400 font-bold">جميع الحقوق محفوظة &copy; 2026 رنان لخدمات التصميم</p>
-        <p class="mt-1 text-[10px] text-slate-600 font-mono tracking-widest">V 3.0 &middot; Rannan Design</p>
+        <p class="mt-1 text-[10px] text-slate-600 font-mono tracking-widest">V 3.0 &middot; Ranan Design</p>
         <p class="mt-1 text-[10px] text-slate-600">صنع بـ<span class="text-rose-500 animate-pulse">♥</span></p>
     </div>
 
@@ -1096,6 +1099,11 @@
                     class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 group hover:bg-white/5 border border-transparent hover:border-white/5 admin-only">
                     <span class="material-symbols-rounded text-2xl group-hover:text-primary transition-colors">link</span>
                     <span class="font-bold text-sm group-hover:translate-x-[-4px] transition-transform">صفحة الروابط</span>
+                </button>
+                <button onclick="RnBackup.open(); toggleSidebar()" id="nav-backup"
+                    class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 group hover:bg-white/5 border border-transparent hover:border-white/5 admin-only">
+                    <span class="material-symbols-rounded text-2xl group-hover:text-primary transition-colors">backup</span>
+                    <span class="font-bold text-sm group-hover:translate-x-[-4px] transition-transform">النسخة الاحتياطية</span>
                 </button>
                 <a href="index.html" target="_blank"
                     class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 group hover:bg-white/5 border border-transparent hover:border-white/5 text-muted admin-only">
@@ -1753,7 +1761,7 @@
                     <h2 class="font-bold text-2xl text-black mb-1">رنان لخدمات التصميم</h2>
                     <p class="text-sm text-gray-500 font-medium">المملكة العربية السعودية</p>
                 </div>
-                <img src="images/ranan-logo-dark.svg" alt="Rannan Logo" class="h-24 w-auto object-contain">
+                <img src="images/ranan-logo-dark.svg" alt="شعار رنان" class="h-24 w-auto object-contain">
             </div>
             <div class="text-left">
                 <h1 class="text-3xl font-black uppercase text-slate-900 mb-1">تقرير أرشيف المشاريع</h1>

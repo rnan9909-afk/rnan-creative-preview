@@ -77,6 +77,11 @@
         if (!strip && main) { main.insertAdjacentHTML('afterbegin', '<div id="ra-strip" class="ra-strip no-print" role="status" hidden></div>'); strip = document.getElementById('ra-strip'); }
         if (strip) {
             strip.hidden = !items.length;
+            // يصغر إلى زر مختصر عند التمرير حتى لا يغطّي المحتوى
+            if (main && !main.dataset.raScroll) {
+                main.dataset.raScroll = '1';
+                main.addEventListener('scroll', () => { const s = document.getElementById('ra-strip'); if (s) s.classList.toggle('mini', main.scrollTop > 140); }, { passive: true });
+            }
             if (items.length) {
                 const one = items.length === 1 ? items[0] : null;
                 strip.innerHTML = `<span class="ra-ic">${ic('rate_review')}${items.some(x => x.fresh) ? '<i></i>' : ''}</span>
@@ -195,7 +200,8 @@
     }
     function greet() {
         const n = Object.values(all).filter(r => r && !r.approval && !expired(r) && unseen(r).length).length;
-        if (n) setTimeout(() => toast(`✎ لديك ملاحظات جديدة من العملاء على ${plural(n, 'تصميم واحد', 'تصميمين', 'تصاميم', 'تصميمًا')}`, ['عرض', () => switchPage('projects')]), 1500);
+        // الشريط الثابت والجرس يعرضان التعديلات غير المنفّذة؛ لا نكرّرها في تنبيه سفلي
+        if (n && !pending().length) setTimeout(() => toast(`✎ لديك ملاحظات جديدة من العملاء على ${plural(n, 'تصميم واحد', 'تصميمين', 'تصاميم', 'تصميمًا')}`, ['عرض', () => switchPage('projects')]), 1500);
     }
     // الحذف التلقائي: يعمل عند فتح لوحة الإدارة
     async function cleanup() {

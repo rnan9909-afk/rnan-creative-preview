@@ -180,7 +180,7 @@
     const SHORT = { proposals: 'العروض' };
     const GROUPS = [
         ['أدوات العمل', ['templates', 'prices', 'time', 'subs']],
-        ['الموقع والإعدادات', ['requests', 'site', 'bank', 'linkpage', 'visit']]
+        ['الموقع والإعدادات', ['requests', 'site', 'bank', 'linkpage', 'backup', 'visit']]
     ];
     function navItems() {
         const nav = document.querySelector('#sidebar nav');

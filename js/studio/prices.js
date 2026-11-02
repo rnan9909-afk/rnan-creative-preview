@@ -359,6 +359,36 @@
         else if (e.key === 'Enter' && e.target.matches && e.target.matches('#prices-page .pl-card [data-pl="qty"]')) e.target.blur();
     });
 
+    // ── طلب من الموقع ← عرض سعر: خدمات الطلب تُقابَل بخدمات القائمة، وبيانات العميل ونص الطلب تُنقل كما هي ──
+    const FROM_SERVICE = { branding: ['identity'], social: ['brochure'], print: ['brochure'], presentation: ['rep-s'] };
+    async function fromRequest(id) {
+        const r = (typeof requestsData !== 'undefined' ? requestsData : []).find(x => String(x.id) === String(id));
+        if (!r) return;
+        await load();
+        const ids = [...new Set((r.services || []).flatMap(s => FROM_SERVICE[s] || []))].filter(find);
+        const items = ids.length ? ids.map(k => ({ desc: find(k).name, qty: 1, price: find(k).price })) : [{ desc: '', qty: 1, price: 0 }];
+        const known = S.clients().find(c => (c.phone && r.phone && String(c.phone).replace(/\D/g, '').slice(-9) === String(r.phone).replace(/\D/g, '').slice(-9)) || S.clientName(c) === r.name);
+        const title = 'عرض سعر — ' + ((window.RNAN && RNAN.serviceTitles ? RNAN.serviceTitles(r.services || []) : '') || 'خدمات التصميم');
+        switchPage('proposals');
+        S.P.edit(null, {
+            title, intro: r.details || '', items, clientKey: known ? known.rowIndex : '', clientName: known ? S.clientName(known) : (r.name || ''), clientPhone: known ? (known.phone || '') : (r.phone || ''),
+            validUntil: S.addDays(S.today(), validity()), terms: terms()
+        });
+        S.toast(ids.length ? '📋 جُهّز العرض من قائمة الأسعار حسب خدمات الطلب — راجع الكميات ثم أرسله' : '📋 جُهّز العرض ببيانات الطلب — أضف البنود من «من قائمة الأسعار»');
+    }
+    // زر «عرض سعر» في بطاقة كل طلب لم يُحوَّل بعد (تُرسم البطاقات في admin.html)
+    const origRequests = window.renderRequestsPage;
+    if (typeof origRequests === 'function') window.renderRequestsPage = function () {
+        const r = origRequests.apply(this, arguments);
+        document.querySelectorAll('#requests-page button[onclick^="openConvertModal("]').forEach(b => {
+            if (b.nextElementSibling && b.nextElementSibling.matches('.rq-quote')) return;
+            const m = /openConvertModal\('([^']+)'\)/.exec(b.getAttribute('onclick'));
+            if (m) b.insertAdjacentHTML('afterend', `<button type="button" class="rq-quote" data-rq-quote="${E(m[1])}" title="عرض سعر من قائمة الأسعار">${ic('request_quote')} عرض سعر</button>`);
+        });
+        return r;
+    };
+    document.addEventListener('click', e => { const b = e.target.closest('[data-rq-quote]'); if (b) fromRequest(b.dataset.rqQuote); });
+
     S.register('prices', { open, boot: () => load() });
     window.PriceList = { load, items, find, byName, validity, notes, terms, priceLabel, priceText, unitOf, cats: CATS, pickerHtml, studioPick, togglePicker, DEFAULT };
 })();

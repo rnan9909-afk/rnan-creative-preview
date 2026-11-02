@@ -39,9 +39,9 @@
     const moneyText = (n, cur) => num(n) + (cur === 'USD' ? ' $' : ' ر.س');
     const dur = secs => {
         secs = Math.max(0, Math.round(+secs || 0));
-        if (secs < 60) return secs + 'ث';
+        if (secs < 60) return secs + ' ث';
         const m = Math.floor(secs / 60), h = Math.floor(m / 60);
-        return h ? h + 'س' + (m % 60 ? ' ' + (m % 60) + 'د' : '') : m + 'د';
+        return h ? h + ' س' + (m % 60 ? ' ' + (m % 60) + ' د' : '') : m + ' د';
     };
     const clock = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return pad(Math.floor(s / 3600)) + ':' + pad(Math.floor(s / 60) % 60) + ':' + pad(s % 60); };
 
