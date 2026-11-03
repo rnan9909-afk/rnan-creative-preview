@@ -216,10 +216,8 @@
         const c = clientName();
         return st.type && st.type !== OTHER ? st.type.t + (c ? ' — ' + c : '') : '';
     }
-    function pendingInv(client) {
-        const I = typeof invoicesData !== 'undefined' ? invoicesData : [];
-        return client ? I.find(i => i.client === client && i.status === 'قيد الانتظار') : null;
-    }
+    // فواتير العميل المفتوحة، الأحدث أولًا (js/project-invoice.js)
+    const openInv = client => (window.ProjectInvoice && client ? ProjectInvoice.open(client) : []);
     function sync() {
         const f = F();
         const sug = suggested();
@@ -234,10 +232,10 @@
         if (span !== null && span < 0) { dur.className = 'pn-dur warn'; dur.innerHTML = `${ic('error')} موعد التسليم قبل تاريخ الاستلام`; }
         else if (span !== null) { dur.className = 'pn-dur'; dur.innerHTML = `${ic('schedule')} مدة التنفيذ <b>${span ? days(span) : 'نفس اليوم'}</b> · التسليم ${longDate(f.deadline.value)}`; }
         else { dur.className = 'pn-dur'; dur.innerHTML = `${ic('event_busy')} بلا موعد تسليم`; }
-        // تنبيه الفاتورة المعلّقة لهذا العميل
-        const inv = pendingInv(c), note = $('.pn-note');
-        note.hidden = !inv;
-        if (inv) note.innerHTML = `${ic('receipt_long')} لدى العميل فاتورة معلّقة <b class="en-num" dir="ltr">${esc(inv.number)}</b> — يمكنك إضافة المشروع إليها بعد الإنشاء`;
+        // تنبيه الفواتير المفتوحة لهذا العميل
+        const invs = openInv(c), note = $('.pn-note');
+        note.hidden = !invs.length;
+        if (invs.length) note.innerHTML = `${ic('receipt_long')} ${invs.length === 2 ? 'لدى العميل فاتورتان مفتوحتان' : invs.length > 2 ? `لدى العميل <span class="en-num">${invs.length}</span> فواتير مفتوحة` : `لدى العميل فاتورة مفتوحة <b class="en-num" dir="ltr">${esc(invs[0].number)}</b>`} — أدخل القيمة لتضيف المشروع إليها بعد الإنشاء`;
         // المعاينة الحية (الشاشات الكبيرة)
         const prevBox = $('.pn-prev');
         if (prevBox && window.ProjectsPage && getComputedStyle($('.pn-side')).display !== 'none') {
@@ -344,7 +342,7 @@
         const m = st.made;
         const C = typeof clientsData !== 'undefined' ? clientsData : [];
         const phone = m.phone || (C.find(x => x.company === m.client || x.name === m.client) || {}).phone || '';
-        const inv = pendingInv(m.client);
+        const invs = openInv(m.client).slice(0, 2);
         const wa = phone && window.RNAN ? RNAN.waLink(phone, receivedText(m)) : '';
         F().hidden = true;
         $('.pn-head').hidden = true;
@@ -358,9 +356,9 @@
             <p class="pn-next-t">الخطوة التالية</p>
             <div class="pn-next">
                 ${wa ? `<a class="pn-act wa" href="${esc(wa)}" target="_blank" rel="noopener" data-done="wa">${ic('chat')}<span><b>أرسل للعميل تأكيد الاستلام</b><small>رسالة واتساب جاهزة برقم التتبع وصفحته</small></span></a>` : ''}
-                ${m.value && inv ? `<button type="button" class="pn-act" data-done="addinv">${ic('playlist_add')}<span><b>إضافته للفاتورة المعلّقة</b><small class="en-num" dir="ltr">${esc(inv.number)}</small></span></button>` : ''}
-                ${m.value ? `<button type="button" class="pn-act" data-done="invoice">${ic('receipt_long')}<span><b>إصدار فاتورة</b><small><span class="en-num">${num(m.value)}</span> ر.س بحالة «قيد الانتظار»</small></span></button>` : ''}
-                <button type="button" class="pn-act" data-done="open">${ic('open_in_new')}<span><b>فتح المشروع</b><small>عرض السعر، الحالة، وكل التفاصيل</small></span></button>
+                ${m.value ? invs.map(inv => `<button type="button" class="pn-act" data-done="addinv" data-inv="${esc(inv.number)}">${ic('playlist_add')}<span><b>إضافته للفاتورة المفتوحة</b><small><span class="en-num" dir="ltr">${esc(inv.number)}</span> · <span class="en-num">${num(m.value)}</span> ر.س</small></span></button>`).join('') : ''}
+                ${m.value ? `<button type="button" class="pn-act" data-done="invoice">${ic('receipt_long')}<span><b>${invs.length ? 'إصدار فاتورة منفصلة' : 'إصدار فاتورة'}</b><small><span class="en-num">${num(m.value)}</span> ر.س بحالة «قيد الانتظار»</small></span></button>` : ''}
+                <button type="button" class="pn-act" data-done="open">${ic('open_in_new')}<span><b>فتح المشروع</b><small>${!m.value && invs.length ? `حدّد قيمته وأضفه للفاتورة المفتوحة <span class="en-num" dir="ltr">${esc(invs[0].number)}</span>` : 'عرض السعر، الحالة، وكل التفاصيل'}</small></span></button>
             </div>
             <footer class="pn-foot">
                 <button type="button" class="pn-cancel" data-done="again">${ic('add')} مشروع آخر</button>
@@ -395,15 +393,12 @@
         const footerText = typeof DEFAULT_BANK_INFO !== 'undefined' ? DEFAULT_BANK_INFO : '';
         try {
             if (what === 'addinv') {
-                const inv = pendingInv(m.client);
-                if (!inv) throw new Error('لم تعد هناك فاتورة معلّقة');
-                const items = (inv.items || []).concat([{ desc: 'مشروع: ' + m.name, qty: 1, price: m.value }]);
-                const total = items.reduce((s, it) => s + (parseFloat(it.qty) || 0) * (parseFloat(it.price) || 0), 0);
-                await run('saveInvoiceToSheet', { invoiceNumber: inv.number, clientSelect: inv.client, issueDate: inv.date, status: inv.status, totalAmount: total, items, notes: inv.notes, footerText: inv.footerText });
+                const inv = openInv(m.client).find(i => String(i.number) === btn.dataset.inv);
+                if (!inv) throw new Error('لم تعد هذه الفاتورة مفتوحة');
+                const r = await ProjectInvoice.add(inv, { rowIndex: m.rowIndex, name: m.name, value: m.value, saved: m.value });
                 btn.classList.add('ok');
-                btn.innerHTML = `${ic('check_circle')}<span><b>أُضيف للفاتورة</b><small class="en-num" dir="ltr">${esc(inv.number)}</small></span>`;
-                const other = wrap.querySelector('[data-done="invoice"]');
-                if (other) other.remove();
+                btn.innerHTML = `${ic('check_circle')}<span><b>أُضيف للفاتورة</b><small><span class="en-num" dir="ltr">${esc(r.number)}</span> · إجماليها <span class="en-num">${num(r.total)}</span> ر.س</small></span>`;
+                wrap.querySelectorAll('[data-done="invoice"], [data-done="addinv"]').forEach(b => { if (b !== btn) b.remove(); });
                 reload();
             } else if (what === 'invoice') {
                 const d = ymd(today()), items = [{ desc: 'مشروع: ' + m.name, qty: 1, price: m.value }];

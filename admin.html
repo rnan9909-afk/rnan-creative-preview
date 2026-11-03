@@ -839,6 +839,7 @@
     <script defer src="js/pwa.js?v=5"></script>
     <link rel="stylesheet" href="css/invoices.css?v=4">
     <script defer src="js/invoices.js?v=5"></script>
+    <script defer src="js/project-invoice.js?v=1"></script>
     <link rel="stylesheet" href="css/invoices-page.css?v=1">
     <link rel="stylesheet" href="css/invoice-edit.css?v=1">
     <script defer src="js/invoices-page.js?v=3"></script>
@@ -850,7 +851,7 @@
     <script defer src="js/digits.js?v=1"></script>
     <script defer src="js/pickers.js?v=1"></script>
     <link rel="stylesheet" href="css/projects.css?v=3">
-    <script defer src="js/projects-ui.js?v=3"></script>
+    <script defer src="js/projects-ui.js?v=4"></script>
     <link rel="stylesheet" href="css/charts.css?v=1">
     <script defer src="js/charts.js?v=1"></script>
     <link rel="stylesheet" href="css/clients.css?v=1">
@@ -861,10 +862,10 @@
     <link rel="stylesheet" href="css/search.css?v=1">
     <script defer src="js/search.js?v=1"></script>
     <link rel="stylesheet" href="css/projects-page.css?v=3">
-    <script defer src="js/projects-page.js?v=3"></script>
-    <link rel="stylesheet" href="css/project-edit.css?v=2">
+    <script defer src="js/projects-page.js?v=4"></script>
+    <link rel="stylesheet" href="css/project-edit.css?v=3">
     <script defer src="js/proofs.js?v=7"></script>
-    <script defer src="js/project-edit.js?v=1"></script>
+    <script defer src="js/project-edit.js?v=2"></script>
     <script defer src="js/delivery.js?v=1"></script>
     <script defer src="js/brief-questions.js?v=1"></script>
     <script defer src="js/brief-admin.js?v=1"></script>
@@ -1779,7 +1780,7 @@
                     <section class="pe-sec" style="--o:4">
                         <h4><span class="material-symbols-rounded">person</span> العميل</h4>
                         <div class="pe-client">
-                            <select id="proj-client" class="form-input-modern" onchange="checkClientPendingInvoices()"></select>
+                            <select id="proj-client" class="form-input-modern"></select>
                             <button type="button" onclick="openClientModal('new')" class="pe-plus admin-only" aria-label="عميل جديد"><span class="material-symbols-rounded">person_add</span></button>
                         </div>
                     </section>
@@ -1799,10 +1800,11 @@
                     <section class="pe-sec" style="--o:7">
                         <h4><span class="material-symbols-rounded">payments</span> المالية</h4>
                         <label class="pe-val"><span>القيمة (ر.س)</span><input id="proj-value" type="number" inputmode="decimal" lang="en" dir="ltr" class="form-input-modern en-num" placeholder="0.00"></label>
-                        <div id="pending-invoice-alert" class="hidden pe-alert">
-                            <span class="material-symbols-rounded">receipt_long</span>
-                            <span class="pe-alert-t">فاتورة معلّقة لهذا العميل <b class="en-num" dir="ltr" id="pending-inv-num"></b></span>
-                            <button onclick="addToPendingInvoice()" id="btn-add-to-pending" class="admin-only"><span class="material-symbols-rounded">add_circle</span> إضافة للفاتورة</button>
+                        <!-- فواتير العميل المفتوحة: تُملأ من js/project-edit.js -->
+                        <div id="pending-invoice-alert" class="hidden pe-alert pe-oi">
+                            <p class="pe-oi-h"><span class="material-symbols-rounded">receipt_long</span> <span id="pe-oi-title">فاتورة مفتوحة لهذا العميل</span><b id="pending-inv-num" hidden></b></p>
+                            <div id="pe-oi-list"></div>
+                            <p id="pe-oi-hint" class="pe-oi-hint" hidden></p>
                         </div>
                         <div class="pe-quote">
                             <span class="pe-quote-ic"><span class="material-symbols-rounded">request_quote</span></span>
@@ -3567,59 +3569,7 @@ ${link}
             document.getElementById('inv-paid-total').innerHTML = formatCurrency(paidTotal);
         }
 
-        function checkClientPendingInvoices() {
-            let client = document.getElementById('proj-client').value;
-            let pendingAlert = document.getElementById('pending-invoice-alert');
-            let pendingNum = document.getElementById('pending-inv-num');
-
-            let pendingInv = invoicesData.find(i => i.client === client && i.status === 'قيد الانتظار');
-
-            if (pendingInv) {
-                pendingAlert.classList.remove('hidden');
-                pendingNum.innerText = pendingInv.number;
-            } else {
-                pendingAlert.classList.add('hidden');
-            }
-        }
-
-        function addToPendingInvoice() {
-            let client = document.getElementById('proj-client').value;
-            let pendingInv = invoicesData.find(i => i.client === client && i.status === 'قيد الانتظار');
-
-            let projName = document.getElementById('proj-name').value || "مشروع جديد";
-            let projValue = parseFloat(document.getElementById('proj-value').value) || 0;
-
-            if (!pendingInv) return alert("حدث خطأ: لم يتم العثور على الفاتورة المعلقة");
-
-            let newItems = pendingInv.items || [];
-            newItems.push({ desc: "مشروع: " + projName, qty: 1, price: projValue });
-
-            let newTotal = newItems.reduce((sum, item) => sum + (item.qty * item.price), 0);
-
-            let data = {
-                invoiceNumber: pendingInv.number,
-                clientSelect: pendingInv.client,
-                issueDate: pendingInv.date,
-                status: pendingInv.status,
-                totalAmount: newTotal,
-                items: newItems,
-                notes: pendingInv.notes,
-                footerText: pendingInv.footerText
-            };
-
-            let btn = document.getElementById('btn-add-to-pending');
-            let originalText = btn.innerHTML;
-            btn.innerHTML = '<span class="material-symbols-rounded animate-spin">sync</span> جاري الإضافة...';
-
-            google.script.run.withSuccessHandler((res) => {
-                loadAllData();
-                btn.innerHTML = '<span class="material-symbols-rounded">check_circle</span> تم الإضافة بنجاح';
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    document.getElementById('projectModal').classList.remove('open');
-                }, 1500);
-            }).saveInvoiceToSheet(data);
-        }
+        // فواتير العميل المفتوحة في نافذة المشروع وإضافة قيمته إليها: js/project-edit.js و js/project-invoice.js
 
         function openClientModal(mode, index = null) {
             document.getElementById('quickClientModal').classList.add('open');

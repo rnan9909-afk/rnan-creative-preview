@@ -12,7 +12,11 @@
     const days = n => n === 1 ? 'يوم واحد' : n === 2 ? 'يومان' : n <= 10 ? n + ' أيام' : n + ' يومًا';
     const UI = () => window.ProjectsUI || {};
     const modal = () => $('projectModal');
-    let current = null;
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const num = v => (Math.round((parseFloat(v) || 0) * 100) / 100).toLocaleString('en-US');
+    const items = n => n === 1 ? 'بند واحد' : n === 2 ? 'بندان' : n <= 10 ? n + ' بنود' : n + ' بندًا';
+    const toast = m => (window.ProjectsPage && ProjectsPage.toast ? ProjectsPage.toast(m) : window.showAdminToast ? showAdminToast(m) : null);
+    let current = null, invBusy = false;
 
     function setType(id) {
         const T = UI().TYPES || [];
@@ -54,6 +58,46 @@
         if (st === 'مكتمل') { el.className = 'pe-due ok'; el.innerHTML = `${ic('task_alt')} مكتمل`; }
         else if (!d) { el.className = 'pe-due'; el.innerHTML = `${ic('event_busy')} بلا موعد تسليم`; }
         else { el.className = 'pe-due ' + due.cls; el.innerHTML = `${ic(due.cls === 'late' ? 'warning' : 'schedule')} ${due.text}${span !== null && span >= 0 ? ' · مدة التنفيذ ' + (span ? days(span) : 'نفس اليوم') : ''}`; }
+        invBox();
+    }
+
+    // ── فواتير العميل المفتوحة: إضافة قيمة المشروع لإحداها بدل فاتورة منفصلة (js/project-invoice.js) ──
+    function invBox() {
+        const box = $('pending-invoice-alert'), PI = window.ProjectInvoice;
+        if (!box || !PI || invBusy) return;
+        const list = PI.open($('proj-client').value).slice(0, 3);
+        const name = $('proj-name').value.trim(), val = parseFloat($('proj-value').value) || 0, ready = val > 0 && !!name;
+        box.classList.toggle('hidden', !list.length);
+        $('pending-inv-num').textContent = list.length ? list[0].number : '';
+        const sep = modal().querySelector('.pe-inv');
+        if (sep) sep.innerHTML = `${ic('receipt_long')} ${list.length ? 'إصدار فاتورة منفصلة بقيمة المشروع' : 'إصدار فاتورة بقيمة المشروع'}`;
+        if (!list.length) return;
+        $('pe-oi-title').textContent = list.length > 1 ? 'فواتير مفتوحة لهذا العميل' : 'فاتورة مفتوحة لهذا العميل';
+        $('pe-oi-list').innerHTML = list.map(i => `<div class="pe-oi-row">
+                <span class="pe-oi-t"><b class="en-num" dir="ltr">${esc(i.number)}</b><small><span class="en-num">${num(i.amount)}</span> ر.س · ${items(PI.count(i))}</small></span>
+                ${PI.has(i, name) ? `<span class="pe-oi-ok">${ic('check_circle')} المشروع فيها</span>`
+                    : `<button type="button" class="admin-only" data-addinv="${esc(i.number)}"${ready ? '' : ' disabled'}>${ic('add_circle')} إضافة${ready ? ` <span class="en-num">${num(val)}</span> ر.س` : ''}</button>`}
+            </div>`).join('');
+        const hint = $('pe-oi-hint');
+        hint.hidden = ready;
+        hint.textContent = name ? 'أدخل قيمة المشروع لتضيفها للفاتورة' : 'اكتب اسم المشروع أولًا';
+    }
+    async function addInv(btn) {
+        const PI = window.ProjectInvoice;
+        const inv = PI && PI.open($('proj-client').value).find(i => String(i.number) === btn.dataset.addinv);
+        if (!inv || invBusy || btn.disabled) return;
+        invBusy = true;
+        btn.disabled = true;
+        btn.innerHTML = `<span class="material-symbols-rounded animate-spin">sync</span> جاري الإضافة...`;
+        try {
+            const r = await PI.add(inv, { rowIndex: $('proj-row-index').value, name: $('proj-name').value.trim(), value: $('proj-value').value, saved: current && current.value });
+            toast(`أُضيف المشروع للفاتورة ${r.number} — إجماليها الآن ${num(r.total)} ر.س`);
+            if (typeof loadAllData === 'function') loadAllData();
+        } catch (e) {
+            toast('تعذّرت الإضافة: ' + ((e && e.message) || e || 'تحقّق من الاتصال'));
+        }
+        invBusy = false;
+        invBox();
     }
     function build() {
         const T = UI().TYPES || [];
@@ -96,6 +140,8 @@
             if (e.target === m) return close();
             const st = e.target.closest('[data-st]');
             if (st) return setStatus(st.dataset.st);
+            const ai = e.target.closest('[data-addinv]');
+            if (ai) return addInv(ai);
             const t = e.target.closest('#pe-types [data-type]');
             if (t) return setType(t.dataset.type);
             const sp = e.target.closest('[data-span]');

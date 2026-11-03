@@ -110,6 +110,20 @@ html:not(#_r1):not(#_r2):not(#_r3):not(#_r4):not(#_r5) #projectModal .pe-steps .
 .pe-alert button { height: 32px; padding: 0 10px; border-radius: 10px; border: 1px solid rgba(251, 191, 36, .5); background: rgba(251, 191, 36, .14); color: #fde68a; font-family: inherit; font-size: 12.5px; font-weight: 800;
     display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
 .pe-alert button .material-symbols-rounded { font-size: 16px; }
+/* فواتير العميل المفتوحة (js/project-edit.js): صف لكل فاتورة بزر الإضافة أو «المشروع فيها» */
+.pe-alert.pe-oi { display: block; }
+.pe-oi-h { margin: 0 0 6px; display: flex; align-items: center; gap: 6px; font-weight: 800; }
+.pe-oi-h .material-symbols-rounded { font-size: 19px; color: #fbbf24; }
+.pe-oi-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid rgba(251, 191, 36, .18); }
+.pe-oi-row:first-child { border-top: 0; }
+.pe-oi-t { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.5; }
+.pe-oi-t b { font-size: 13px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pe-oi-t small { font-size: 11.5px; opacity: .78; }
+.pe-oi-ok { display: inline-flex; align-items: center; gap: 4px; color: #6ee7b7; font-size: 12px; font-weight: 800; white-space: nowrap; }
+.pe-oi-ok .material-symbols-rounded { font-size: 16px; }
+.pe-oi button { flex-shrink: 0; white-space: nowrap; }
+.pe-oi button:disabled { opacity: .45; cursor: not-allowed; }
+.pe-oi-hint { margin: 4px 0 0; font-size: 11.5px; opacity: .8; }
 .pe-quote { margin-top: 10px; padding: 10px; border-radius: 14px; display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, .035); border: 1px solid var(--pe-line); }
 .pe-quote-ic { width: 38px; height: 38px; flex-shrink: 0; border-radius: 12px; display: grid; place-items: center; color: #60a5fa; background: rgba(96, 165, 250, .14); }
 .pe-quote > div { flex: 1; min-width: 0; }
@@ -282,6 +296,8 @@ html.light-mode:not(#_r1):not(#_r2):not(#_r3):not(#_r4):not(#_r5) #projectModal 
 html.light-mode:not(#_r1):not(#_r2):not(#_r3):not(#_r4):not(#_r5) #projectModal .pe-steps .step-item input[type="text"] { color: #101965 !important; }
 html.light-mode .pe-alert { background: #FEF3C7; color: #92400E; }
 html.light-mode .pe-alert button { color: #92400E; }
+html.light-mode .pe-oi-row { border-top-color: rgba(146, 64, 14, .15); }
+html.light-mode .pe-oi-ok { color: #047857; }
 html.light-mode .pe-quote { background: #F7F9FF; border-color: rgba(16, 25, 101, .08); }
 html.light-mode .pe-inv { background: #FFFBEB; color: #B45309; }
 html.light-mode .pe-due.soon { color: #B45309; }

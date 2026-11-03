@@ -1,5 +1,5 @@
 // صفحة المشاريع: أرقام مختصرة، بحث وفلاتر وترتيب، بطاقات مجمّعة حسب قرب التسليم مع إنجاز «المهمة التالية» بضغطة،
-// وقائمة «⋯» (تحديث للعميل، رابط التتبع، إيقاف/استئناف، تسليم، فاتورة، حذف)، وتقويم تسليمات بجدول أعمال اليوم.
+// وقائمة «⋯» (تحديث للعميل، رابط التتبع، إيقاف/استئناف، تسليم، إضافة لفاتورة مفتوحة أو فاتورة جديدة، حذف)، وتقويم تسليمات بجدول أعمال اليوم.
 // أنواع المشاريع ومواعيد التسليم من js/projects-ui.js، والأنماط في css/projects-page.css.
 (function () {
     const ACTIVE = 'قيد التنفيذ', HOLD = 'معلق', DONE = 'مكتمل';
@@ -301,6 +301,18 @@
             })
             .catch(e => toast('تعذّر إصدار الفاتورة: ' + ((e && e.message) || e)));
     }
+    // قيمة المشروع بندًا في فاتورة مفتوحة للعميل (js/project-invoice.js)
+    function addInv(i, number) {
+        const p = P()[i];
+        const inv = p && window.ProjectInvoice && ProjectInvoice.open(p.client).find(v => String(v.number) === String(number));
+        if (!inv) return toast('لم تعد هذه الفاتورة مفتوحة');
+        ProjectInvoice.add(inv, { rowIndex: p.rowIndex, name: p.name, value: p.value, saved: p.value })
+            .then(r => {
+                toast(`أُضيف «${p.name}» للفاتورة ${r.number} — إجماليها الآن ${num(r.total)} ر.س`);
+                if (typeof loadAllData === 'function') loadAllData();
+            })
+            .catch(e => toast('تعذّرت الإضافة: ' + ((e && e.message) || e)));
+    }
     function remove(i) {
         const p = P()[i];
         if (!p) return;
@@ -377,6 +389,7 @@
         const p = P()[i];
         if (!p) return;
         const x = info(p, i), sheet = mobile(), val = parseFloat(p.value) || 0;
+        const PI = window.ProjectInvoice, openInv = val && PI ? PI.open(p.client).filter(v => !PI.has(v, p.name)).slice(0, 2) : [];
         const m = document.createElement('div');
         m.className = 'cl-menu-wrap pp-menu no-print' + (sheet ? ' sheet' : '');
         m.innerHTML = `<div class="cl-scrim" data-x></div><div class="cl-menu" role="menu">
@@ -388,7 +401,8 @@
             ${p.code ? `<button type="button" role="menuitem" data-do="track">${ic('qr_code_2')} نسخ رابط التتبع</button>` : ''}
             <button type="button" role="menuitem" data-do="hold">${x.hold ? ic('play_circle') + ' استئناف العمل' : ic('pause_circle') + ' إيقاف مؤقت'}</button>
             <button type="button" role="menuitem" data-do="deliver">${ic('task_alt')} تم التسليم</button>
-            ${val ? `<button type="button" role="menuitem" data-do="invoice">${ic('receipt_long')} إصدار فاتورة</button>` : ''}
+            ${openInv.map(v => `<button type="button" role="menuitem" data-do="addinv" data-inv="${esc(v.number)}">${ic('playlist_add')} إضافة للفاتورة <span class="en-num" dir="ltr">${esc(v.number)}</span></button>`).join('')}
+            ${val ? `<button type="button" role="menuitem" data-do="invoice">${ic('receipt_long')} ${openInv.length ? 'إصدار فاتورة منفصلة' : 'إصدار فاتورة'}</button>` : ''}
             <button type="button" role="menuitem" class="danger" data-do="delete">${ic('delete')} حذف المشروع</button>
         </div>`;
         document.body.appendChild(m);
@@ -403,6 +417,7 @@
         const SURE = {
             deliver: `${ic('task_alt')} اضغط مجددًا لتأكيد التسليم`,
             invoice: `${ic('receipt_long')} اضغط مجددًا لإصدار فاتورة بـ <span class="en-num">${num(val)}</span> ر.س`,
+            addinv: b => `${ic('playlist_add')} اضغط مجددًا لإضافة <span class="en-num">${num(val)}</span> ر.س للفاتورة <span class="en-num" dir="ltr">${esc(b.dataset.inv)}</span>`,
             delete: `${ic('warning')} اضغط مجددًا للتأكيد — حذف نهائي`
         };
         m.addEventListener('click', e => {
@@ -412,14 +427,14 @@
             const act = b.dataset.do;
             if (SURE[act] && !b.classList.contains('sure')) {
                 b.classList.add('sure');
-                b.innerHTML = SURE[act];
+                b.innerHTML = typeof SURE[act] === 'function' ? SURE[act](b) : SURE[act];
                 return;
             }
             closeMenu();
-            act_(act, i);
+            act_(act, i, b.dataset.inv);
         });
     }
-    function act_(act, i) {
+    function act_(act, i, inv) {
         const p = P()[i];
         if (!p) return;
         if (act === 'open') return window.openProjectModal('edit', i);
@@ -431,6 +446,7 @@
         if (act === 'deliver') return deliver(i);
         if (act === 'hold') return hold(i);
         if (act === 'invoice') return invoice(i);
+        if (act === 'addinv') return addInv(i, inv);
         if (act === 'delete') return remove(i);
     }
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
