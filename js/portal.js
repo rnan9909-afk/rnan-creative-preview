@@ -10,7 +10,8 @@
     const E = RNAN.esc;
     const token = new URLSearchParams(location.search).get('k');
 
-    const state = { key: null, client: null, projects: [], invoices: [], notifs: [], coupons: [], feedback: {}, seenAt: 0, settings: {}, tab: 'active', rating: null };
+    const state = { key: null, client: null, projects: [], invoices: [], notifs: [], coupons: [], feedback: {}, seenAt: 0, settings: {}, tab: 'active', rating: null,
+        lim: { proj: 6, inv: 6 }, total: { proj: 0, inv: 0 }, openProj: null };
 
     function withTimeout(promise, ms) {
         return Promise.race([promise, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms || 15000))]);
@@ -129,80 +130,130 @@
         });
     }
 
+    // المشاريع والفواتير بطاقات صغيرة (ثلاث في السطر)؛ تظهر أول ستّ ثم «عرض المزيد»
+    const PAGE = 6;
+    function moreBtn(kind, total) {
+        state.total[kind] = total;
+        if (total <= PAGE) return '';
+        const shown = Math.min(state.lim[kind], total);
+        return shown < total
+            ? `<button type="button" class="more-btn" data-more="${kind}">عرض المزيد <span class="en">(${total - shown})</span> ${icon('chevron-down')}</button>`
+            : `<button type="button" class="more-btn less" data-more="${kind}">عرض أقل ${icon('chevron-down')}</button>`;
+    }
+
     function renderProjects() {
         reviewBanner();
         const list = state.projects
             .filter(p => state.tab === 'done' ? p.status === 'مكتمل' : p.status !== 'مكتمل')
-            .sort((a, b) => String(b.startDate || '').localeCompare(String(a.startDate || '')));
+            .sort((a, b) => (!!reviewLink(b) - !!reviewLink(a)) || String(b.startDate || '').localeCompare(String(a.startDate || '')));
         $$('[data-ptab]').forEach(b => b.classList.toggle('active', b.dataset.ptab === state.tab));
+        if (state.openProj && $('#project-modal').classList.contains('open')) openProject(state.openProj);
         if (!list.length) {
+            state.total.proj = 0;
             $('#projects').innerHTML = `<div class="empty">${icon('folder')}${state.tab === 'done' ? 'لا توجد مشاريع منجزة بعد.' : 'لا توجد مشاريع جارية الآن. عندك فكرة؟ اطلب خدمة جديدة من الأسفل.'}</div>`;
             return;
         }
-        $('#projects').innerHTML = list.map(p => {
-            const done = p.status === 'مكتمل';
-            const prog = done ? 100 : (parseInt(p.progress) || 0);
-            const steps = Array.isArray(p.steps) ? p.steps : (typeof p.steps === 'string' ? RNAN.safeJSON(p.steps, []) : []);
-            const days = RNAN.daysUntil(p.deadline);
-            let dl = '';
-            if (p.deadline && !done) {
-                const cls = days < 0 ? 'late' : (days <= 3 ? 'soon' : '');
-                const txt = days < 0 ? 'تجاوز الموعد' : RNAN.inDays(days);
-                dl = `<span class="${cls}">${icon('calendar')} التسليم ${RNAN.fmtDate(p.deadline)} · ${txt}</span>`;
-            }
-            const pillCls = done ? 'paid' : (p.status === 'معلق' ? 'due' : 'paid');
-            const pillTxt = done ? 'تم التسليم' : (p.status === 'معلق' ? 'متوقف مؤقتًا' : 'قيد التنفيذ');
-            let rate = '';
-            if (done) {
-                const r = parseInt(p.rating) || 0;
-                rate = `<div class="rate-row">${r ? 'تقييمك:' : 'قيّم تجربتك في هذا المشروع:'}
-                    <span class="stars">${[1, 2, 3, 4, 5].map(n => `<button class="star-btn${n <= r ? ' on' : ''}" data-rate="${p.id}" data-value="${n}" aria-label="${n} نجوم">${icon('star')}</button>`).join('')}</span>
-                    ${r ? '<span style="color:var(--mint-3)">شكرًا لك 💚</span>' : ''}</div>`;
-            }
-            return `
-            <article class="card proj">
-                <div class="proj-top">
-                    <div><h3>${E(p.name)}</h3>${p.code ? `<small class="mono">${E(p.code)}</small>` : ''}</div>
-                    <span class="pill ${pillCls}">${pillTxt}</span>
-                </div>
-                <div class="proj-progress">
-                    <div class="proj-progress-top"><span>الإنجاز</span><b class="en">${prog}%</b></div>
-                    <div class="bar"><i style="width:${prog}%"></i></div>
-                </div>
-                <div class="proj-meta">
-                    ${p.startDate ? `<span>${icon('clock')} البدء ${RNAN.fmtDate(p.startDate)}</span>` : ''}
-                    ${dl}
-                </div>
-                ${reviewLink(p)}
-                ${window.PortalPay ? PortalPay.delivery(p) : ''}
-                ${steps.length ? `<details ${done ? '' : 'open'}><summary>مراحل العمل (${steps.filter(s => s.done).length}/${steps.length}) ${icon('chevron-down')}</summary>
-                    <ul class="substeps">${steps.map(s => `<li class="${s.done ? 'done' : ''}"><span class="ck">${s.done ? icon('check') : ''}</span>${E(s.text)}</li>`).join('')}</ul></details>` : ''}
-                ${rate}
-            </article>`;
-        }).join('');
+        $('#projects').innerHTML = list.slice(0, state.lim.proj).map(projectTile).join('') + moreBtn('proj', list.length);
+    }
+
+    function projectTile(p) {
+        const done = p.status === 'مكتمل', hold = p.status === 'معلق';
+        const prog = done ? 100 : Math.min(100, Math.max(0, parseInt(p.progress) || 0));
+        const days = RNAN.daysUntil(p.deadline);
+        let sub = done ? 'تم التسليم' : (hold ? 'متوقف مؤقتًا' : 'قيد التنفيذ'), cls = done ? 'ok' : (hold ? 'soon' : '');
+        if (!done && !hold && days !== null) {
+            sub = days < 0 ? 'تجاوز الموعد' : 'التسليم ' + RNAN.inDays(days);
+            cls = days < 0 ? 'late' : (days <= 3 ? 'soon' : '');
+        }
+        const delivered = done && p.delivery && /^https?:\/\//i.test(String(p.delivery.url || ''));
+        const tag = reviewLink(p) ? `<span class="pt-tag">${icon('eye')} راجع التصميم</span>`
+            : delivered ? `<span class="pt-tag">${icon('package')} ملفاتك جاهزة</span>`
+            : done && !(parseInt(p.rating) || 0) ? `<span class="pt-tag amber">${icon('star')} قيّم المشروع</span>` : '';
+        return `
+            <button type="button" class="card ptile" data-project="${E(p.id)}">
+                <span class="pt-ring${done ? ' done' : ''}" style="--p:${prog}"><b class="en">${done ? icon('check') : prog + '%'}</b></span>
+                <b class="pt-name">${E(p.name)}</b>
+                <small class="pt-sub ${cls}">${sub}</small>
+                ${tag}
+            </button>`;
+    }
+
+    // تفاصيل المشروع كاملة في نافذة عند الضغط على بطاقته
+    function openProject(id) {
+        const p = state.projects.find(x => x.id === id);
+        if (!p) return;
+        state.openProj = id;
+        $('#project-detail').innerHTML = projectDetail(p);
+        if (!$('#project-modal').classList.contains('open')) openModal('#project-modal');
+    }
+
+    function projectDetail(p) {
+        const done = p.status === 'مكتمل';
+        const prog = done ? 100 : (parseInt(p.progress) || 0);
+        const steps = Array.isArray(p.steps) ? p.steps : (typeof p.steps === 'string' ? RNAN.safeJSON(p.steps, []) : []);
+        const days = RNAN.daysUntil(p.deadline);
+        let dl = '';
+        if (p.deadline && !done) {
+            const cls = days < 0 ? 'late' : (days <= 3 ? 'soon' : '');
+            const txt = days < 0 ? 'تجاوز الموعد' : RNAN.inDays(days);
+            dl = `<span class="${cls}">${icon('calendar')} التسليم ${RNAN.fmtDate(p.deadline)} · ${txt}</span>`;
+        }
+        const pillCls = done ? 'paid' : (p.status === 'معلق' ? 'due' : 'paid');
+        const pillTxt = done ? 'تم التسليم' : (p.status === 'معلق' ? 'متوقف مؤقتًا' : 'قيد التنفيذ');
+        let rate = '';
+        if (done) {
+            const r = parseInt(p.rating) || 0;
+            rate = `<div class="rate-row">${r ? 'تقييمك:' : 'قيّم تجربتك في هذا المشروع:'}
+                <span class="stars">${[1, 2, 3, 4, 5].map(n => `<button class="star-btn${n <= r ? ' on' : ''}" data-rate="${p.id}" data-value="${n}" aria-label="${n} نجوم">${icon('star')}</button>`).join('')}</span>
+                ${r ? '<span style="color:var(--mint-3)">شكرًا لك 💚</span>' : ''}</div>`;
+        }
+        return `
+        <article class="proj proj-detail">
+            <div class="proj-top">
+                <div><h3>${E(p.name)}</h3>${p.code ? `<small class="mono">${E(p.code)}</small>` : ''}</div>
+                <span class="pill ${pillCls}">${pillTxt}</span>
+            </div>
+            <div class="proj-progress">
+                <div class="proj-progress-top"><span>الإنجاز</span><b class="en">${prog}%</b></div>
+                <div class="bar"><i style="width:${prog}%"></i></div>
+            </div>
+            <div class="proj-meta">
+                ${p.startDate ? `<span>${icon('clock')} البدء ${RNAN.fmtDate(p.startDate)}</span>` : ''}
+                ${dl}
+            </div>
+            ${reviewLink(p)}
+            ${window.PortalPay ? PortalPay.delivery(p) : ''}
+            ${steps.length ? `<details ${done ? '' : 'open'}><summary>مراحل العمل (${steps.filter(s => s.done).length}/${steps.length}) ${icon('chevron-down')}</summary>
+                <ul class="substeps">${steps.map(s => `<li class="${s.done ? 'done' : ''}"><span class="ck">${s.done ? icon('check') : ''}</span>${E(s.text)}</li>`).join('')}</ul></details>` : ''}
+            ${rate}
+        </article>`;
     }
 
     // ═══ الفواتير ═══
+    // غير المسدّدة أولًا، ثم الأحدث
     function renderInvoices() {
-        const list = state.invoices.slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+        const open = i => !isPaid(i) && !isVoid(i);
+        const list = state.invoices.slice().sort((a, b) => (open(b) - open(a)) || String(b.date || '').localeCompare(String(a.date || '')));
         $('#inv-count').textContent = list.length;
         if (!list.length) {
+            state.total.inv = 0;
             $('#invoices').innerHTML = `<div class="empty">${icon('receipt')}لا توجد فواتير بعد.</div>`;
             return;
         }
-        $('#invoices').innerHTML = list.map(i => {
+        $('#invoices').innerHTML = list.slice(0, state.lim.inv).map(i => {
             const cls = isPaid(i) ? 'paid' : (isVoid(i) ? 'void' : 'due');
             // دفعة جزئية: js/portal-pay.js
-            const part = !isPaid(i) && !isVoid(i) && window.PortalPay && PortalPay.remaining(i) < (parseFloat(i.amount) || 0) - 0.009;
+            const part = open(i) && window.PortalPay && PortalPay.remaining(i) < (parseFloat(i.amount) || 0) - 0.009;
             const txt = isPaid(i) ? 'مدفوعة' : (isVoid(i) ? 'ملغاة' : part ? 'مدفوعة جزئيًا' : 'بانتظار السداد');
             return `
-            <button class="card inv" data-invoice="${E(i.id)}" style="text-align:start;width:100%">
-                <span class="inv-icon">${icon('receipt')}</span>
-                <span><b><span class="en">#${E(i.number)}</span></b><small>${RNAN.fmtDate(i.date)}</small>${window.PortalPay ? PortalPay.row(i) : ''}</span>
-                <span class="amount"><span class="en">${sar(i.amount)}</span> <small>ريال</small></span>
+            <button type="button" class="card itile ${cls}" data-invoice="${E(i.id)}">
+                <small class="it-no en">#${E(i.number)}</small>
+                <b class="it-amt"><span class="en">${sar(i.amount)}</span> <small>ريال</small></b>
+                <small class="it-date">${RNAN.fmtDate(i.date)}</small>
                 <span class="pill ${cls}">${txt}</span>
+                ${window.PortalPay ? PortalPay.row(i) : ''}
             </button>`;
-        }).join('');
+        }).join('') + moreBtn('inv', list.length);
     }
 
     // «حفظ كـ PDF» يقترح عنوان الصفحة اسمًا للملف: رقم الفاتورة - اسم الجهة
@@ -406,7 +457,17 @@
             const t = e.target;
             if (t.closest('[data-close]') || t.classList.contains('modal')) return closeModals();
             const tab = t.closest('[data-ptab]');
-            if (tab) { state.tab = tab.dataset.ptab; return renderProjects(); }
+            if (tab) { state.tab = tab.dataset.ptab; state.lim.proj = PAGE; return renderProjects(); }
+            const proj = t.closest('[data-project]');
+            if (proj) return openProject(proj.dataset.project);
+            const more = t.closest('[data-more]');
+            if (more) {
+                const k = more.dataset.more, all = state.lim[k] >= state.total[k];
+                state.lim[k] = all ? PAGE : state.lim[k] + PAGE;
+                (k === 'proj' ? renderProjects : renderInvoices)();
+                if (all) $(k === 'proj' ? '#projects' : '#invoices').closest('.p-section').scrollIntoView({ block: 'start', behavior: 'smooth' });
+                return;
+            }
             const inv = t.closest('[data-invoice]');
             if (inv) return openInvoice(inv.dataset.invoice);
             const red = t.closest('[data-redeem]');

@@ -38,11 +38,12 @@
     }
     function rowInner(i) {
         const parts = [], c = lastClaim(i), r = remaining(i);
-        if (i.status !== PAID && !VOID.includes(i.status) && paid(i) > 0.009) parts.push(`<span class="pp-part">دُفع ${sar(paid(i))} · متبقٍ <b>${sar(r)}</b> ريال</span>`);
+        if (i.status !== PAID && !VOID.includes(i.status) && paid(i) > 0.009) parts.push(`<span class="pp-part"><span class="pp-paid">دُفع ${sar(paid(i))} · </span><span class="pp-left">متبقٍ <b>${sar(r)}</b> ريال</span></span>`);
         const due = dueText(i);
         if (due) parts.push(due);
         if (c && i.status !== PAID) parts.push(c.status === 'new' ? `<span class="pp-wait">${icon('clock')} إشعار التحويل قيد المراجعة</span>` : c.status === 'rejected' ? `<span class="pp-late">لم يُعتمد التحويل</span>` : '');
-        return parts.filter(Boolean).join(' · ');
+        // كل جزء في عنصر مستقل لتعرضه بطاقة الفاتورة الصغيرة سطرًا سطرًا (css/portal-tiles.css)
+        return parts.filter(Boolean).map(x => /^<span/.test(x) ? x : `<span>${x}</span>`).join('<i class="pp-sep"> · </i>');
     }
     // تحت رقم الفاتورة في القائمة
     function row(i) { known[i.id] = i; return `<small class="pp-row" data-pp-inv="${E(i.id)}">${rowInner(i)}</small>`; }

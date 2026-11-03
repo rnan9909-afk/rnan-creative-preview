@@ -16,6 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Arabic:wght@200;300;400;500;600;700&family=Readex+Pro:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/site.css?v=7">
     <link rel="stylesheet" href="css/portal-pay.css?v=1">
+    <link rel="stylesheet" href="css/portal-tiles.css?v=1">
 </head>
 
 <body>
@@ -155,6 +156,14 @@
         </div>
     </div>
 
+    <!-- تفاصيل المشروع (قبل نافذة التقييم لتظهر الأخيرة فوقها) -->
+    <div class="modal" id="project-modal" role="dialog" aria-modal="true" aria-label="تفاصيل المشروع">
+        <div class="modal-box proj-box">
+            <button class="icon-btn modal-close" data-close aria-label="إغلاق"><svg class="icon"><use href="#i-x"/></svg></button>
+            <div id="project-detail"></div>
+        </div>
+    </div>
+
     <!-- تأكيد الاستبدال -->
     <div class="modal" id="redeem-modal" role="dialog" aria-modal="true" aria-label="استبدال النقاط">
         <div class="modal-box" style="text-align:center">
@@ -197,8 +206,8 @@
     <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script defer src="js/firebase-init.js?v=2"></script>
     <script defer src="js/rnan-core.js?v=4"></script>
-    <script defer src="js/portal.js?v=6"></script>
-    <script defer src="js/portal-pay.js?v=1"></script>
+    <script defer src="js/portal.js?v=7"></script>
+    <script defer src="js/portal-pay.js?v=2"></script>
 </body>
 
 </html>

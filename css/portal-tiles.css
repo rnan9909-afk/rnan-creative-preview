@@ -1,0 +1,79 @@
+/* صفحة العميل (js/portal.js): المشاريع والفواتير بطاقات صغيرة ثلاث في السطر، أول ستّ ثم «عرض المزيد»، وتفاصيل المشروع في نافذة. */
+.proj-list, .inv-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.proj-list > .empty, .inv-list > .empty { grid-column: 1 / -1; }
+.p-section { scroll-margin-top: 84px; }
+
+.ptile, .itile { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; padding: 20px 16px 18px; border-radius: 22px; text-align: center; }
+.ptile:hover, .itile:hover { transform: translateY(-2px); }
+.ptile:focus-visible, .itile:focus-visible, .more-btn:focus-visible { outline: 2px solid var(--mint); outline-offset: 2px; }
+
+/* المشروع: حلقة الإنجاز والاسم والحالة */
+.pt-ring { position: relative; width: 64px; height: 64px; margin-bottom: 6px; border-radius: 50%; display: grid; place-items: center; }
+.pt-ring::before { content: ""; position: absolute; inset: 0; border-radius: 50%;
+    background: conic-gradient(var(--mint) calc(var(--p) * 1%), rgba(255, 255, 255, .09) 0);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4.5px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4.5px)); }
+.pt-ring b { font-size: 15px; font-weight: 700; }
+.pt-ring.done b { color: var(--mint); }
+.pt-ring .icon { width: 24px; height: 24px; stroke-width: 2.6; }
+.pt-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 15.5px; line-height: 1.55; font-weight: 700; }
+.pt-sub { color: var(--text-2); font-size: 12.5px; }
+.pt-sub.ok { color: var(--mint-3); }
+.pt-sub.soon { color: var(--amber); }
+.pt-sub.late { color: var(--danger); }
+.pt-tag { margin-top: auto; display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap;
+    background: rgba(var(--mint-rgb), .12); color: var(--mint-3); }
+.pt-tag.amber { background: rgba(251, 191, 36, .1); color: var(--amber); }
+.pt-tag .icon { width: 13px; height: 13px; }
+
+/* الفاتورة: خط علوي بلون حالتها */
+.itile { gap: 4px; }
+.itile::after { content: ""; position: absolute; top: 0; inset-inline: 22%; height: 3px; border-radius: 0 0 4px 4px; background: var(--amber); }
+.itile.paid::after { background: var(--mint); }
+.itile.void::after { background: var(--line-2); }
+.itile.void { opacity: .7; }
+.it-no { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-3); font-size: 12.5px; }
+.it-amt { font-size: 21px; font-weight: 700; line-height: 1.4; white-space: nowrap; }
+.it-amt small { color: var(--text-2); font-size: 12px; font-weight: 500; }
+.it-date { color: var(--text-3); font-size: 12px; }
+.itile .pill { margin-top: 6px; }
+.itile .pp-row { margin-top: 2px; font-size: 11.5px; line-height: 1.6; }
+.itile .pp-row > span { display: block; }
+.itile .pp-sep, .itile .pp-paid { display: none; }
+.pp-left { white-space: nowrap; }
+.pp-sep { font-style: normal; }
+
+/* عرض المزيد / عرض أقل */
+.more-btn { grid-column: 1 / -1; justify-self: center; display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; padding: 10px 22px; border-radius: 999px;
+    background: rgba(255, 255, 255, .04); border: 1px solid var(--line-2); color: var(--mint-3); font-size: 14px; font-weight: 600; transition: background .2s, border-color .2s; }
+.more-btn:hover { background: rgba(var(--mint-rgb), .1); border-color: rgba(var(--mint-rgb), .4); }
+.more-btn .icon { width: 16px; height: 16px; transition: transform .25s; }
+.more-btn.less .icon { transform: rotate(180deg); }
+
+/* نافذة تفاصيل المشروع */
+.modal-box.proj-box { max-width: 560px; }
+.proj-detail { padding: 0; }
+.proj-detail .proj-top { padding-inline-end: 50px; }
+
+@media (max-width: 560px) {
+    .proj-list, .inv-list { gap: 8px; }
+    .ptile, .itile { padding: 14px 6px 12px; border-radius: 18px; gap: 4px; }
+    .pt-ring { width: 52px; height: 52px; margin-bottom: 4px; }
+    .pt-ring::before { -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3.5px)); mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3.5px)); }
+    .pt-ring b { font-size: 13px; }
+    .pt-ring .icon { width: 20px; height: 20px; }
+    .pt-name { font-size: 13px; line-height: 1.5; }
+    .pt-sub { font-size: 11px; line-height: 1.5; }
+    .pt-tag { padding: 2px 7px; font-size: 10.5px; gap: 3px; }
+    .pt-tag .icon { width: 11px; height: 11px; }
+    .it-no { font-size: 11px; }
+    .it-amt { font-size: 16px; }
+    .it-amt small { font-size: 10.5px; }
+    .it-date { font-size: 10.5px; }
+    .itile .pill { padding: 3px 8px; font-size: 10.5px; margin-top: 4px; }
+    .itile .pp-row { font-size: 10.5px; line-height: 1.5; }
+    .proj-detail .proj-top { padding-inline-end: 44px; }
+}
+@media (max-width: 350px) {
+    .proj-list, .inv-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
