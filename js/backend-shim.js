@@ -22,35 +22,103 @@ window.RecurringPeriods = {
 };
 
 const backendFunctions = {
-    // الدخول للإدارة فقط — العميل لا يملك حسابًا، بل رابطًا خاصًا ثابتًا (client.html?k=...)
-    checkLogin: async function(input) {
-        if (!window.db) return { success: false, message: "Firebase not initialized" };
-        let foundUser = null;
+    // الدخول للإدارة فقط عبر Firebase Authentication (بريد + كلمة مرور).
+    // العميل لا يملك حسابًا، بل رابطًا خاصًا ثابتًا (client.html?k=...)
+    checkLogin: async function(email, password) {
+        if (!window.auth) return { success: false, message: "Firebase Auth not initialized" };
+        try {
+            let cred = await window.auth.signInWithEmailAndPassword(String(email || '').trim(), password || '');
+            return await backendFunctions._admitUser(cred.user);
+        } catch (err) {
+            return { success: false, message: backendFunctions._authMessage(err) };
+        }
+    },
 
-        let snap = await window.db.ref('users').once('value');
-        if (snap.exists()) {
-            snap.forEach(child => {
-                if (child.val().password === input) {
-                    foundUser = child.val();
-                }
+    // جلسة محفوظة من زيارة سابقة: يُعيد نفس نتيجة checkLogin أو { success: false }
+    restoreSession: function() {
+        if (!window.auth) return Promise.resolve({ success: false });
+        return new Promise(resolve => {
+            let off = window.auth.onAuthStateChanged(user => {
+                off();
+                if (!user) return resolve({ success: false });
+                backendFunctions._admitUser(user).then(resolve, () => resolve({ success: false }));
             });
-        }
+        });
+    },
 
-        if (foundUser) {
-            return { success: true, type: 'admin', name: foundUser.name || 'مدير' };
+    logout: async function() {
+        if (window.auth) await window.auth.signOut();
+        return "ok";
+    },
+
+    sendPasswordReset: async function(email) {
+        try {
+            await window.auth.sendPasswordResetEmail(String(email || '').trim());
+            return { success: true };
+        } catch (err) {
+            return { success: false, message: backendFunctions._authMessage(err) };
         }
-        return { success: false };
+    },
+
+    // الصلاحية من admins/<uid> في قاعدة البيانات، لا من مجرد امتلاك حساب.
+    // أول حساب يدخل قبل قفل القواعد يُسجَّل مديرًا (بعد القفل لا يقرأ admins إلا مدير).
+    _admitUser: async function(user) {
+        let isAdmin = false;
+        try {
+            isAdmin = (await window.db.ref('admins/' + user.uid).once('value')).val() === true;
+        } catch (e) { }
+        if (!isAdmin) {
+            try {
+                let all = await window.db.ref('admins').once('value');
+                if (!all.exists()) {
+                    await window.db.ref('admins/' + user.uid).set(true);
+                    isAdmin = true;
+                }
+            } catch (e) { }
+        }
+        if (!isAdmin) {
+            await window.auth.signOut();
+            return { success: false, message: 'هذا الحساب لا يملك صلاحية الإدارة' };
+        }
+        await backendFunctions._removeLegacyPasswords();
+        return { success: true, type: 'admin', name: user.displayName || user.email };
+    },
+
+    // كلمات المرور القديمة كانت تُخزّن نصًا مقروءًا؛ تُحذف بعد أول دخول بالنظام الجديد
+    _removeLegacyPasswords: async function() {
+        let updates = { 'settings/admin_password': null };
+        let snap = await window.db.ref('users').once('value');
+        snap.forEach(child => {
+            if (child.child('password').exists()) updates['users/' + child.key + '/password'] = null;
+        });
+        await window.db.ref().update(updates);
+    },
+
+    _authMessage: function(err) {
+        let code = (err && err.code) || '';
+        if (code === 'auth/invalid-email') return 'صيغة البريد الإلكتروني غير صحيحة';
+        if (code === 'auth/too-many-requests') return 'محاولات كثيرة، انتظر قليلًا ثم حاول مجددًا';
+        if (code === 'auth/network-request-failed') return 'تعذّر الاتصال، تأكّد من الإنترنت';
+        if (code === 'auth/user-disabled') return 'هذا الحساب موقوف';
+        if (code === 'auth/missing-email') return 'اكتب البريد الإلكتروني أولًا';
+        return 'بيانات الدخول غير صحيحة';
     },
 
     // يُنشئ للعميل رابطًا خاصًا (token) ورمز دعوة (refCode) ويُسجّل فهرسيهما
-    _issueClientKeys: function(clientKey, updates) {
+    _issueClientKeys: function(clientKey, updates, client) {
         let token = RNAN.newToken();
         let refCode = RNAN.newRefCode();
         updates['clients/' + clientKey + '/token'] = token;
         updates['clients/' + clientKey + '/refCode'] = refCode;
         updates['portal/' + token] = clientKey;
-        updates['referrals/' + refCode] = clientKey;
+        updates['referrals/' + refCode] = backendFunctions._referralEntry(clientKey, client);
         return { token: token, refCode: refCode };
+    },
+
+    // referrals/<code>: المفتاح للإدارة فقط، والاسم الأول وحده مقروء للعامة (لافتة «دعاك فلان»)
+    _referralEntry: function(clientKey, client) {
+        let first = String((client && (client.name || client.company)) || '').trim().split(/\s+/)[0] || '';
+        return { key: clientKey, name: first.slice(0, 40) };
     },
 
     getClientsData: async function() {
@@ -62,9 +130,14 @@ const backendFunctions = {
                 let val = child.val();
                 // إصدار تلقائي للروابط للعملاء القدامى الذين أُضيفوا قبل هذه الميزة
                 if (!val.token || !val.refCode) {
-                    let keys = backendFunctions._issueClientKeys(child.key, updates);
+                    let keys = backendFunctions._issueClientKeys(child.key, updates, val);
                     val.token = keys.token;
                     val.refCode = keys.refCode;
+                }
+                // قاعدة الاستبدال تقارن النقاط رقميًا، فتُوحَّد القيم النصية القديمة
+                if (typeof val.points !== 'number') {
+                    val.points = parseInt(val.points) || 0;
+                    updates['clients/' + child.key + '/points'] = val.points;
                 }
                 clients.push({
                     rowIndex: child.key,
@@ -97,6 +170,7 @@ const backendFunctions = {
                 phone: data.phone,
                 invitedBy: data.invitedBy || ''
             });
+            await backendFunctions.syncClientPortal(data.rowIndex);
             return "تم تحديث بيانات العميل بنجاح";
         } else {
             let key = await backendFunctions._createClient({
@@ -105,6 +179,7 @@ const backendFunctions = {
                 phone: data.phone,
                 invitedBy: data.invitedBy || ''
             });
+            await backendFunctions.syncClientPortal(key);
             return { message: "تمت إضافة العميل بنجاح", rowIndex: key };
         }
     },
@@ -129,7 +204,7 @@ const backendFunctions = {
             refCode: refCode
         };
         updates['portal/' + token] = key;
-        updates['referrals/' + refCode] = key;
+        updates['referrals/' + refCode] = backendFunctions._referralEntry(key, fields);
         await window.db.ref().update(updates);
         return key;
     },
@@ -141,10 +216,18 @@ const backendFunctions = {
         let old = snap.val().token;
         let token = RNAN.newToken();
         let updates = {};
-        if (old) updates['portal/' + old] = null;
+        if (old) {
+            updates['portal/' + old] = null;
+            updates['portalData/' + old] = null;
+            // تقييمات العميل مرتبطة برابطه، فتنتقل معه للرابط الجديد
+            let fb = await window.db.ref('feedback/' + old).once('value');
+            updates['feedback/' + old] = null;
+            if (fb.exists()) updates['feedback/' + token] = fb.val();
+        }
         updates['portal/' + token] = rowIndex;
         updates['clients/' + rowIndex + '/token'] = token;
         await window.db.ref().update(updates);
+        await backendFunctions.syncClientPortal(rowIndex);
         return token;
     },
 
@@ -214,51 +297,51 @@ const backendFunctions = {
                 await window.db.ref('invoices/' + key).update(invData);
                 if (data.status === 'مدفوعة' && oldData.status !== 'مدفوعة') {
                     await backendFunctions._updateLoyaltyPoints(data.clientSelect, data.totalAmount);
-                    backendFunctions.logNotification(data.clientSelect, "invoice_paid", "تم سداد الفاتورة رقم " + invoiceId + " بنجاح.");
+                    await backendFunctions.logNotification(data.clientSelect, "invoice_paid", "تم سداد الفاتورة رقم " + invoiceId + " بنجاح.");
                 }
+                await backendFunctions.syncClientPortal(data.clientSelect);
+                if (oldData.client && oldData.client !== data.clientSelect) await backendFunctions.syncClientPortal(oldData.client);
                 return { success: true, message: "تم التحديث", id: invoiceId };
             }
-        } 
-        
+        }
+
         // New invoice
         if (invData.status === 'مدفوعة') invData.paidAt = data.paidAt || new Date().toISOString();
         await window.db.ref('invoices').push(invData);
         if (data.status === 'مدفوعة') {
             await backendFunctions._updateLoyaltyPoints(data.clientSelect, data.totalAmount);
         } else {
-            backendFunctions.logNotification(data.clientSelect, "new_invoice", "تم إصدار فاتورة جديدة رقم " + invoiceId + " بقيمة " + data.totalAmount + " ريال.");
+            await backendFunctions.logNotification(data.clientSelect, "new_invoice", "تم إصدار فاتورة جديدة رقم " + invoiceId + " بقيمة " + data.totalAmount + " ريال.");
         }
+        await backendFunctions.syncClientPortal(data.clientSelect);
         return { success: true, message: "تم الإصدار", id: invoiceId };
     },
-    
+
     _updateLoyaltyPoints: async function(clientName, amountPaid) {
         let amount = parseFloat(amountPaid) || 0;
         if (amount <= 0) return;
-        
+
         let cSnap = await window.db.ref('clients').once('value');
-        if (cSnap.exists()) {
-            cSnap.forEach(child => {
-                let val = child.val();
-                if (val.name === clientName || val.company === clientName) {
-                    let currentPoints = parseInt(val.points) || 0;
-                    let currentSpent = parseFloat(val.totalSpent) || 0;
-                    
-                    let projectedTotal = currentSpent + amount;
-                    let multiplier = 1.0;
-                    if (projectedTotal >= 5000) multiplier = 1.25;
-                    else if (projectedTotal >= 1000) multiplier = 1.1;
-                    
-                    let earnedPoints = Math.floor(amount * multiplier);
-                    window.db.ref('clients/' + child.key).update({
-                        points: currentPoints + earnedPoints,
-                        totalSpent: projectedTotal
-                    });
-                    
-                    if (earnedPoints > 0) {
-                        backendFunctions.logNotification(clientName, "points_earned", "لقد اكتسبت " + earnedPoints + " نقطة ولاء من سداد فاتورة جديدة.");
-                    }
-                }
-            });
+        let matches = [];
+        cSnap.forEach(child => {
+            let val = child.val();
+            if (val.name === clientName || val.company === clientName) matches.push({ key: child.key, val: val });
+        });
+        for (let m of matches) {
+            let currentSpent = parseFloat(m.val.totalSpent) || 0;
+            let projectedTotal = currentSpent + amount;
+            let multiplier = 1.0;
+            if (projectedTotal >= 5000) multiplier = 1.25;
+            else if (projectedTotal >= 1000) multiplier = 1.1;
+
+            let earnedPoints = Math.floor(amount * multiplier);
+            // معاملة لا كتابة مباشرة: العميل قد يستبدل نقاطًا من صفحته في نفس اللحظة
+            await window.db.ref('clients/' + m.key + '/points').transaction(p => (parseInt(p) || 0) + earnedPoints);
+            await window.db.ref('clients/' + m.key + '/totalSpent').set(projectedTotal);
+
+            if (earnedPoints > 0) {
+                await backendFunctions.logNotification(clientName, "points_earned", "لقد اكتسبت " + earnedPoints + " نقطة ولاء من سداد فاتورة جديدة.");
+            }
         }
     },
 
@@ -266,14 +349,27 @@ const backendFunctions = {
         let snap = await window.db.ref('invoices').orderByChild('number').equalTo(invoiceId).once('value');
         if (snap.exists()) {
             let key = Object.keys(snap.val())[0];
+            let client = snap.val()[key].client;
             await window.db.ref('invoices/' + key).remove();
+            await backendFunctions.syncClientPortal(client);
             return "تم حذف الفاتورة بنجاح";
         }
         return "لم يتم العثور على الفاتورة";
     },
 
     getProjectsData: async function() {
-        let snap = await window.db.ref('projects').once('value');
+        let [snap, fbSnap] = await Promise.all([
+            window.db.ref('projects').once('value'),
+            window.db.ref('feedback').once('value')
+        ]);
+        // تقييمات العملاء تُكتب في feedback/<token>/<projectId> (لا يملكون كتابة projects)
+        let feedback = {};
+        fbSnap.forEach(t => {
+            t.forEach(p => {
+                let v = p.val();
+                if (!feedback[p.key] || (v.at || 0) > (feedback[p.key].at || 0)) feedback[p.key] = v;
+            });
+        });
         let projects = [];
         let updates = {};
         if (snap.exists()) {
@@ -284,6 +380,15 @@ const backendFunctions = {
                     val.code = RNAN.newTrackCode();
                     updates['projects/' + child.key + '/code'] = val.code;
                     updates['track/' + val.code] = RNAN.trackFromProject(val);
+                }
+                let fb = feedback[child.key];
+                if (fb && (fb.at || 0) > (val.ratedAt || 0)) {
+                    val.rating = fb.rating;
+                    val.review = fb.review || '';
+                    val.ratedAt = fb.at;
+                    updates['projects/' + child.key + '/rating'] = val.rating;
+                    updates['projects/' + child.key + '/review'] = val.review;
+                    updates['projects/' + child.key + '/ratedAt'] = val.ratedAt;
                 }
                 projects.push({
                     code: val.code,
@@ -338,19 +443,22 @@ const backendFunctions = {
             await window.db.ref('track/' + projData.code).set(Object.assign(RNAN.trackFromProject(projData, trackSnap.val()), reviewSnap.val() ? { review: reviewSnap.val() } : {}));
             if (old.status !== projData.status) {
                 if (projData.status === 'مكتمل') {
-                    backendFunctions.logNotification(data.client, "project_done", "🎉 تم تسليم مشروع '" + data.name + "'. يسعدنا تقييمك للتجربة.");
+                    await backendFunctions.logNotification(data.client, "project_done", "🎉 تم تسليم مشروع '" + data.name + "'. يسعدنا تقييمك للتجربة.");
                 } else if (projData.status === 'معلق') {
-                    backendFunctions.logNotification(data.client, "project_hold", "مشروع '" + data.name + "' متوقف مؤقتًا، وسنتواصل معك قريبًا.");
+                    await backendFunctions.logNotification(data.client, "project_hold", "مشروع '" + data.name + "' متوقف مؤقتًا، وسنتواصل معك قريبًا.");
                 }
             } else if ((parseInt(projData.progress) || 0) > (parseInt(old.progress) || 0)) {
-                backendFunctions.logNotification(data.client, "project_progress", "تقدّم مشروع '" + data.name + "' إلى " + projData.progress + "%.");
+                await backendFunctions.logNotification(data.client, "project_progress", "تقدّم مشروع '" + data.name + "' إلى " + projData.progress + "%.");
             }
+            await backendFunctions.syncClientPortal(data.client);
+            if (old.client && old.client !== data.client) await backendFunctions.syncClientPortal(old.client);
             return "تم تحديث المشروع بنجاح";
         } else {
             projData.code = data.code || RNAN.newTrackCode();
-            backendFunctions.logNotification(data.client, "project_new", "تم إنشاء مشروع جديد باسم '" + data.name + "' برقم تتبع " + projData.code + ".");
+            await backendFunctions.logNotification(data.client, "project_new", "تم إنشاء مشروع جديد باسم '" + data.name + "' برقم تتبع " + projData.code + ".");
             let ref = await window.db.ref('projects').push(projData);
             await window.db.ref('track/' + projData.code).set(RNAN.trackFromProject(projData));
+            await backendFunctions.syncClientPortal(data.client);
             return { message: "تم حفظ المشروع الجديد", rowIndex: ref.key, code: projData.code };
         }
     },
@@ -362,11 +470,13 @@ const backendFunctions = {
     },
 
     deleteProjectFromSheet: async function(rowIndex) {
-        let snap = await window.db.ref('projects/' + rowIndex + '/code').once('value');
+        let snap = await window.db.ref('projects/' + rowIndex).once('value');
+        let old = snap.val() || {};
         let proofSnap = await window.db.ref('projects/' + rowIndex + '/proof/token').once('value');
         if (proofSnap.val()) await window.db.ref().update({ ['proofs/' + proofSnap.val()]: null, ['proofFiles/' + proofSnap.val()]: null });
         await window.db.ref('projects/' + rowIndex).remove();
-        if (snap.val()) await window.db.ref('track/' + snap.val()).remove();
+        if (old.code) await window.db.ref('track/' + old.code).remove();
+        await backendFunctions.syncClientPortal(old.client);
         return "تم حذف المشروع بنجاح";
     },
 
@@ -376,7 +486,9 @@ const backendFunctions = {
     },
 
     saveProjectRating: async function(rowIndex, rating, review) {
-        await window.db.ref('projects/' + rowIndex).update({ rating: rating, review: review });
+        await window.db.ref('projects/' + rowIndex).update({ rating: rating, review: review, ratedAt: Date.now() });
+        let snap = await window.db.ref('projects/' + rowIndex + '/client').once('value');
+        await backendFunctions.syncClientPortal(snap.val());
         return "تم إرسال التقييم بنجاح";
     },
 
@@ -466,7 +578,11 @@ const backendFunctions = {
         let val = snap.val() || {};
         let updates = {};
         updates['clients/' + rowIndex] = null;
-        if (val.token) updates['portal/' + val.token] = null;
+        if (val.token) {
+            updates['portal/' + val.token] = null;
+            updates['portalData/' + val.token] = null;
+            updates['feedback/' + val.token] = null;
+        }
         if (val.refCode) updates['referrals/' + val.refCode] = null;
         await window.db.ref().update(updates);
         return "تم حذف العميل بنجاح";
@@ -525,24 +641,22 @@ const backendFunctions = {
                 await window.db.ref('invoices').update(updates);
             }
         }
+        await backendFunctions.syncAllPortals();
         return "تم تحديث الحساب البنكي وتحديث جميع الفواتير بنجاح";
     },
 
+    // كلمة المرور تُدار في Firebase Authentication ولا تُخزّن في قاعدة البيانات
     changeAdminPassword: async function(newPassword) {
-        await window.db.ref('settings').update({ admin_password: newPassword });
-        let snap = await window.db.ref('users').once('value');
-        if (snap.exists()) {
-            let updates = {};
-            snap.forEach(child => {
-                if (child.val().role === 'admin') {
-                    updates[child.key + '/password'] = newPassword;
-                }
-            });
-            if (Object.keys(updates).length > 0) {
-                await window.db.ref('users').update(updates);
-            }
+        let user = window.auth && window.auth.currentUser;
+        if (!user) throw new Error('سجّل الدخول أولًا');
+        try {
+            await user.updatePassword(newPassword);
+        } catch (err) {
+            if (err.code === 'auth/requires-recent-login') throw new Error('لأمان حسابك، سجّل الخروج ثم ادخل من جديد قبل تغيير كلمة المرور');
+            if (err.code === 'auth/weak-password') throw new Error('كلمة المرور ضعيفة — استخدم 8 أحرف على الأقل');
+            throw err;
         }
-        return "تم تحديث رمز مرور الإدارة بنجاح";
+        return "تم تحديث كلمة مرور الإدارة بنجاح";
     },
 
     getAllNotifications: async function() {
@@ -721,10 +835,16 @@ const backendFunctions = {
                 clientName = c.name || c.company;
             }
         });
+        // الطلبات الجديدة تحمل رمز الدعوة فقط (مفتاح العميل لا يظهر للعامة)، والقديمة تحمل المفتاح
+        let referrerKey = req.referrerKey || null;
+        if (!referrerKey && req.referrerCode) {
+            let ref = (await window.db.ref('referrals/' + req.referrerCode).once('value')).val();
+            referrerKey = ref && typeof ref === 'object' ? ref.key : ref;
+        }
         let referrer = null;
-        if (req.referrerKey) {
-            let rSnap = await window.db.ref('clients/' + req.referrerKey).once('value');
-            if (rSnap.exists()) referrer = Object.assign({ key: req.referrerKey }, rSnap.val());
+        if (referrerKey) {
+            let rSnap = await window.db.ref('clients/' + referrerKey).once('value');
+            if (rSnap.exists()) referrer = Object.assign({ key: referrerKey }, rSnap.val());
         }
         if (!clientKey || !clientName) {
             clientName = req.company || req.name;
@@ -764,12 +884,14 @@ const backendFunctions = {
         await window.db.ref('requests/' + id).update({
             status: 'تم التحويل', projectKey: ref.key, clientKey: clientKey, updatedAt: new Date().toISOString()
         });
-        backendFunctions.logNotification(clientName, "project_new", "بدأنا العمل على مشروعك '" + projData.name + "' برقم تتبع " + req.code + ".");
+        await backendFunctions.logNotification(clientName, "project_new", "بدأنا العمل على مشروعك '" + projData.name + "' برقم تتبع " + req.code + ".");
+        await backendFunctions.syncClientPortal(clientKey);
 
         // 3) مكافأة الدعوة: تُمنح مرة واحدة عند أول مشروع لعميل جديد
         if (referrer && isNewClient && referrer.key !== clientKey) {
             await window.db.ref('clients/' + referrer.key + '/points').transaction(p => (parseInt(p) || 0) + RNAN.REFERRAL_BONUS);
-            backendFunctions.logNotification(referrer.name || referrer.company, "referral_bonus", "🎁 حصلت على " + RNAN.REFERRAL_BONUS + " نقطة لأن " + clientName + " انضم لرنان عن طريق دعوتك.");
+            await backendFunctions.logNotification(referrer.name || referrer.company, "referral_bonus", "🎁 حصلت على " + RNAN.REFERRAL_BONUS + " نقطة لأن " + clientName + " انضم لرنان عن طريق دعوتك.");
+            await backendFunctions.syncClientPortal(referrer.key);
         }
         return { clientKey: clientKey, projectKey: ref.key, clientName: clientName, isNewClient: isNewClient };
     },
@@ -808,6 +930,8 @@ const backendFunctions = {
     },
     markRedemptionUsed: async function(id) {
         await window.db.ref('redemptions/' + id).update({ status: 'مستخدم', usedAt: new Date().toISOString() });
+        let snap = await window.db.ref('redemptions/' + id + '/clientKey').once('value');
+        await backendFunctions.syncClientPortal(snap.val());
         return "تم تعليم الكوبون كمستخدم";
     },
 
@@ -852,6 +976,135 @@ const backendFunctions = {
     saveSiteSettings: async function(data) {
         await window.db.ref('settings/site').set(data);
         return "تم حفظ بيانات الموقع";
+    },
+
+    // ── صفحات العملاء: portalData/<token> ─────────────────────
+    // القواعد تمنع العامة من قراءة clients/projects/invoices، فتكتب الإدارة لكل عميل
+    // ما يخصّه فقط (بلا قيمة المشروع ولا ملاحظاته الداخلية) تحت رابطه الخاص.
+    // ما يكتبه العميل نفسه (seenAt، النقاط والكوبونات عند الاستبدال) لا يُمسح هنا.
+    _portalView: function(key, c, recs) {
+        let arr = v => Array.isArray(v) ? v : (typeof v === 'string' ? RNAN.safeJSON(v, []) : (v ? Object.values(v) : []));
+        let fb = recs.feedback || {};
+        let view = { key: key, projects: {}, invoices: {}, notifs: {}, coupons: {}, syncedAt: Date.now() };
+        view.profile = {
+            name: c.name || '', company: c.company || c.name || '', phone: c.phone || '', email: c.email || '',
+            points: parseInt(c.points) || 0, totalSpent: parseFloat(c.totalSpent) || 0,
+            dateAdded: c.dateAdded || '', refCode: c.refCode || ''
+        };
+        recs.projects.forEach(([id, p]) => {
+            let f = fb[id] && (fb[id].at || 0) > (p.ratedAt || 0) ? fb[id] : null;
+            view.projects[id] = {
+                name: p.name || '', code: p.code || '', status: p.status || '',
+                progress: parseInt(p.progress) || 0, startDate: p.startDate || '', deadline: p.deadline || '',
+                steps: arr(p.steps).map(s => ({ text: String((s && s.text) || ''), done: !!(s && s.done) })),
+                rating: parseInt(f ? f.rating : p.rating) || 0, review: (f ? f.review : p.review) || ''
+            };
+            // رابط مراجعة التصميم (review.html) ورابط تسليم الملفات النهائية
+            if (p.proof && p.proof.token) view.projects[id].proof = { token: String(p.proof.token), round: parseInt(p.proof.round) || 1, at: p.proof.at || '', until: p.proof.until || '' };
+            if (p.delivery && p.delivery.url) view.projects[id].delivery = { url: String(p.delivery.url), note: p.delivery.note || '', at: p.delivery.at || '' };
+        });
+        recs.invoices.forEach(([id, i]) => {
+            view.invoices[id] = {
+                number: String(i.number || id), client: i.client || '', amount: parseFloat(i.amount) || 0,
+                date: i.date || '', status: i.status || 'قيد الانتظار', notes: i.notes || '', footerText: i.footerText || '',
+                items: arr(i.items).map(it => ({ desc: String((it && it.desc) || ''), qty: parseFloat(it && it.qty) || 0, price: parseFloat(it && it.price) || 0 })),
+                dueDate: i.dueDate || '', paidAt: i.paidAt || '', payMethod: i.payMethod || ''
+            };
+            // الدفعات الجزئية (المتبقي وسجل الدفعات في صفحة العميل) بلا مرجع إشعار التحويل الداخلي
+            if (i.payments) {
+                view.invoices[id].payments = {};
+                Object.entries(i.payments).forEach(([k, pm]) => { if (pm && parseFloat(pm.amount) > 0) view.invoices[id].payments[k] = { amount: parseFloat(pm.amount), at: pm.at || '', method: pm.method || '' }; });
+            }
+        });
+        recs.notifs.sort((a, b) => String(b[1].date || '').localeCompare(String(a[1].date || ''))).slice(0, 50).forEach(([id, n]) => {
+            view.notifs[id] = { type: n.type || 'info', message: n.message || '', date: n.date || '', isRead: !!n.isRead };
+        });
+        recs.redemptions.forEach(([id, r]) => {
+            view.coupons[id] = { code: r.code || '', title: r.title || '', value: parseFloat(r.value) || 0, cost: parseInt(r.cost) || 0, status: r.status || 'جديد', createdAt: r.createdAt || '' };
+            if (r.usedAt) view.coupons[id].usedAt = r.usedAt;
+        });
+        return view;
+    },
+
+    _writePortal: function(updates, key, c, recs) {
+        let view = backendFunctions._portalView(key, c, recs);
+        Object.keys(view).forEach(k => { updates['portalData/' + c.token + '/' + k] = view[k]; });
+        updates['portal/' + c.token] = key;
+        if (c.refCode) updates['referrals/' + c.refCode] = backendFunctions._referralEntry(key, c);
+    },
+
+    _namesOf: function(c) {
+        return Array.from(new Set([c.name, c.company].filter(Boolean)));
+    },
+
+    // [snapshot, ...] → [[key, value], ...] بلا تكرار
+    _pairs: function(snaps) {
+        let seen = {};
+        snaps.forEach(s => s.forEach(child => { seen[child.key] = child.val(); }));
+        return Object.keys(seen).map(k => [k, seen[k]]);
+    },
+
+    // يعيد بناء صفحة عميل واحد (بمفتاحه أو اسمه) بعد أي تعديل يخصّه
+    syncClientPortal: async function(ref) {
+        if (!ref) return;
+        let cSnap = await window.db.ref('clients').once('value');
+        let targets = [];
+        cSnap.forEach(child => {
+            let c = child.val();
+            if (c.token && (child.key === ref || c.name === ref || c.company === ref)) targets.push([child.key, c]);
+        });
+        let updates = {};
+        for (let [key, c] of targets) {
+            let names = backendFunctions._namesOf(c);
+            let byClient = node => Promise.all(names.map(n => window.db.ref(node).orderByChild('client').equalTo(n).once('value')));
+            let [projects, invoices, notifs, reds, fb] = await Promise.all([
+                byClient('projects'), byClient('invoices'), byClient('notifications'),
+                window.db.ref('redemptions').orderByChild('clientKey').equalTo(key).once('value'),
+                window.db.ref('feedback/' + c.token).once('value')
+            ]);
+            backendFunctions._writePortal(updates, key, c, {
+                projects: backendFunctions._pairs(projects),
+                invoices: backendFunctions._pairs(invoices),
+                notifs: backendFunctions._pairs(notifs),
+                redemptions: backendFunctions._pairs([reds]),
+                feedback: fb.val() || {}
+            });
+        }
+        if (Object.keys(updates).length > 0) await window.db.ref().update(updates);
+    },
+
+    // يعيد بناء صفحات كل العملاء ويحذف صفحات الروابط الملغاة — يعمل عند كل دخول للإدارة
+    syncAllPortals: async function() {
+        await backendFunctions.getClientsData(); // يُصدر الروابط الناقصة ويوحّد النقاط
+        let [cSnap, pSnap, iSnap, nSnap, rSnap, fSnap, tSnap] = await Promise.all(
+            ['clients', 'projects', 'invoices', 'notifications', 'redemptions', 'feedback', 'portal'].map(p => window.db.ref(p).once('value')));
+        let projects = backendFunctions._pairs([pSnap]);
+        let invoices = backendFunctions._pairs([iSnap]);
+        let notifs = backendFunctions._pairs([nSnap]);
+        let reds = backendFunctions._pairs([rSnap]);
+        let feedback = fSnap.val() || {};
+        let updates = {};
+        let live = {};
+        cSnap.forEach(child => {
+            let key = child.key, c = child.val();
+            if (!c.token) return;
+            live[c.token] = key;
+            let names = backendFunctions._namesOf(c);
+            let mine = list => list.filter(([, v]) => names.includes(v.client));
+            backendFunctions._writePortal(updates, key, c, {
+                projects: mine(projects), invoices: mine(invoices), notifs: mine(notifs),
+                redemptions: reds.filter(([, r]) => r.clientKey === key),
+                feedback: feedback[c.token] || {}
+            });
+        });
+        tSnap.forEach(t => {
+            if (live[t.key] !== t.val()) {
+                updates['portal/' + t.key] = null;
+                updates['portalData/' + t.key] = null;
+            }
+        });
+        if (Object.keys(updates).length > 0) await window.db.ref().update(updates);
+        return Object.keys(live).length;
     }
 };
 

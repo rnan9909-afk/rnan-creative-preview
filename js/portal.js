@@ -1,6 +1,8 @@
 /**
  * صفحة العميل الخاصة — تُفتح برابط ثابت client.html?k=TOKEN بدون كلمة مرور.
- * portal/<TOKEN> → مفتاح العميل، ثم تُقرأ مشاريعه وفواتيره وإشعاراته باسمه.
+ * قواعد القاعدة تمنع قراءة clients/projects/invoices، فتقرأ الصفحة نسخة العميل وحده
+ * في portalData/<TOKEN> (تكتبها لوحة الإدارة)، وتكتب فقط ما تسمح به القواعد:
+ * تقييماته (feedback/<TOKEN>)، وقت آخر قراءة (seenAt)، واستبدال النقاط.
  */
 (function () {
     const $ = (sel, root) => (root || document).querySelector(sel);
@@ -8,21 +10,31 @@
     const E = RNAN.esc;
     const token = new URLSearchParams(location.search).get('k');
 
-    const state = { key: null, client: null, names: [], projects: [], invoices: [], notifs: [], coupons: [], settings: {}, tab: 'active', rating: null };
+    const state = { key: null, client: null, projects: [], invoices: [], notifs: [], coupons: [], feedback: {}, seenAt: 0, settings: {}, tab: 'active', rating: null };
 
     function withTimeout(promise, ms) {
         return Promise.race([promise, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms || 15000))]);
     }
     const read = (path) => withTimeout(db.ref(path).once('value')).then(s => s.val());
+    const list = (obj) => Object.keys(obj || {}).map(id => Object.assign({ id: id }, obj[id]));
 
-    // كل السجلات المرتبطة بالعميل (بالاسم أو اسم الشركة)
-    async function byClient(node, field, values) {
-        const out = {};
-        for (const v of values) {
-            const snap = await withTimeout(db.ref(node).orderByChild(field).equalTo(v).once('value'));
-            snap.forEach(ch => { out[ch.key] = Object.assign({ id: ch.key }, ch.val()); });
-        }
-        return Object.values(out);
+    function applyData(d) {
+        state.key = d.key;
+        state.client = d.profile;
+        state.seenAt = d.seenAt || 0;
+        state.projects = list(d.projects).map(p => {
+            const f = state.feedback[p.id];
+            return f ? Object.assign(p, { rating: f.rating, review: f.review || '' }) : p;
+        });
+        state.invoices = list(d.invoices);
+        state.coupons = list(d.coupons).sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+        // الاستبدالات تظهر في التحديثات من الكوبونات نفسها
+        const redeemed = state.coupons.map(c => ({
+            id: 'rw-' + c.id, type: 'points_redeemed', date: c.createdAt, isRead: true,
+            message: `استبدلت ${c.cost} نقطة بـ «${c.title}». كود الخصم: ${c.code}`
+        }));
+        state.notifs = list(d.notifs).concat(redeemed).map(n =>
+            Object.assign(n, { isRead: !!n.isRead || Date.parse(n.date) <= state.seenAt }));
     }
 
     function toast(msg) {
@@ -288,38 +300,38 @@
         const btn = $('#redeem-go');
         btn.disabled = true;
         try {
-            let applied = false;
-            // معاملة ذرّية: لا يمكن صرف نفس النقاط مرتين
-            const res = await withTimeout(db.ref('clients/' + state.key + '/points').transaction(p => {
-                if (p === null) { applied = false; return null; }
-                const cur = parseInt(p) || 0;
-                if (cur < r.cost) { applied = false; return; }
-                applied = true;
-                return cur - r.cost;
-            }));
-            if (!res.committed || !applied) {
+            const points = parseInt(state.client.points) || 0;
+            if (points < r.cost) {
                 closeModals();
                 toast('رصيدك لا يكفي لهذه المكافأة');
                 return;
             }
+            // كتابة واحدة ذرّية تتحقق منها القواعد: الرصيد الجديد = الرصيد الحالي في القاعدة − تكلفة
+            // المكافأة بالضبط، ومعه سجل استبدال جديد برابط العميل. لو تغيّر الرصيد بين القراءة
+            // والكتابة (استبدال آخر، أو تحديث من الإدارة) تُرفض الكتابة كاملة فلا تُصرف النقاط مرتين.
+            const rid = db.ref('redemptions').push().key;
             const code = 'RWD-' + RNAN.newRefCode();
-            const name = state.client.name || state.client.company;
-            await withTimeout(db.ref('redemptions').push({
-                clientKey: state.key, client: name, title: r.title, value: r.value, cost: r.cost,
-                code: code, status: 'جديد', createdAt: new Date().toISOString()
-            }));
-            db.ref('notifications').push({
-                client: name, type: 'points_redeemed', isRead: false, date: new Date().toISOString(),
-                message: `استبدلت ${r.cost} نقطة بـ «${r.title}». كود الخصم: ${code}`
-            });
-            state.coupons.unshift({ code: code, title: r.title, status: 'جديد' });
-            renderCoupons();
+            const createdAt = new Date().toISOString();
+            const left = points - r.cost;
+            const coupon = { code: code, title: r.title, value: r.value, cost: r.cost, status: 'جديد', createdAt: createdAt };
+            const updates = {};
+            updates['clients/' + state.key + '/points'] = left;
+            updates['clients/' + state.key + '/lastRedeem'] = rid;
+            updates['redemptions/' + rid] = Object.assign({
+                clientKey: state.key, token: token, rewardId: r.id,
+                client: String(state.client.name || state.client.company).slice(0, 100)
+            }, coupon);
+            updates['portalData/' + token + '/profile/points'] = left;
+            updates['portalData/' + token + '/coupons/' + rid] = coupon;
+            await withTimeout(db.ref().update(updates));
             $('#coupon-code').textContent = code;
             $('#redeem-confirm').hidden = true;
             $('#redeem-done').hidden = false;
         } catch (err) {
             closeModals();
-            toast('تعذّر الاتصال، حاول مرة أخرى');
+            toast(err && err.code === 'PERMISSION_DENIED'
+                ? 'تغيّر رصيدك للتو، حدّث الصفحة وحاول مجددًا'
+                : 'تعذّر الاتصال، حاول مرة أخرى');
         } finally {
             btn.disabled = false;
         }
@@ -344,7 +356,9 @@
         const { id, value } = state.rating;
         const review = $('#rate-review').value.trim();
         try {
-            await withTimeout(db.ref('projects/' + id).update({ rating: value, review: review }));
+            const f = { rating: value, review: review.slice(0, 1000), at: firebase.database.ServerValue.TIMESTAMP };
+            await withTimeout(db.ref('feedback/' + token + '/' + id).set(f));
+            state.feedback[id] = { rating: value, review: f.review };
             const p = state.projects.find(x => x.id === id);
             if (p) { p.rating = value; p.review = review; }
             closeModals();
@@ -367,9 +381,8 @@
             </div>`).join('') : `<div class="empty" style="border:0">${icon('bell')}ستظهر هنا تحديثات مشاريعك ونقاطك.</div>`;
     }
     function markAllRead() {
-        const updates = {};
-        state.notifs.forEach(n => { if (!n.isRead) { updates[n.id + '/isRead'] = true; n.isRead = true; } });
-        if (Object.keys(updates).length) db.ref('notifications').update(updates);
+        state.notifs.forEach(n => { n.isRead = true; });
+        db.ref('portalData/' + token + '/seenAt').set(firebase.database.ServerValue.TIMESTAMP).catch(() => {});
         renderUpdates();
     }
 
@@ -411,6 +424,15 @@
         $('#print-invoice').addEventListener('click', printInvoice);
     }
 
+    function renderAll() {
+        renderMember();
+        renderStats();
+        renderProjects();
+        renderInvoices();
+        renderCoupons();
+        renderUpdates();
+    }
+
     async function init() {
         bindEvents();
         if (!token || token.length < 10) {
@@ -418,45 +440,35 @@
         }
         if (!window.db) return showError('تعذّر الاتصال', 'تأكّد من اتصالك بالإنترنت ثم أعد تحميل الصفحة.');
         try {
-            const key = await read('portal/' + token);
-            if (!key) return showError();
-            state.key = key;
-            const client = await read('clients/' + key);
-            if (!client) return showError();
-            state.client = client;
-            state.names = Array.from(new Set([client.name, client.company].filter(Boolean)));
-
-            const [projects, invoices, notifs, coupons, footer, agency] = await Promise.all([
-                byClient('projects', 'client', state.names),
-                byClient('invoices', 'client', state.names),
-                byClient('notifications', 'client', state.names),
-                byClient('redemptions', 'clientKey', [key]),
+            const [data, feedback, footer, agency] = await Promise.all([
+                read('portalData/' + token),
+                read('feedback/' + token).catch(() => null),
                 read('settings/invoice_footer').catch(() => ''),
                 read('settings/agency_name').catch(() => '')
             ]);
-            state.projects = projects;
-            state.invoices = invoices;
-            state.notifs = notifs;
-            state.coupons = coupons.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+            if (!data || !data.profile) {
+                // رابط صحيح لكن صفحته لم تُبنَ بعد (تُبنى عند دخول لوحة الإدارة)
+                const key = await read('portal/' + token).catch(() => null);
+                return key
+                    ? showError('صفحتك قيد التجهيز', 'نحدّث صفحتك الآن. أعد فتح الرابط بعد قليل، أو تواصل معنا.')
+                    : showError();
+            }
+            state.feedback = feedback || {};
             state.settings = { invoice_footer: footer, agency_name: agency };
+            applyData(data);
             if (!state.projects.some(p => p.status !== 'مكتمل') && state.projects.length) state.tab = 'done';
 
-            renderMember();
-            renderStats();
-            renderProjects();
-            renderInvoices();
-            renderCoupons();
-            renderUpdates();
+            renderAll();
             renderReferral();
-            document.title = 'صفحة ' + (client.name || client.company) + ' | رنان';
+            document.title = 'صفحة ' + (state.client.name || state.client.company) + ' | رنان';
             $('#state-loading').hidden = true;
             $('#portal').hidden = false;
 
-            // النقاط والمستوى تتحدّث لحظيًا عند سداد فاتورة من لوحة الإدارة
-            db.ref('clients/' + key).on('value', snap => {
-                if (!snap.exists()) return;
-                state.client = snap.val();
-                renderMember();
+            // كل ما تعدّله الإدارة (سداد فاتورة، تقدّم مشروع، نقاط) يظهر لحظيًا
+            db.ref('portalData/' + token).on('value', snap => {
+                if (!snap.exists() || !snap.val().profile) return;
+                applyData(snap.val());
+                renderAll();
             });
         } catch (err) {
             showError('تعذّر الاتصال', 'تأكّد من اتصالك بالإنترنت ثم أعد تحميل الصفحة.');

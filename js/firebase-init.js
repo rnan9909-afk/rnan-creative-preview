@@ -15,3 +15,5 @@ if (!firebase.apps.length) {
 }
 const db = firebase.database();
 window.db = db;
+// مكتبة الدخول تُحمّل في لوحة الإدارة فقط؛ الموقع وصفحة العميل لا يحتاجانها
+window.auth = firebase.auth ? firebase.auth() : null;

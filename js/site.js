@@ -415,13 +415,16 @@
                 createdAt: new Date().toISOString()
             });
             if (state.client) req.clientKey = state.client.key;
-            if (state.referrer && (!state.client || state.client.key !== state.referrer.key)) {
-                req.referrerKey = state.referrer.key;
+            // رمز الدعوة فقط — مفتاح صاحب الدعوة لا يظهر للزوار، والإدارة تحلّه عند التحويل
+            if (state.referrer && !state.client) {
+                req.referrerCode = state.referrer.code;
                 req.referrerName = state.referrer.name;
             }
+            // القواعد تقبل إنشاء رقم التتبع فقط مع طلب جديد يحمل نفس الرقم في نفس الكتابة
+            const id = db.ref('requests').push().key;
             const updates = {};
-            updates['requests/' + db.ref('requests').push().key] = req;
-            updates['track/' + code] = RNAN.trackFromRequest(req);
+            updates['requests/' + id] = req;
+            updates['track/' + code] = Object.assign(RNAN.trackFromRequest(req), { rid: id });
             await withTimeout(db.ref().update(updates));
             try { localStorage.setItem('rnan-last-request', String(Date.now())); } catch (err) { }
 
@@ -455,9 +458,8 @@
 
         if (token) {
             try {
-                const key = await read('portal/' + token);
-                const c = key ? await read('clients/' + key) : null;
-                if (c) {
+                const [key, c] = await Promise.all([read('portal/' + token), read('portalData/' + token + '/profile')]);
+                if (key && c) {
                     state.client = { key: key, name: c.name || c.company };
                     $('#rq-name').value = c.name || '';
                     $('#rq-company').value = c.company && c.company !== c.name ? c.company : '';
@@ -470,12 +472,14 @@
         }
         if (ref && !state.client) {
             try {
-                const key = await read('referrals/' + String(ref).toUpperCase());
-                const c = key ? await read('clients/' + key) : null;
-                if (c) {
-                    state.referrer = { key: key, name: c.name || c.company };
-                    const first = String(state.referrer.name).split(' ')[0];
-                    banner.innerHTML = `${icon('gift')} <span>دعاك ${E(first)} إلى رنان — أهلًا بك! اطلب خدمتك وسنعتني بك جيدًا.</span>`;
+                const code = String(ref).toUpperCase().replace(/[^A-Z0-9]/g, '');
+                // القواعد تكشف الاسم الأول فقط من referrals/<code>
+                const name = code ? await read('referrals/' + code + '/name') : null;
+                if (name != null) {
+                    state.referrer = { code: code, name: name };
+                    banner.innerHTML = name
+                        ? `${icon('gift')} <span>دعاك ${E(name)} إلى رنان — أهلًا بك! اطلب خدمتك وسنعتني بك جيدًا.</span>`
+                        : `${icon('gift')} <span>وصلت برابط دعوة — أهلًا بك! اطلب خدمتك وسنعتني بك جيدًا.</span>`;
                     banner.hidden = false;
                 }
             } catch (err) { }

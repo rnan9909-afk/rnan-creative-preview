@@ -881,7 +881,8 @@
     <!-- Firebase SDK & Backend Shim -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="js/firebase-init.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="js/firebase-init.js?v=2"></script>
     <script src="js/rnan-core.js?v=4"></script>
     <script src="js/backend-shim.js?v=9"></script>
 
@@ -920,7 +921,12 @@
 
             <div class="w-full space-y-4">
                 <div>
-                    <input type="password" id="login-password" placeholder="كلمة مرور الإدارة"
+                    <input type="email" id="login-email" placeholder="البريد الإلكتروني" dir="ltr" autocomplete="username"
+                        class="form-input-modern text-center font-bold"
+                        onkeypress="if(event.key === 'Enter') document.getElementById('login-password').focus()">
+                </div>
+                <div>
+                    <input type="password" id="login-password" placeholder="كلمة المرور" autocomplete="current-password"
                         class="form-input-modern text-center font-bold tracking-widest"
                         onkeypress="if(event.key === 'Enter') doLogin()">
                 </div>
@@ -930,6 +936,7 @@
                 </button>
                 <p id="login-error" class="text-red-400 text-xs text-center hidden font-bold mt-2">بيانات الدخول غير
                     صحيحة</p>
+                <button type="button" onclick="resetAdminPassword()" class="block mx-auto text-[11px] text-muted hover:text-white transition">نسيت كلمة المرور؟</button>
                 <div class="mt-6 pt-5 border-t border-white/[0.06] text-center space-y-2">
                     <p class="text-[11px] text-muted leading-relaxed">عميل لدى رنان؟ لا تحتاج لكلمة مرور —<br>افتح رابطك الخاص الذي أرسلناه لك.</p>
                     <a href="index.html" class="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline">
@@ -2513,7 +2520,12 @@
         function initApp() {
             // Apply saved theme state icons
             updateThemeIcons(localStorage.getItem('theme') || 'dark');
-            
+
+            // جلسة دخول محفوظة من زيارة سابقة تتخطى شاشة الدخول
+            google.script.run.withSuccessHandler((res) => {
+                if (res.success) enterAdmin();
+            }).restoreSession();
+
             document.addEventListener('keydown', function (event) {
                 if (event.key === "Escape") {
                     document.getElementById('notesViewerModal').classList.remove('open');
@@ -2563,8 +2575,10 @@
         }
 
         // --- Login System ---
+        // الدخول عبر Firebase Authentication؛ الجلسة تبقى محفوظة حتى تسجيل الخروج
         function doLogin() {
             let btn = document.getElementById('login-btn');
+            let email = document.getElementById('login-email').value;
             let pass = document.getElementById('login-password').value;
             let errorMsg = document.getElementById('login-error');
 
@@ -2573,20 +2587,45 @@
 
             google.script.run.withSuccessHandler((res) => {
                 if (res.success) {
-                    // الدخول هنا للإدارة فقط؛ العملاء يستخدمون روابطهم الخاصة (client.html)
-                    currentUserRole = 'admin';
-                    document.body.classList.remove('client-mode');
-                    document.getElementById('login-overlay').classList.add('hidden');
-                    switchPage('dashboard');
-                    loadAllData();
+                    enterAdmin();
                 } else {
+                    errorMsg.innerText = res.message || 'بيانات الدخول غير صحيحة';
                     errorMsg.classList.remove('hidden');
                     btn.innerHTML = `<span class="material-symbols-rounded">login</span> دخول للنظام`;
                 }
-            }).checkLogin(pass);
+            }).checkLogin(email, pass);
+        }
+
+        function enterAdmin() {
+            // الدخول هنا للإدارة فقط؛ العملاء يستخدمون روابطهم الخاصة (client.html)
+            currentUserRole = 'admin';
+            document.body.classList.remove('client-mode');
+            document.getElementById('login-overlay').classList.add('hidden');
+            document.getElementById('login-password').value = '';
+            switchPage('dashboard');
+            // صفحات العملاء تُبنى من بيانات الإدارة؛ تُحدَّث كلها عند كل دخول ثم تُحمّل اللوحة
+            google.script.run.withSuccessHandler(() => loadAllData()).withFailureHandler((err) => {
+                console.error('syncAllPortals', err);
+                loadAllData();
+            }).syncAllPortals();
+        }
+
+        function resetAdminPassword() {
+            let email = document.getElementById('login-email').value.trim();
+            let msg = document.getElementById('login-error');
+            if (!email) {
+                msg.innerText = 'اكتب بريدك الإلكتروني أولًا ثم اضغط «نسيت كلمة المرور»';
+                msg.classList.remove('hidden');
+                return;
+            }
+            google.script.run.withSuccessHandler((res) => {
+                msg.innerText = res.success ? 'أرسلنا رابط تعيين كلمة المرور إلى بريدك' : res.message;
+                msg.classList.remove('hidden');
+            }).sendPasswordReset(email);
         }
 
         function doLogout() {
+            google.script.run.logout();
             document.getElementById('login-overlay').classList.remove('hidden');
             document.getElementById('login-password').value = '';
             document.getElementById('login-btn').innerHTML = `<span class="material-symbols-rounded">login</span> دخول للنظام`;

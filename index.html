@@ -239,12 +239,12 @@
                             <div class="chips" id="service-chips" role="group" aria-labelledby="services-label"></div>
                         </div>
                         <div class="field-row">
-                            <div class="field"><label for="rq-name">الاسم الكامل <em>*</em></label><input class="input" id="rq-name" name="name" autocomplete="name" required></div>
-                            <div class="field"><label for="rq-company">اسم الجهة / المشروع <small>(اختياري)</small></label><input class="input" id="rq-company" name="company" autocomplete="organization"></div>
+                            <div class="field"><label for="rq-name">الاسم الكامل <em>*</em></label><input class="input" id="rq-name" maxlength="100" name="name" autocomplete="name" required></div>
+                            <div class="field"><label for="rq-company">اسم الجهة / المشروع <small>(اختياري)</small></label><input class="input" id="rq-company" maxlength="100" name="company" autocomplete="organization"></div>
                         </div>
                         <div class="field-row">
-                            <div class="field"><label for="rq-phone">رقم الجوال <em>*</em></label><input class="input" id="rq-phone" name="phone" type="tel" inputmode="tel" dir="ltr" placeholder="05XXXXXXXX" autocomplete="tel" required></div>
-                            <div class="field"><label for="rq-email">البريد الإلكتروني <small>(اختياري)</small></label><input class="input" id="rq-email" name="email" type="email" dir="ltr" placeholder="name@example.com" autocomplete="email"></div>
+                            <div class="field"><label for="rq-phone">رقم الجوال <em>*</em></label><input class="input" id="rq-phone" maxlength="25" name="phone" type="tel" inputmode="tel" dir="ltr" placeholder="05XXXXXXXX" autocomplete="tel" required></div>
+                            <div class="field"><label for="rq-email">البريد الإلكتروني <small>(اختياري)</small></label><input class="input" id="rq-email" maxlength="100" name="email" type="email" dir="ltr" placeholder="name@example.com" autocomplete="email"></div>
                         </div>
                         <div class="field">
                             <span class="label" id="budget-label">الميزانية التقريبية</span>
@@ -265,8 +265,8 @@
                                 <button type="button" class="chip-opt" aria-pressed="false" data-value="مرن"><svg class="icon"><use href="#i-check"/></svg>الوقت مرن</button>
                             </div>
                         </div>
-                        <div class="field"><label for="rq-details">حدّثنا عن مشروعك <em>*</em></label><textarea class="input" id="rq-details" name="details" rows="5" placeholder="ما فكرة مشروعك؟ من جمهورك؟ هل لديك ألوان أو مراجع تحبها؟" required></textarea></div>
-                        <div class="field"><label for="rq-links">روابط مرجعية <small>(اختياري — حساباتك أو أعمال أعجبتك)</small></label><input class="input" id="rq-links" name="links" dir="ltr" placeholder="https://"></div>
+                        <div class="field"><label for="rq-details">حدّثنا عن مشروعك <em>*</em></label><textarea class="input" id="rq-details" maxlength="3000" name="details" rows="5" placeholder="ما فكرة مشروعك؟ من جمهورك؟ هل لديك ألوان أو مراجع تحبها؟" required></textarea></div>
+                        <div class="field"><label for="rq-links">روابط مرجعية <small>(اختياري — حساباتك أو أعمال أعجبتك)</small></label><input class="input" id="rq-links" maxlength="1000" name="links" dir="ltr" placeholder="https://"></div>
                         <input class="hp" type="text" name="website" id="rq-website" tabindex="-1" autocomplete="off" aria-hidden="true">
                         <p class="form-error" id="request-error" role="alert"></p>
                         <button type="submit" class="btn btn-primary btn-block" id="request-submit">أرسل الطلب <svg class="icon icon-arrow"><use href="#i-arrow"/></svg></button>
@@ -350,9 +350,9 @@
                     <div class="contact-cards" id="contact-cards"></div>
                     <div class="card form-card reveal" data-delay="1">
                         <form id="contact-form" novalidate>
-                            <div class="field"><label for="ct-name">الاسم <em>*</em></label><input class="input" id="ct-name" autocomplete="name" required></div>
-                            <div class="field"><label for="ct-contact">جوالك أو بريدك <em>*</em></label><input class="input" id="ct-contact" dir="ltr" autocomplete="email" required></div>
-                            <div class="field"><label for="ct-message">رسالتك <em>*</em></label><textarea class="input" id="ct-message" rows="4" required></textarea></div>
+                            <div class="field"><label for="ct-name">الاسم <em>*</em></label><input class="input" id="ct-name" maxlength="100" autocomplete="name" required></div>
+                            <div class="field"><label for="ct-contact">جوالك أو بريدك <em>*</em></label><input class="input" id="ct-contact" maxlength="100" dir="ltr" autocomplete="email" required></div>
+                            <div class="field"><label for="ct-message">رسالتك <em>*</em></label><textarea class="input" id="ct-message" maxlength="3000" rows="4" required></textarea></div>
                             <input class="hp" type="text" id="ct-website" tabindex="-1" autocomplete="off" aria-hidden="true">
                             <p class="form-error" id="contact-error" role="alert"></p>
                             <button type="submit" class="btn btn-primary btn-block" id="contact-submit">أرسل الرسالة <svg class="icon"><use href="#i-send"/></svg></button>
@@ -430,7 +430,7 @@
 
     <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script defer src="js/firebase-init.js"></script>
+    <script defer src="js/firebase-init.js?v=2"></script>
     <script defer src="js/rnan-core.js?v=4"></script>
     <script defer src="js/site.js?v=5"></script>
     <script defer src="js/site-extra.js?v=1"></script>
