@@ -118,6 +118,7 @@
         let stage = 2, state = 'active', label = 'التصميم قيد التنفيذ';
         if (p.status === 'مكتمل') { stage = 3; state = 'done'; label = 'تم تسليم المشروع'; }
         else if (p.status === 'معلق') { state = 'hold'; label = 'المشروع متوقف مؤقتًا'; }
+        else if (p.status === 'ملغي') { state = 'cancelled'; label = 'أُلغي المشروع'; }
         const steps = Array.isArray(p.steps) ? p.steps : (typeof p.steps === 'string' ? safeJSON(p.steps, []) : []);
         return {
             code: p.code, kind: 'project', title: p.name || 'مشروع',

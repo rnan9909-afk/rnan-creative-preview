@@ -44,7 +44,7 @@
 .cp-prj { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
 .cp-p { padding: 12px; border-radius: 16px; background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .07); cursor: pointer; display: flex; flex-direction: column; gap: 8px; --c: 122, 162, 255; }
 .cp-p:hover { border-color: rgba(255, 255, 255, .16); }
-.cp-p.run { --c: 71, 224, 172; } .cp-p.hold { --c: 251, 191, 36; } .cp-p.done { --c: 167, 139, 250; }
+.cp-p.run { --c: 71, 224, 172; } .cp-p.hold { --c: 251, 191, 36; } .cp-p.done { --c: 167, 139, 250; } .cp-p.cancel { --c: 248, 113, 113; opacity: .72; }
 .cp-p-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
 .cp-p-top b { font-size: 14px; line-height: 1.5; }
 .cp-st { flex-shrink: 0; padding: 2px 9px; border-radius: 999px; background: rgba(var(--c), .14); color: rgb(var(--c)); font-size: 11.5px; font-weight: 800; }

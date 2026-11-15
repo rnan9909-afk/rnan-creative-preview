@@ -138,7 +138,7 @@
         const tasks = (Array.isArray(p.tasks) ? p.tasks : []).filter(t => t && !t.done).map(t => t.title);
         return [...new Set([...tasks, ...steps])].map(t => `<option ${sel.task === t ? 'selected' : ''}>${E(t)}</option>`).join('');
     }
-    const activeProjects = () => Object.keys(raw).map(k => Object.assign({ id: k }, raw[k])).filter(p => p.status !== 'مكتمل');
+    const activeProjects = () => Object.keys(raw).map(k => Object.assign({ id: k }, raw[k])).filter(p => p.status !== 'مكتمل' && p.status !== 'ملغي');
 
     function renderTimer() {
         const box = document.getElementById('st-timer-card');

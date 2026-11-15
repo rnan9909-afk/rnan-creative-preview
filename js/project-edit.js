@@ -29,6 +29,11 @@
         document.querySelectorAll('#pe-types [data-type]').forEach(b => b.classList.toggle('on', b.dataset.type === t.id));
     }
     function setStatus(v) {
+        // «ملغي» يمرّ بنافذة الإلغاء (السبب وفواتير المشروع) ثم تُغلق النافذة؛ الحالات الأخرى تُحفظ بـ «حفظ المشروع»
+        if (v === 'ملغي' && $('proj-status').value !== 'ملغي') {
+            if (window.ProjectCancel && current) ProjectCancel.ask(current).then(ok => { if (ok) close(); });
+            return;
+        }
         const sel = $('proj-status');
         if (sel.value !== v) {
             sel.value = v;
@@ -58,7 +63,23 @@
         if (st === 'مكتمل') { el.className = 'pe-due ok'; el.innerHTML = `${ic('task_alt')} مكتمل`; }
         else if (!d) { el.className = 'pe-due'; el.innerHTML = `${ic('event_busy')} بلا موعد تسليم`; }
         else { el.className = 'pe-due ' + due.cls; el.innerHTML = `${ic(due.cls === 'late' ? 'warning' : 'schedule')} ${due.text}${span !== null && span >= 0 ? ' · مدة التنفيذ ' + (span ? days(span) : 'نفس اليوم') : ''}`; }
+        cancelNote(st);
         invBox();
+    }
+
+    // المشروع الملغي: متى أُلغي ولماذا، وزر استعادته (js/project-cancel.js)
+    const MONTHS = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    function cancelNote(st) {
+        const box = $('pe-cancel');
+        if (!box) return;
+        const on = st === 'ملغي' && current && current.status === 'ملغي';
+        box.hidden = !on;
+        if (!on) return;
+        const d = current.cancelledAt ? new Date(current.cancelledAt) : null;
+        box.innerHTML = `<span class="pe-cancel-ic">${ic('block')}</span>
+            <span class="pe-cancel-t"><b>أُلغي هذا المشروع${d && !isNaN(d) ? ` في <span class="en-num">${d.getDate()}</span> ${MONTHS[d.getMonth()]}` : ''}</b>
+            <small>${current.cancelReason ? 'السبب: ' + esc(current.cancelReason) : 'لا يظهر للعميل ولا في المشاريع الجارية'}</small></span>
+            <button type="button" class="admin-only" data-pe-restore>${ic('settings_backup_restore')} استعادة المشروع</button>`;
     }
 
     // ── فواتير العميل المفتوحة: إضافة قيمة المشروع لإحداها بدل فاتورة منفصلة (js/project-invoice.js) ──
@@ -142,6 +163,11 @@
             if (st) return setStatus(st.dataset.st);
             const ai = e.target.closest('[data-addinv]');
             if (ai) return addInv(ai);
+            const rs = e.target.closest('[data-pe-restore]');
+            if (rs && current && window.ProjectCancel) {
+                rs.disabled = true;
+                return ProjectCancel.restore(current).then(ok => { if (ok) close(); else rs.disabled = false; });
+            }
             const t = e.target.closest('#pe-types [data-type]');
             if (t) return setType(t.dataset.type);
             const sp = e.target.closest('[data-span]');

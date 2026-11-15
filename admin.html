@@ -829,17 +829,18 @@
     <link rel="stylesheet" href="css/studio.css?v=2">
     <link rel="stylesheet" href="css/prices.css?v=1">
     <script defer src="js/studio/data.js?v=1"></script>
-    <script defer src="js/studio/core.js?v=3"></script>
-    <script defer src="js/studio/proposals.js?v=5"></script>
+    <script defer src="js/studio/core.js?v=4"></script>
+    <script defer src="js/studio/proposals.js?v=6"></script>
     <script defer src="js/studio/templates.js?v=2"></script>
     <script defer src="js/studio/prices.js?v=2"></script>
     <script defer src="js/studio/subs.js?v=2"></script>
-    <script defer src="js/studio/time.js?v=2"></script>
+    <script defer src="js/studio/time.js?v=3"></script>
     <link rel="stylesheet" href="css/pwa.css?v=2">
     <script defer src="js/pwa.js?v=5"></script>
     <link rel="stylesheet" href="css/invoices.css?v=4">
     <script defer src="js/invoices.js?v=5"></script>
-    <script defer src="js/project-invoice.js?v=1"></script>
+    <script defer src="js/project-invoice.js?v=2"></script>
+    <script defer src="js/project-cancel.js?v=1"></script>
     <link rel="stylesheet" href="css/invoices-page.css?v=1">
     <link rel="stylesheet" href="css/invoice-edit.css?v=1">
     <script defer src="js/invoices-page.js?v=3"></script>
@@ -855,17 +856,17 @@
     <link rel="stylesheet" href="css/charts.css?v=1">
     <script defer src="js/charts.js?v=1"></script>
     <link rel="stylesheet" href="css/clients.css?v=1">
-    <script defer src="js/clients-ui.js?v=2"></script>
+    <script defer src="js/clients-ui.js?v=3"></script>
     <script defer src="js/clients-dup.js?v=1"></script>
-    <link rel="stylesheet" href="css/client-profile.css?v=1">
-    <script defer src="js/client-profile.js?v=1"></script>
+    <link rel="stylesheet" href="css/client-profile.css?v=2">
+    <script defer src="js/client-profile.js?v=2"></script>
     <link rel="stylesheet" href="css/search.css?v=1">
     <script defer src="js/search.js?v=1"></script>
     <link rel="stylesheet" href="css/projects-page.css?v=3">
-    <script defer src="js/projects-page.js?v=4"></script>
-    <link rel="stylesheet" href="css/project-edit.css?v=3">
-    <script defer src="js/proofs.js?v=7"></script>
-    <script defer src="js/project-edit.js?v=2"></script>
+    <script defer src="js/projects-page.js?v=5"></script>
+    <link rel="stylesheet" href="css/project-edit.css?v=4">
+    <script defer src="js/proofs.js?v=8"></script>
+    <script defer src="js/project-edit.js?v=3"></script>
     <script defer src="js/delivery.js?v=1"></script>
     <script defer src="js/brief-questions.js?v=1"></script>
     <script defer src="js/brief-admin.js?v=1"></script>
@@ -875,7 +876,7 @@
     <script defer src="js/backup.js?v=1"></script>
     <script defer src="js/bell.js?v=2"></script>
     <link rel="stylesheet" href="css/home.css?v=2">
-    <script defer src="js/home.js?v=3"></script>
+    <script defer src="js/home.js?v=4"></script>
     <link rel="stylesheet" href="css/finance.css?v=1">
     <script defer src="js/finance.js?v=2"></script>
 
@@ -884,8 +885,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="js/firebase-init.js?v=2"></script>
-    <script src="js/rnan-core.js?v=4"></script>
-    <script src="js/backend-shim.js?v=9"></script>
+    <script src="js/rnan-core.js?v=5"></script>
+    <script src="js/backend-shim.js?v=10"></script>
 
     <script>
         // Apply theme immediately to prevent flashing
@@ -1445,7 +1446,7 @@
                             <button type="button" role="tab" data-view="list" class="on"><span class="material-symbols-rounded">view_agenda</span><span class="lbl">القائمة</span></button>
                             <button type="button" role="tab" data-view="cal"><span class="material-symbols-rounded">calendar_month</span><span class="lbl">التقويم</span></button>
                         </div>
-                        <button type="button" class="pp-btn ghost" onclick="openArchiveModal()" title="أرشيف المشاريع المكتملة"><span class="material-symbols-rounded">inventory_2</span><span class="lbl">الأرشيف</span><em class="en-num" id="stat-proj-completed">0</em></button>
+                        <button type="button" class="pp-btn ghost" onclick="openArchiveModal()" title="أرشيف المشاريع المسلّمة والملغاة"><span class="material-symbols-rounded">inventory_2</span><span class="lbl">الأرشيف</span><em class="en-num" id="stat-proj-completed">0</em></button>
                         <button type="button" class="pp-btn main admin-only" onclick="openProjectModal('new')"><span class="material-symbols-rounded">add</span> مشروع جديد</button>
                     </div>
                 </div>
@@ -1494,9 +1495,9 @@
                 <div>
                     <h2 class="text-2xl sm:text-3xl font-black text-white flex items-center gap-3"><span
                             class="material-symbols-rounded text-accent-green">archive</span> <span
-                            class="hidden sm:inline">أرشيف المشاريع المكتملة</span><span
+                            class="hidden sm:inline">أرشيف المشاريع</span><span
                             class="sm:hidden">الأرشيف</span></h2>
-                    <p class="text-muted text-xs sm:text-sm mt-1">البحث وطباعة التقارير للمشاريع المسلمة</p>
+                    <p class="text-muted text-xs sm:text-sm mt-1">المشاريع المسلّمة والملغاة: البحث وطباعة التقارير</p>
                 </div>
                 <button onclick="document.getElementById('archiveModal').classList.remove('open')"
                     class="w-10 h-10 rounded-full bg-white/10 hover:bg-red-500/20 hover:text-red-500 flex items-center justify-center transition-all"><span
@@ -1508,6 +1509,14 @@
                     <label class="block text-[10px] text-muted font-bold uppercase mb-2">اسم الجهة / العميل</label>
                     <input type="text" id="archive-search-client" class="form-input-modern py-3 text-sm"
                         placeholder="اكتب اسم العميل...">
+                </div>
+                <div class="w-full sm:w-auto min-w-[140px]">
+                    <label class="block text-[10px] text-muted font-bold uppercase mb-2">الحالة</label>
+                    <select id="archive-status" class="form-input-modern py-3 text-sm" onchange="filterArchive()">
+                        <option value="">الكل</option>
+                        <option value="مكتمل">المسلّمة</option>
+                        <option value="ملغي">الملغاة</option>
+                    </select>
                 </div>
                 <div class="flex gap-2 w-full sm:w-auto">
                     <div class="flex-1 min-w-[120px]">
@@ -1746,17 +1755,20 @@
             </header>
             <div class="pe-body">
                 <div class="pe-main">
+                    <div id="pe-cancel" class="pe-cancel" hidden></div>
                     <section class="pe-sec" style="--o:1">
                         <h4><span class="material-symbols-rounded">flag</span> الحالة</h4>
                         <div class="pe-status" role="radiogroup" aria-label="حالة المشروع">
                             <button type="button" data-st="قيد التنفيذ" role="radio"><span class="material-symbols-rounded">autorenew</span> قيد التنفيذ</button>
                             <button type="button" data-st="معلق" role="radio"><span class="material-symbols-rounded">pause_circle</span> معلّق</button>
                             <button type="button" data-st="مكتمل" role="radio"><span class="material-symbols-rounded">task_alt</span> مكتمل</button>
+                            <button type="button" data-st="ملغي" role="radio" class="admin-only"><span class="material-symbols-rounded">block</span> ملغي</button>
                         </div>
                         <select id="proj-status" class="pe-native" onchange="syncStatusToProgress()" aria-hidden="true" tabindex="-1">
                             <option value="قيد التنفيذ">قيد التنفيذ</option>
                             <option value="مكتمل">مكتمل</option>
                             <option value="معلق">معلق</option>
+                            <option value="ملغي">ملغي</option>
                         </select>
                     </section>
                     <section class="pe-sec" style="--o:2">
@@ -2950,7 +2962,7 @@ ${link}
 
         function checkNotifications() {
             let today = new Date().toISOString().split('T')[0];
-            let todayProjects = projectsData.filter(p => p.deadline === today && p.status !== 'مكتمل');
+            let todayProjects = projectsData.filter(p => p.deadline === today && p.status !== 'مكتمل' && p.status !== 'ملغي');
             let badge = document.getElementById('notif-badge');
             let mobileBadge = document.getElementById('notif-badge-mobile');
             let list = document.getElementById('notif-list');
@@ -3013,7 +3025,7 @@ ${link}
         }
 
         function openDayModal(dateStr) {
-            let dayProjects = projectsData.filter(p => p.deadline === dateStr && p.status !== 'مكتمل');
+            let dayProjects = projectsData.filter(p => p.deadline === dateStr && p.status !== 'مكتمل' && p.status !== 'ملغي');
             let content = document.getElementById('day-modal-content');
             document.getElementById('day-modal-title').innerText = `مشاريع ${dateStr}`;
             content.innerHTML = '';
@@ -3182,7 +3194,7 @@ ${link}
                 if (dashPaidInv) dashPaidInv.innerText = invoicesData.filter(i => i.status === 'مدفوعة').length;
             }
 
-            document.getElementById('stat-proj-completed').innerText = projectsData.filter(p => p.status === 'مكتمل').length;
+            document.getElementById('stat-proj-completed').innerText = projectsData.filter(p => p.status === 'مكتمل' || p.status === 'ملغي').length;
             document.getElementById('stat-proj-pending').innerText = projectsData.filter(p => p.status === 'معلق').length;
             document.getElementById('stat-proj-active').innerText = projectsData.filter(p => p.status === 'قيد التنفيذ').length;
 
@@ -4145,8 +4157,10 @@ ${link}
             let fromTime = dateFrom ? new Date(dateFrom).getTime() : null;
             let toTime = dateTo ? new Date(dateTo).getTime() : null;
 
+            let status = (document.getElementById('archive-status') || {}).value || '';
             let archived = projectsData.filter(p => {
-                if (p.status !== 'مكتمل') return false;
+                if (p.status !== 'مكتمل' && p.status !== 'ملغي') return false;
+                if (status && p.status !== status) return false;
 
                 // Client filter in client mode too
                 if (currentUserRole === 'client' && p.client !== currentClientName) return false;
@@ -4180,7 +4194,9 @@ ${link}
             } else {
                 emptyMsg.classList.add('hidden');
                 data.forEach(p => {
-                    totalVal += (parseFloat(p.value) || 0);
+                    // الملغي يظهر بقيمته مشطوبة ولا يدخل في المجموع
+                    let off = p.status === 'ملغي';
+                    if (!off) totalVal += (parseFloat(p.value) || 0);
                     // Find Global Index for Editing
                     let globalIndex = projectsData.findIndex(x => x.rowIndex === p.rowIndex);
 
@@ -4189,8 +4205,8 @@ ${link}
                     <td class="px-6 py-4 font-bold text-white">${p.name}</td>
                     <td class="px-6 py-4 text-gray-300">${p.client}</td>
                     <td class="px-6 py-4 text-center en-num text-sm text-muted">${p.deadline}</td>
-                    <td class="px-6 py-4 text-center font-bold text-accent-green en-num">${formatCurrency(p.value)}</td>
-                    <td class="px-6 py-4 text-center"><span class="px-3 py-1 bg-accent-green/20 text-accent-green text-xs font-bold rounded-full">مكتمل</span></td>
+                    <td class="px-6 py-4 text-center font-bold en-num ${off ? 'arc-off' : 'text-accent-green'}">${formatCurrency(p.value)}</td>
+                    <td class="px-6 py-4 text-center">${off ? `<span class="arc-cancel" title="${(p.cancelReason || '').replace(/"/g, '&quot;')}">ملغي</span>${p.cancelReason ? `<small class="arc-why">${p.cancelReason.replace(/</g, '&lt;')}</small>` : ''}` : '<span class="px-3 py-1 bg-accent-green/20 text-accent-green text-xs font-bold rounded-full">مكتمل</span>'}</td>
                     <td class="px-6 py-4 text-center admin-only">
                         <button onclick='openProjectModal("edit", ${globalIndex}); document.getElementById("archiveModal").classList.remove("open");' class="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center text-muted hover:text-white transition" title="تعديل"><span class="material-symbols-rounded text-sm">edit</span></button>
                     </td>
@@ -4202,7 +4218,7 @@ ${link}
                     <td class="font-bold text-slate-800">${p.name}</td>
                     <td class="text-slate-600">${p.client}</td>
                     <td class="text-center en-num text-slate-600">${p.deadline}</td>
-                    <td class="text-center font-bold text-slate-800 en-num">${formatCurrency(p.value)}</td>
+                    <td class="text-center font-bold text-slate-800 en-num">${off ? 'ملغي' : formatCurrency(p.value)}</td>
                 </tr>`;
                     printBody.innerHTML += printRow;
                 });

@@ -56,7 +56,7 @@
     // المتبقي بعد الدفعات الجزئية (js/invoices.js)
     const rem = i => (window.InvoiceMoney ? InvoiceMoney.remaining(i) : amount(i));
     const ageOf = i => { const d = parse(i.date); return d ? Math.round((today() - d) / 864e5) : 0; };
-    const openProjects = () => P().filter(p => p.status !== DONE);
+    const openProjects = () => P().filter(p => p.status !== DONE && p.status !== 'ملغي');
     function offerStage(p) {
         if (p.status === 'lost' || p.projectKey) return null;
         if (p.status === 'draft') return 'draft';

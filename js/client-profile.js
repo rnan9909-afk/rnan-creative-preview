@@ -22,7 +22,7 @@
     const hue = s => { let h = 0; for (const ch of String(s || '')) h = (h * 31 + ch.charCodeAt(0)) % 360; return h; };
     const names = c => [...new Set([c.company, c.name].filter(Boolean).map(x => String(x).trim()))];
     const phone9 = s => String(s || '').replace(/\D/g, '').slice(-9);
-    const STATUS = { 'قيد التنفيذ': 'run', 'مكتمل': 'done', 'معلق': 'hold', 'جديد': 'new' };
+    const STATUS = { 'قيد التنفيذ': 'run', 'مكتمل': 'done', 'معلق': 'hold', 'ملغي': 'cancel', 'جديد': 'new' };
     let cur = null, proposals = null, propsAt = 0, noteTimer = null;
 
     async function loadProposals() {
@@ -72,7 +72,7 @@
         cur = { index, row: c.rowIndex };
         const d = data(c), name = c.company || c.name || 'عميل', tier = window.RNAN && RNAN.tierOf ? RNAN.tierOf(c.totalSpent) : null;
         const since = parse(c.dateAdded), months = since ? Math.max(0, Math.round((Date.now() - since) / (30.4 * 864e5))) : null;
-        const active = d.prj.filter(p => p.status !== DONE), done = d.prj.filter(p => p.status === DONE);
+        const active = d.prj.filter(p => p.status !== DONE && p.status !== 'ملغي'), done = d.prj.filter(p => p.status === DONE), off = d.prj.filter(p => p.status === 'ملغي');
         const phone = String(c.phone || '').trim();
         page.innerHTML = `<div class="cp">
             <header class="cp-head">
@@ -98,7 +98,7 @@
             <section class="cp-kpis">
                 <div class="mint"><span>${ic('payments')}</span><small>إجمالي المدفوع</small><b>${moneyText(sum(d.paid))}</b><em>${plural(d.paid.length, 'فاتورة واحدة', 'فاتورتان', 'فواتير', 'فاتورة')}</em></div>
                 <div class="${d.open.length ? 'gold' : 'mint'}"><span>${ic('account_balance_wallet')}</span><small>مستحق عليه</small><b>${moneyText(sum(d.open))}</b><em>${d.late.length ? `<i class="late">${moneyText(sum(d.late))} متأخرة</i>` : d.open.length ? 'ضمن المهلة' : 'لا مستحقات'}</em></div>
-                <div class="violet"><span>${ic('folder_open')}</span><small>المشاريع</small><b class="en-num">${d.prj.length}</b><em>${active.length} جارية · ${done.length} منجزة</em></div>
+                <div class="violet"><span>${ic('folder_open')}</span><small>المشاريع</small><b class="en-num">${d.prj.length}</b><em>${active.length} جارية · ${done.length} منجزة${off.length ? ` · ${off.length} ملغاة` : ''}</em></div>
                 <div class="blue"><span>${ic('timer')}</span><small>متوسط مدة السداد</small><b>${d.avgPay === null ? '—' : `<span class="en-num">${d.avgPay}</span> ${d.avgPay === 1 ? 'يوم' : d.avgPay === 2 ? 'يومان' : d.avgPay <= 10 ? 'أيام' : 'يومًا'}`}</b><em>${d.avgPay === null ? 'بعد أول سداد مسجّل' : d.avgPay <= 7 ? 'عميل منتظم السداد 👏' : 'يحتاج تذكيرًا أحيانًا'}</em></div>
                 <div class="gold"><span>${ic('stars')}</span><small>نقاط الولاء</small><b class="en-num">${num(c.points)}</b><em>${tier && tier.next ? `باقي ${moneyText(tier.remaining)} للمستوى ${tier.next}` : tier ? 'أعلى مستوى' : ''}</em></div>
                 <div class="blue"><span>${ic('handshake')}</span><small>مدة العلاقة</small><b>${months === null ? '—' : months < 1 ? 'جديد' : `<span class="en-num">${months}</span> ${months === 1 ? 'شهر' : months === 2 ? 'شهران' : months <= 10 ? 'أشهر' : 'شهرًا'}`}</b><em>${d.props.length ? plural(d.props.length, 'عرض واحد', 'عرضان', 'عروض', 'عرضًا') : 'بلا عروض'}</em></div>

@@ -15,16 +15,17 @@
         approved: { label: 'وافق العميل', badge: 'mint' },
         project: { label: 'قيد التنفيذ', badge: 'mint' },
         delivered: { label: 'سُلِّم', badge: 'mint' },
+        cancelled: { label: 'أُلغي المشروع', badge: 'red' },
         expired: { label: 'انتهت صلاحيته', badge: 'red' },
         lost: { label: 'مؤرشف', badge: 'gray' }
     };
     const TABS = [
-        ['all', 'الكل', s => s !== 'lost'],
+        ['all', 'الكل', s => s !== 'lost' && s !== 'cancelled'],
         ['action', 'تحتاج إجراء', s => ['changes', 'approved', 'expired'].includes(s)],
         ['waiting', 'بانتظار الرد', s => ['sent', 'viewed'].includes(s)],
         ['draft', 'مسودات', s => s === 'draft'],
         ['won', 'موقّعة', s => ['approved', 'project', 'delivered'].includes(s)],
-        ['lost', 'مؤرشفة', s => s === 'lost']
+        ['lost', 'مؤرشفة', s => s === 'lost' || s === 'cancelled']
     ];
     let list = [], offers = {}, tab = 'all', loaded = false;
 
@@ -38,7 +39,7 @@
 
     function stage(p) {
         if (p.status === 'lost') return 'lost';
-        if (p.projectKey) { const pr = projOf(p); return pr && pr.status === 'مكتمل' ? 'delivered' : 'project'; }
+        if (p.projectKey) { const pr = projOf(p); return pr && pr.status === 'مكتمل' ? 'delivered' : pr && pr.status === 'ملغي' ? 'cancelled' : 'project'; }
         if (p.status === 'draft') return 'draft';
         const r = offerOf(p).reply;
         if (r && r.decision === 'approved') return 'approved';
@@ -98,7 +99,7 @@
 
     function pipe(s) {
         const steps = ['أُرسل', 'فُتح', 'وافق', 'مشروع', 'سُلّم'];
-        const reached = { draft: -1, sent: 0, expired: 0, viewed: 1, changes: 1, approved: 2, project: 3, delivered: 4, lost: -1 }[s];
+        const reached = { draft: -1, sent: 0, expired: 0, viewed: 1, changes: 1, approved: 2, project: 3, delivered: 4, cancelled: 3, lost: -1 }[s];
         return `<div class="st-pipe">${steps.map((t, i) => {
             if (s === 'changes' && i === 2) return `<span class="alert">طلب تعديل</span>`;
             if (s === 'expired' && i === 1) return `<span class="alert">انتهت الصلاحية</span>`;
@@ -136,6 +137,7 @@
             expired: `<button class="st-btn sm soft" onclick="Studio.P.extend('${p.id}')">${ic('update')} مدّد 14 يومًا</button>`,
             project: `<button class="st-btn sm ghost" onclick="switchPage('projects')">${ic('folder_open')} فتح المشروع</button>`,
             delivered: `<button class="st-btn sm ghost" onclick="switchPage('projects')">${ic('folder_open')} فتح المشروع</button>`,
+            cancelled: `<button class="st-btn sm ghost" onclick="openArchiveModal()">${ic('inventory_2')} في الأرشيف</button>`,
             lost: `<button class="st-btn sm ghost" onclick="Studio.P.restore('${p.id}')">${ic('unarchive')} استرجاع</button>`
         }[s];
 

@@ -193,7 +193,7 @@
             .map(c => `<option value="${esc(c.rowIndex)}" ${String(c.rowIndex) === String(selectedKey) ? 'selected' : ''}>${esc(clientName(c))}</option>`).join('');
     }
     function projectOptions(selectedKey, all) {
-        return projects().filter(p => all || p.status !== 'مكتمل' || String(p.rowIndex) === String(selectedKey))
+        return projects().filter(p => all || (p.status !== 'مكتمل' && p.status !== 'ملغي') || String(p.rowIndex) === String(selectedKey))
             .map(p => `<option value="${esc(p.rowIndex)}" ${String(p.rowIndex) === String(selectedKey) ? 'selected' : ''}>${esc(p.name)}${p.client ? ' — ' + esc(p.client) : ''}</option>`).join('');
     }
 

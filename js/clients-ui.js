@@ -26,7 +26,7 @@
             const inv = I.filter(mine);
             const paid = inv.filter(i => i.status === PAID).reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
             const due = inv.filter(i => i.status !== PAID && !CANCELLED.includes(i.status)).reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
-            const active = P.filter(p => mine(p) && p.status !== 'مكتمل').length;
+            const active = P.filter(p => mine(p) && p.status !== 'مكتمل' && p.status !== 'ملغي').length;
             const added = Date.parse(c.dateAdded || '') || 0;
             return { c, idx, paid, due, active, points: parseInt(c.points) || 0, added, isNew: added >= month };
         });

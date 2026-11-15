@@ -421,7 +421,7 @@
     }
 
     // ═══ التحديثات ═══
-    const NOTIF_ICON = { points_earned: 'coins', points_redeemed: 'gift', referral_bonus: 'user-plus', tier_upgrade: 'star', new_invoice: 'receipt', invoice_paid: 'check', project_new: 'rocket', project_done: 'check', project_progress: 'target', project_hold: 'clock' };
+    const NOTIF_ICON = { points_earned: 'coins', points_redeemed: 'gift', referral_bonus: 'user-plus', tier_upgrade: 'star', new_invoice: 'receipt', invoice_paid: 'check', project_new: 'rocket', project_done: 'check', project_progress: 'target', project_hold: 'clock', project_cancelled: 'x', project_resumed: 'rocket' };
     function renderUpdates() {
         const list = state.notifs.slice().sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 30);
         $('#mark-read').hidden = !list.some(n => !n.isRead);

@@ -408,7 +408,9 @@ const backendFunctions = {
                     type: val.type || '',
                     proof: val.proof || null,
                     delivery: val.delivery || null,
-                    brief: val.brief || null
+                    brief: val.brief || null,
+                    cancelledAt: val.cancelledAt || '',
+                    cancelReason: val.cancelReason || ''
                 });
             });
         }
@@ -437,15 +439,33 @@ const backendFunctions = {
             let oldSnap = await window.db.ref('projects/' + data.rowIndex).once('value');
             let old = oldSnap.val() || {};
             projData.code = old.code || data.code || RNAN.newTrackCode();
+            // المشروع الملغي (js/project-cancel.js): تاريخ الإلغاء وسببه يبقيان ما دام ملغيًا، ويُمسحان عند استعادته
+            if (projData.status === 'ملغي') {
+                projData.cancelledAt = data.cancelledAt || old.cancelledAt || new Date().toISOString();
+                projData.cancelReason = data.cancelReason !== undefined ? String(data.cancelReason || '') : (old.cancelReason || '');
+            } else if (old.cancelledAt || old.cancelReason) {
+                projData.cancelledAt = null;
+                projData.cancelReason = null;
+            }
             let trackSnap = await window.db.ref('track/' + projData.code + '/createdAt').once('value');
             await window.db.ref('projects/' + data.rowIndex).update(projData);
             let reviewSnap = await window.db.ref('track/' + projData.code + '/review').once('value');
             await window.db.ref('track/' + projData.code).set(Object.assign(RNAN.trackFromProject(projData, trackSnap.val()), reviewSnap.val() ? { review: reviewSnap.val() } : {}));
-            if (old.status !== projData.status) {
+            if (data.undoCancel && old.status === 'ملغي') {
+                // «تراجع» فور الإلغاء: يُسحب إشعار الإلغاء من صفحة العميل بدل إضافة إشعار عودة
+                let nSnap = await window.db.ref('notifications').orderByChild('client').equalTo(data.client).once('value');
+                let since = Date.now() - 10 * 60000, drop = {};
+                nSnap.forEach(n => { let v = n.val() || {}; if (v.type === 'project_cancelled' && String(v.message || '').includes("'" + data.name + "'") && Date.parse(v.date) > since) drop['notifications/' + n.key] = null; });
+                if (Object.keys(drop).length) await window.db.ref().update(drop);
+            } else if (old.status !== projData.status) {
                 if (projData.status === 'مكتمل') {
                     await backendFunctions.logNotification(data.client, "project_done", "🎉 تم تسليم مشروع '" + data.name + "'. يسعدنا تقييمك للتجربة.");
                 } else if (projData.status === 'معلق') {
                     await backendFunctions.logNotification(data.client, "project_hold", "مشروع '" + data.name + "' متوقف مؤقتًا، وسنتواصل معك قريبًا.");
+                } else if (projData.status === 'ملغي') {
+                    await backendFunctions.logNotification(data.client, "project_cancelled", "تم إلغاء مشروع '" + data.name + "'.");
+                } else if (old.status === 'ملغي') {
+                    await backendFunctions.logNotification(data.client, "project_resumed", "عاد مشروع '" + data.name + "' إلى التنفيذ.");
                 }
             } else if ((parseInt(projData.progress) || 0) > (parseInt(old.progress) || 0)) {
                 await backendFunctions.logNotification(data.client, "project_progress", "تقدّم مشروع '" + data.name + "' إلى " + projData.progress + "%.");
@@ -991,7 +1011,8 @@ const backendFunctions = {
             points: parseInt(c.points) || 0, totalSpent: parseFloat(c.totalSpent) || 0,
             dateAdded: c.dateAdded || '', refCode: c.refCode || ''
         };
-        recs.projects.forEach(([id, p]) => {
+        // المشروع الملغي لا يظهر في صفحة العميل (يصله إشعار الإلغاء فقط)
+        recs.projects.filter(([, p]) => p.status !== 'ملغي').forEach(([id, p]) => {
             let f = fb[id] && (fb[id].at || 0) > (p.ratedAt || 0) ? fb[id] : null;
             view.projects[id] = {
                 name: p.name || '', code: p.code || '', status: p.status || '',

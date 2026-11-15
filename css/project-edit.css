@@ -57,13 +57,58 @@ html:not(#_r1):not(#_r2):not(#_r3):not(#_r4):not(#_r5) #projectModal .pe-name:fo
     display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
 .pe-add .material-symbols-rounded { font-size: 17px; }
 
-.pe-status { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.pe-status { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
 .pe-status button { height: 46px; padding: 0 6px; border-radius: 14px; border: 1px solid var(--pe-line); background: rgba(255, 255, 255, .04); color: #D5DAF0; font-family: inherit; font-size: 13.5px; font-weight: 800;
     display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; white-space: nowrap; transition: background .2s, color .2s, border-color .2s; }
 .pe-status button .material-symbols-rounded { font-size: 19px; }
 .pe-status button.on[data-st="قيد التنفيذ"] { border-color: transparent; background: linear-gradient(135deg, var(--pe-mint), var(--pe-teal)); color: var(--pe-night); }
 .pe-status button.on[data-st="معلق"] { border-color: rgba(251, 191, 36, .5); background: rgba(251, 191, 36, .14); color: #fbbf24; }
 .pe-status button.on[data-st="مكتمل"] { border-color: rgba(16, 185, 129, .55); background: rgba(16, 185, 129, .16); color: #6ee7b7; }
+.pe-status button.on[data-st="ملغي"] { border-color: rgba(248, 113, 113, .55); background: rgba(248, 113, 113, .14); color: #fca5a5; }
+.pe-box[data-status="ملغي"] .pe-bar i { background: #f87171; }
+
+/* المشروع الملغي (js/project-edit.js): شريط أعلى النافذة بتاريخ الإلغاء وسببه وزر الاستعادة */
+.pe-cancel { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 18px; color: #fecaca; background: rgba(248, 113, 113, .1); border: 1px solid rgba(248, 113, 113, .35); }
+.pe-cancel[hidden] { display: none; }
+.pe-cancel-ic { width: 38px; height: 38px; flex-shrink: 0; border-radius: 12px; display: grid; place-items: center; color: #f87171; background: rgba(248, 113, 113, .16); }
+.pe-cancel-t { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.55; }
+.pe-cancel-t b { font-size: 14px; font-weight: 800; color: #fff; }
+.pe-cancel-t small { font-size: 12px; opacity: .85; overflow-wrap: anywhere; }
+.pe-cancel button { height: 38px; padding: 0 12px; flex-shrink: 0; border-radius: 12px; border: 0; background: linear-gradient(135deg, var(--pe-mint), var(--pe-teal)); color: var(--pe-night); font-family: inherit; font-size: 13px; font-weight: 800;
+    display: inline-flex; align-items: center; gap: 5px; cursor: pointer; white-space: nowrap; }
+.pe-cancel button:disabled { opacity: .6; cursor: wait; }
+.pe-cancel button .material-symbols-rounded { font-size: 18px; }
+
+/* نافذة إلغاء المشروع (js/project-cancel.js) فوق أنماط rd- في css/dialogs.css */
+.pc-dlg { max-width: 440px; max-height: calc(100vh - 32px); overflow-y: auto; }
+.pc-sub { margin: -2px 0 8px !important; color: #fff !important; font-weight: 700; }
+.pc-what { margin: 0 0 14px !important; font-size: 13px !important; line-height: 1.75 !important; }
+.pc-f { display: block; text-align: start; }
+.pc-f > span { display: block; margin-bottom: 6px; color: #D5DAF0; font-size: 12.5px; font-weight: 700; }
+.pc-f > span em { font-style: normal; font-weight: 500; opacity: .7; }
+.pc-f .rd-in { margin: 0 0 14px; }
+.pc-inv { margin: 0 0 14px; padding: 10px 12px; border-radius: 16px; text-align: start; background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .1); }
+.pc-inv-h { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 13px; font-weight: 800; color: #fbbf24; }
+.pc-inv-h .material-symbols-rounded { font-size: 18px; }
+.pc-opt { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; cursor: pointer; border-top: 1px solid rgba(255, 255, 255, .07); }
+.pc-inv-h + .pc-opt, .pc-inv-h + .pc-note { border-top: 0; }
+.pc-opt input { width: 18px; height: 18px; margin-top: 3px; flex-shrink: 0; accent-color: #47E0AC; }
+.pc-opt > span { display: flex; flex-direction: column; line-height: 1.55; }
+.pc-opt b { font-size: 13px; font-weight: 800; color: #fff; }
+.pc-opt small { font-size: 12px; color: #A9B2D8; }
+.pc-note { display: flex; align-items: flex-start; gap: 6px; margin: 0 !important; padding: 8px 0; border-top: 1px solid rgba(255, 255, 255, .07); font-size: 12.5px !important; line-height: 1.7 !important; text-align: start; }
+.pc-note .material-symbols-rounded { font-size: 17px; margin-top: 2px; color: #7aa2ff; }
+.pc-err { margin: 0 0 12px !important; color: #fca5a5 !important; font-size: 13px !important; }
+.pc-dlg .rd-ok { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.pc-dlg .rd-ok .material-symbols-rounded { font-size: 19px; }
+.pc-dlg button:disabled, .pc-dlg input:disabled { opacity: .7; cursor: wait; }
+
+/* الأرشيف (admin.html): المشروع الملغي */
+/* القيمة داخل حاوية inline-flex (formatCurrency) فلا يمتد إليها الشطب من الخلية، وسمات الجداول تفرض لون الأرقام */
+#archive-table-body .arc-off { opacity: .6; }
+#archive-table-body .arc-off .en-num { color: #A9B2D8 !important; text-decoration: line-through; }
+.arc-cancel { display: inline-block; padding: 4px 12px; border-radius: 999px; background: rgba(248, 113, 113, .16); color: #fca5a5; font-size: 12px; font-weight: 800; }
+.arc-why { display: block; max-width: 220px; margin: 4px auto 0; color: #A9B2D8; font-size: 11.5px; line-height: 1.5; overflow-wrap: anywhere; }
 #projectModal .pe-native { display: none !important; }
 
 .pe-prog { display: flex; align-items: center; gap: 10px; }
@@ -255,7 +300,11 @@ html:not(#_r1):not(#_r2):not(#_r3):not(#_r4):not(#_r5) #projectModal .pe-steps .
     .pe-body { padding: 10px; gap: 10px; }
     .pe-sec { padding: 12px; border-radius: 18px; }
     .pe-types { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .pe-status { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .pe-status button { font-size: 12.5px; gap: 4px; }
+    .pe-cancel { flex-wrap: wrap; }
+    .pe-cancel button { width: 100%; justify-content: center; }
+    .pc-dlg { max-height: 92vh; }
     .pe-foot { padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)); }
     .pe-save { flex: 1; min-width: 0; }
     .pe-grow { display: none; }
@@ -298,6 +347,15 @@ html.light-mode .pe-alert { background: #FEF3C7; color: #92400E; }
 html.light-mode .pe-alert button { color: #92400E; }
 html.light-mode .pe-oi-row { border-top-color: rgba(146, 64, 14, .15); }
 html.light-mode .pe-oi-ok { color: #047857; }
+html.light-mode .pe-cancel { color: #991B1B; background: #FEF2F2; border-color: rgba(220, 38, 38, .25); }
+html.light-mode .pe-cancel-t b { color: #7F1D1D; }
+html.light-mode .pe-status button.on[data-st="ملغي"] { color: #B91C1C; background: #FEE2E2; }
+html.light-mode .pc-sub, html.light-mode .pc-opt b { color: #101965 !important; }
+html.light-mode .pc-f > span, html.light-mode .pc-opt small { color: #3B4373; }
+html.light-mode .pc-inv { background: #F7F9FF; border-color: rgba(16, 25, 101, .1); }
+html.light-mode .pc-opt, html.light-mode .pc-note { border-top-color: rgba(16, 25, 101, .08); }
+html.light-mode .pc-inv-h { color: #B45309; }
+html.light-mode .arc-cancel { background: #FEE2E2; color: #B91C1C; }
 html.light-mode .pe-quote { background: #F7F9FF; border-color: rgba(16, 25, 101, .08); }
 html.light-mode .pe-inv { background: #FFFBEB; color: #B45309; }
 html.light-mode .pe-due.soon { color: #B45309; }

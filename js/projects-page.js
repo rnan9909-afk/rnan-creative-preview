@@ -1,8 +1,9 @@
 // صفحة المشاريع: أرقام مختصرة، بحث وفلاتر وترتيب، بطاقات مجمّعة حسب قرب التسليم مع إنجاز «المهمة التالية» بضغطة،
-// وقائمة «⋯» (تحديث للعميل، رابط التتبع، إيقاف/استئناف، تسليم، إضافة لفاتورة مفتوحة أو فاتورة جديدة، حذف)، وتقويم تسليمات بجدول أعمال اليوم.
+// وقائمة «⋯» (تحديث للعميل، رابط التتبع، إيقاف/استئناف، تسليم، إضافة لفاتورة مفتوحة أو فاتورة جديدة، إلغاء، حذف)، وتقويم تسليمات بجدول أعمال اليوم.
+// المشروع المكتمل والملغي في الأرشيف (admin.html)، وإلغاء المشروع في js/project-cancel.js.
 // أنواع المشاريع ومواعيد التسليم من js/projects-ui.js، والأنماط في css/projects-page.css.
 (function () {
-    const ACTIVE = 'قيد التنفيذ', HOLD = 'معلق', DONE = 'مكتمل';
+    const ACTIVE = 'قيد التنفيذ', HOLD = 'معلق', DONE = 'مكتمل', CANCEL = 'ملغي';
     const MONTHS = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
     const WEEK = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
     const WEEK_S = ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
@@ -45,7 +46,7 @@
             phone: (clientOf(p.client) || {}).phone || ''
         };
     }
-    const open = () => P().map((p, i) => info(p, i)).filter(x => x.p.status !== DONE);
+    const open = () => P().map((p, i) => info(p, i)).filter(x => x.p.status !== DONE && x.p.status !== CANCEL);
 
     const FILTERS = [
         ['all', 'الكل', () => true],
@@ -118,7 +119,7 @@
         set('pp-stat-week', all.filter(x => x.week).length);
         set('pp-stat-value', money(all.reduce((s, x) => s + (parseFloat(x.p.value) || 0), 0)), true);
         set('stat-proj-active', all.filter(x => x.p.status === ACTIVE).length);
-        set('stat-proj-completed', P().filter(p => p.status === DONE).length);
+        set('stat-proj-completed', P().filter(p => p.status === DONE || p.status === CANCEL).length);
         const lateBox = document.querySelector('#projects-page .pp-stats .late');
         if (lateBox) lateBox.classList.toggle('on', late > 0);
         const sub = document.getElementById('pp-sub');
@@ -403,6 +404,7 @@
             <button type="button" role="menuitem" data-do="deliver">${ic('task_alt')} تم التسليم</button>
             ${openInv.map(v => `<button type="button" role="menuitem" data-do="addinv" data-inv="${esc(v.number)}">${ic('playlist_add')} إضافة للفاتورة <span class="en-num" dir="ltr">${esc(v.number)}</span></button>`).join('')}
             ${val ? `<button type="button" role="menuitem" data-do="invoice">${ic('receipt_long')} ${openInv.length ? 'إصدار فاتورة منفصلة' : 'إصدار فاتورة'}</button>` : ''}
+            <button type="button" role="menuitem" data-do="cancel">${ic('block')} إلغاء المشروع</button>
             <button type="button" role="menuitem" class="danger" data-do="delete">${ic('delete')} حذف المشروع</button>
         </div>`;
         document.body.appendChild(m);
@@ -447,6 +449,7 @@
         if (act === 'hold') return hold(i);
         if (act === 'invoice') return invoice(i);
         if (act === 'addinv') return addInv(i, inv);
+        if (act === 'cancel') return window.ProjectCancel && ProjectCancel.ask(p);
         if (act === 'delete') return remove(i);
     }
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });

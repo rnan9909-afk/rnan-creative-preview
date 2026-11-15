@@ -45,7 +45,7 @@
     // كل تصميم عليه تعديلات لم تُنفَّذ بعد (يختفي حين تُعلَّم «تم التعديل» أو يعتمد العميل)
     function pending() {
         return Object.entries(all).map(([t, r]) => Object.assign({ token: t }, r))
-            .filter(r => r.versions && !r.approval && !expired(r) && openNotesAll(r).length)
+            .filter(r => r.versions && !r.approval && !expired(r) && openNotesAll(r).length && !P().some(p => p.rowIndex === r.project && p.status === 'ملغي'))
             .map(r => ({ r, n: openNotesAll(r).length, fresh: unseen(r).length, last: openNotesAll(r).slice(-1)[0].at }))
             .sort((a, b) => String(b.last).localeCompare(String(a.last)));
     }
