@@ -120,7 +120,8 @@
             chips.push(left < 0 ? `<span class="st-chip hot">انتهى ${S.fmtDate(p.validUntil)}</span>` : `<span class="st-chip ${left <= 3 ? 'warn' : ''}">صالح ${left === 0 ? 'حتى اليوم' : S.days(left, true)}</span>`);
         }
         if (p.revision > 1) chips.push(`<span class="st-chip">نسخة <span class="st-num">${p.revision}</span></span>`);
-        if (p.agreement) chips.push(`<button class="st-chip ok" onclick="Studio.P.agreement('${p.id}')">${ic('contract')} اتفاقية رسمية جاهزة</button>`);
+        if (o.clientSign) chips.push(`<button class="st-chip ok" onclick="Studio.P.agreement('${p.id}')">${ic('draw')} وقّع العميل الاتفاقية</button>`);
+        else if (p.agreement) chips.push(`<button class="st-chip ok" onclick="Studio.P.agreement('${p.id}')">${ic('contract')} اتفاقية رسمية جاهزة</button>`);
         const asks = agPending(p).length;
         if (asks) chips.push(`<button class="st-chip hot" onclick="Studio.P.agreement('${p.id}')">${ic('rate_review')} طلب تعديل على الاتفاقية <span class="st-num">${asks}</span></button>`);
 
@@ -534,6 +535,8 @@
     // ── الاتفاقية الرسمية: صيغة الطرف الأول والثاني تُطبع PDF عند طلب العميل ──
     // بيانات رنان (الطرف الأول) تُحفظ مرة في settings/agreement، وبيانات العميل على العرض نفسه،
     // وتُنشر نسخة منهما في offer/<token>/agreement لتقرأها agreement.html.
+    // توقيع رنان وختمها مرة واحدة في settings/agreementSign (مقروء للعموم) فيظهران في كل الاتفاقيات،
+    // والعميل يوقّع من صفحة الاتفاقية في offer/<token>/clientSign.
     const agreementUrl = p => RNAN.pageUrl('agreement.html', { k: p.token });
     const P1_FIELDS = [
         ['name', 'الاسم النظامي *', ''], ['cr', 'السجل التجاري / وثيقة العمل الحر', 'اختياري'], ['vat', 'الرقم الضريبي', 'اختياري'],
@@ -559,12 +562,12 @@
     async function agreement(id) {
         const p = byId(id);
         if (!p) return;
-        const [saved, site, bankSaved] = await Promise.all([S.get('settings/agreement'), S.site(), S.get('settings/bank')]);
+        const [saved, site, bankSaved, sig] = await Promise.all([S.get('settings/agreement'), S.site(), S.get('settings/bank'), S.get('settings/agreementSign')]);
         const c = S.clients().find(x => String(x.rowIndex) === String(p.clientKey));
         const isOrg = !!(c && c.company && c.name && c.company !== c.name);
-        const a = p.agreement || {}, r = offerOf(p).reply;
+        const a = p.agreement || {}, r = offerOf(p).reply, cs = offerOf(p).clientSign;
         ag = {
-            id, bank: bankOf(bankSaved),
+            id, bank: bankOf(bankSaved), sig: { sign: (sig && sig.sign) || '', stamp: (sig && sig.stamp) || '' },
             p1: Object.assign({ name: 'رنان لخدمات التصميم', city: site.city || '', phone: site.phone || site.whatsapp || '', email: site.email || '' }, saved || {}),
             p2: Object.assign({ type: isOrg ? 'org' : 'person', name: isOrg ? c.company : (p.clientName || ''), rep: isOrg ? c.name : '', phone: p.clientPhone || (c && c.phone) || '' }, a.party2 || {})
         };
@@ -585,6 +588,16 @@
                             ${n.status === 'done' ? `<span class="st-chip ok">${ic('check')} تم التعديل</span>` : `<button class="st-btn sm ghost" onclick="Studio.P.agNoteDone('${p.id}', '${E(n.id)}', this)">${ic('done_all')} تم التعديل</button>`}</div>
                     </div>`).join('')}
                 </div>` : ''}
+                ${cs ? `<div class="st-block st-csign">
+                    <div class="st-block-h"><b>${ic('verified')} وقّع العميل الاتفاقية</b><span class="st-muted text-xs">${E(cs.name || '')} · ${S.fmtDate(cs.at)} ${S.fmtTime(cs.at)}</span></div>
+                    <div class="st-sig-paper">${cs.sign ? `<img src="${E(cs.sign)}" alt="توقيع العميل">` : ''}${cs.stamp ? `<img class="stamp" src="${E(cs.stamp)}" alt="ختم العميل">` : ''}</div>
+                    <div class="st-csign-foot"><span class="st-muted text-xs">عدّلت البنود بعد توقيعه؟ ألغِ التوقيع ليوقّع على النسخة الجديدة.</span>
+                        <button class="st-btn sm ghost" onclick="Studio.P.sgClientReset('${p.id}', this)">${ic('restart_alt')} إلغاء توقيع العميل</button></div>
+                </div>` : ''}
+                <div class="st-block st-sigs">
+                    <div class="st-block-h"><b>${ic('draw')} توقيعك وختم رنان</b><span class="st-muted text-xs">يظهران في كل الاتفاقيات تلقائيًا</span></div>
+                    <div class="st-sig-grid">${sgSlot('sign')}${sgSlot('stamp')}</div>
+                </div>
                 <div class="st-block">
                     <div class="st-block-h"><b>${ic('person')} الطرف الثاني — العميل</b></div>
                     <div class="st-seg">
@@ -716,6 +729,80 @@
         agreement(id);
     }
 
+    // ── توقيع رنان وختمها: رسم أو رفع صورة، والحفظ فوري فيظهر في كل الاتفاقيات ──
+    let sgPad = null;
+    function sgSlot(k, drawing) {
+        const v = ag.sig[k], sign = k === 'sign';
+        const body = drawing
+            ? `<div class="st-sig-paper pad"><canvas aria-label="ارسم توقيعك"></canvas><span class="st-sig-ph">وقّع هنا بالفأرة أو بإصبعك</span></div>
+                <div class="st-sig-acts">
+                    <button class="st-btn sm primary" onclick="Studio.P.sgDrawDone(this)">${ic('check')} اعتماد التوقيع</button>
+                    <button class="st-btn sm ghost" onclick="Studio.P.sgDrawClear()">مسح</button>
+                    <button class="st-btn sm ghost" onclick="Studio.P.sgDrawCancel()">إلغاء</button>
+                </div>`
+            : `<div class="st-sig-paper${sign ? '' : ' round'}">${v ? `<img src="${E(v)}" alt="${sign ? 'التوقيع' : 'الختم'}">` : `<span class="st-sig-ph">${sign ? 'لا يوجد توقيع بعد' : 'لا يوجد ختم بعد'}</span>`}</div>
+                <div class="st-sig-acts">
+                    ${sign ? `<button class="st-btn sm soft" onclick="Studio.P.sgDraw()">${ic('draw')} ارسم</button>` : ''}
+                    <label class="st-btn sm ghost">${ic('upload')} ${v ? 'تغيير' : 'رفع صورة'}<input type="file" accept="image/*" hidden onchange="Studio.P.sgPick('${k}', this)"></label>
+                    ${v ? `<button class="st-btn sm icon ghost" title="حذف" onclick="Studio.P.sgRemove('${k}', this)">${ic('delete')}</button>` : ''}
+                </div>`;
+        return `<div class="st-sig-slot" id="st-sig-${k}"><span class="st-sig-k">${sign ? 'التوقيع' : 'الختم'}</span>${body}</div>`;
+    }
+    const sgRedraw = (k, drawing) => { const el = document.getElementById('st-sig-' + k); if (el) el.outerHTML = sgSlot(k, drawing); };
+
+    async function sgCommit(k, val, btn) {
+        const old = ag.sig[k];
+        ag.sig[k] = val || '';
+        let done = false;
+        await S.busy(btn, async () => {
+            const { sign, stamp } = ag.sig;
+            await S.ref('settings/agreementSign').set(sign || stamp
+                ? Object.assign({ updatedAt: new Date().toISOString() }, sign ? { sign } : {}, stamp ? { stamp } : {}) : null);
+            done = true;
+        }, 'جاري الحفظ...');
+        if (!done) { ag.sig[k] = old; return; }
+        sgRedraw(k);
+        S.toast(`${val ? (k === 'sign' ? 'حُفظ توقيعك' : 'حُفظ ختم رنان') : (k === 'sign' ? 'حُذف التوقيع' : 'حُذف الختم')} — في كل الاتفاقيات ✓`);
+    }
+    function sgDraw() {
+        sgRedraw('sign', true);
+        const slot = document.getElementById('st-sig-sign');
+        const ph = slot.querySelector('.st-sig-ph');
+        sgPad = SignKit.pad(slot.querySelector('canvas'), has => { ph.hidden = has; });
+    }
+    async function sgDrawDone(btn) {
+        if (!sgPad || sgPad.isEmpty()) { S.toast('ارسم توقيعك في المربع أولًا'); return; }
+        const v = sgPad.toDataURL();
+        sgPad = null;
+        await sgCommit('sign', v, btn);
+    }
+    async function sgPick(k, input) {
+        const file = input.files[0];
+        if (!file) return;
+        try {
+            const v = await SignKit.fromFile(file, k === 'stamp' ? 360 : 640);
+            await sgCommit(k, v, input.closest('label'));
+        } catch (err) { S.toast(err.message); }
+    }
+    async function sgRemove(k, btn) {
+        if (!await rnConfirm(k === 'sign' ? 'حذف توقيعك من كل الاتفاقيات؟' : 'حذف ختم رنان من كل الاتفاقيات؟')) return;
+        await sgCommit(k, '', btn);
+    }
+    async function sgClientReset(id, btn) {
+        const p = byId(id);
+        if (!p || !await rnConfirm('إلغاء توقيع العميل؟ يختفي توقيعه وختمه من الاتفاقية ويستطيع التوقيع من جديد على النسخة الحالية.')) return;
+        let done = false;
+        await S.busy(btn, async () => {
+            await S.ref('offer/' + p.token + '/clientSign').remove();
+            delete offerOf(p).clientSign;
+            done = true;
+        }, '...');
+        if (!done) return;
+        render();
+        S.toast('أُلغي توقيع العميل — أرسل له رابط الاتفاقية ليوقّع من جديد');
+        agreement(id);
+    }
+
     async function agNoteDone(id, nid, btn) {
         const p = byId(id);
         if (!p) return;
@@ -736,6 +823,8 @@
     S.register('proposals', { open, boot: async () => { await load(); badge(); } });
     S.P = {
         edit, save, send, copy, preview, extend, archive, restore, remove, duplicate, convert, doConvert, agreement, agType, agSave, agEditSave, agNoteDone,
+        sgDraw, sgDrawDone, sgPick, sgRemove, sgClientReset,
+        sgDrawClear: () => { if (sgPad) sgPad.clear(); }, sgDrawCancel: () => { sgPad = null; sgRedraw('sign'); },
         tab: k => { tab = k; render(); }, kind: setKind, client: setClient, tpl: applyTemplate,
         // يُستدعى من صفحة القوالب لبدء عرض من قالب لعميل محدّد
         fromTemplate: (t, clientKey, startDate) => {

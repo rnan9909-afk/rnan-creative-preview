@@ -1,7 +1,8 @@
 /**
  * الاتفاقية الرسمية (agreement.html?k=<token>): تُبنى من العرض العام offer/<token> نفسه —
  * النطاق والبنود والمراحل والتسعير والشروط — مع بيانات الطرفين في offer/<token>/agreement
- * (تكتبها لوحة الإدارة من نافذة «الاتفاقية الرسمية»). للقراءة والطباعة فقط؛ لا تكتب شيئًا.
+ * (تكتبها لوحة الإدارة من نافذة «الاتفاقية الرسمية»)، وتوقيع رنان وختمها في settings/agreementSign.
+ * العميل يكتب هنا فقط طلبات تعديل النص (agreementNotes) وتوقيعه وختمه مرة واحدة (clientSign).
  * ‎&print=1‎ يفتح نافذة الطباعة تلقائيًا بعد التحميل.
  */
 (function () {
@@ -97,7 +98,10 @@
         return out;
     }
     const EDIT = params.get('edit') === '1' && window.parent !== window;
-    let ORIG = {}, SAVED = {}, ready = false;
+    const PRINT = params.get('print') === '1';
+    let ORIG = {}, SAVED = {}, ready = false, CTX = null;
+    // صور التوقيع والختم من القاعدة: PNG بصيغة data URL فقط
+    const pngOk = s => typeof s === 'string' && /^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(s);
     const dirty = new Set(), resets = new Set();
 
     function render(o) {
@@ -255,25 +259,8 @@
             ${sec('<span>التمهيد</span>', 'التمهيد', `<p>لمّا كان الطرف الأول جهةً متخصصة في تقديم خدمات التصميم والهوية البصرية والمحتوى الإبداعي، ولمّا رغب الطرف الثاني في الاستعانة بخدماته لتنفيذ «${E(o.title)}»، فقد اتفق الطرفان — وهما بكامل أهليتهما المعتبرة شرعًا ونظامًا — على إبرام هذه الاتفاقية وفق البنود الآتية:</p>`)}
             ${C.map(([t, html], i) => sec(`<span>البند ${ORD[i] || i + 1}</span> ${t}`, t, html)).join('')}
 
-            <div class="ag-sign">
-                <div class="sig stamped">
-                    <h3>الطرف الأول <small>${E(p1.name)}</small></h3>
-                    <div class="row"><span>الاسم</span><b>${E(p1.rep || '')}</b></div>
-                    <div class="row"><span>الصفة</span><b>${E(p1.repTitle || '')}</b></div>
-                    <div class="row tall"><span>التوقيع</span><b></b></div>
-                    <div class="row"><span>التاريخ</span><b></b></div>
-                    <div class="stamp">الختم</div>
-                </div>
-                <div class="sig${org ? ' stamped' : ''}">
-                    <h3>الطرف الثاني <small>${E(p2Name)}</small></h3>
-                    <div class="row"><span>الاسم</span><b>${E(org ? (p2.rep || '') : (p2Name || (reply && reply.name) || ''))}</b></div>
-                    <div class="row"><span>الصفة</span><b>${E(org ? (p2.repTitle || '') : 'أصالةً عن نفسه')}</b></div>
-                    <div class="row tall"><span>التوقيع</span><b></b></div>
-                    <div class="row"><span>التاريخ</span><b></b></div>
-                    ${org ? '<div class="stamp">الختم</div>' : ''}
-                </div>
-            </div>
-            ${reply ? `<div class="ag-annex"><b>الاعتماد الإلكتروني:</b> اعتمد الطرف الثاني ${kind} رقم (<span class="en">${E(o.number || '')}</span>) المرتبط بهذه الاتفاقية إلكترونيًا عبر رابطه الخاص بتاريخ ${greg(reply.at)} الساعة ${time(reply.at)} باسم «<b>${E(reply.name)}</b>»، مع إقراره بقراءة نطاق العمل والتسعير والشروط والموافقة عليها.</div>` : ''}
+            <div id="ag-signs"></div>
+            ${reply ?`<div class="ag-annex"><b>الاعتماد الإلكتروني:</b> اعتمد الطرف الثاني ${kind} رقم (<span class="en">${E(o.number || '')}</span>) المرتبط بهذه الاتفاقية إلكترونيًا عبر رابطه الخاص بتاريخ ${greg(reply.at)} الساعة ${time(reply.at)} باسم «<b>${E(reply.name)}</b>»، مع إقراره بقراءة نطاق العمل والتسعير والشروط والموافقة عليها.</div>` : ''}
             <footer class="ag-foot"><span>${E(p1.name)}</span>${contact}</footer>
             </td></tr></tbody></table>`;
 
@@ -286,15 +273,164 @@
         }`;
         document.head.appendChild(st);
 
+        CTX = { o, p1, p2, p2Name, org, reply, date, sign1: o._sign1 };
+        renderSigns();
+
         const offerLink = $('#ag-offer');
         offerLink.href = RNAN.pageUrl('offer.html', { k: token });
         offerLink.hidden = false;
         const printBtn = $('#ag-print');
         printBtn.disabled = false;
         printBtn.onclick = () => window.print();
-        if (params.get('print') === '1') (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => setTimeout(() => window.print(), 400));
-        if (EDIT) setupEdit(); else if (params.get('print') !== '1') setupRequests(o);
+        if (PRINT) (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => setTimeout(() => window.print(), 400));
+        if (EDIT) setupEdit(); else if (!PRINT) { setupRequests(o); setupSigning(); }
         ready = true;
+    }
+
+    // ── خانتا التوقيع: توقيع رنان وختمها (agreement.sign1) وتوقيع العميل وختمه (clientSign) ──
+    function renderSigns() {
+        const { o, p1, p2, p2Name, org, reply, date } = CTX;
+        const s1 = CTX.sign1 || {}, cs =o.clientSign && pngOk(o.clientSign.sign) ? o.clientSign : null;
+        const ink = (src, alt) => pngOk(src) ? `<img src="${src}" alt="${alt}">` : '';
+        const stamp = (src, show) => pngOk(src) ? `<img class="stamp-img" src="${src}" alt="الختم">` : (show ? '<div class="stamp">الختم</div>' : '');
+        const canSign = !cs && !EDIT && !PRINT;
+        const clientStamp = !!(cs && pngOk(cs.stamp));
+        $('#ag-signs').innerHTML = `
+            <div class="ag-sign">
+                <div class="sig stamped">
+                    <h3>الطرف الأول <small>${E(p1.name)}</small></h3>
+                    <div class="row"><span>الاسم</span><b>${E(p1.rep || '')}</b></div>
+                    <div class="row"><span>الصفة</span><b>${E(p1.repTitle || '')}</b></div>
+                    <div class="row tall"><span>التوقيع</span><b class="ink">${ink(s1.sign, 'توقيع الطرف الأول')}</b></div>
+                    <div class="row"><span>التاريخ</span><b>${pngOk(s1.sign) ? greg(date) : ''}</b></div>
+                    ${stamp(s1.stamp, true)}
+                </div>
+                <div class="sig${org || clientStamp ? ' stamped' : ''}${cs ? ' signed' : ''}">
+                    <h3>الطرف الثاني <small>${E(p2Name)}</small></h3>
+                    <div class="row"><span>الاسم</span><b>${E(cs ? cs.name : org ? (p2.rep || '') : (p2Name || (reply && reply.name) || ''))}</b></div>
+                    <div class="row"><span>الصفة</span><b>${E(org ? (p2.repTitle || '') : 'أصالةً عن نفسه')}</b></div>
+                    <div class="row tall"><span>التوقيع</span><b class="ink">${cs ? ink(cs.sign, 'توقيع الطرف الثاني') : canSign ? `<button type="button" class="sig-btn no-print" data-sign>${svg('pen')} وقّع هنا إلكترونيًا</button>` : ''}</b></div>
+                    <div class="row"><span>التاريخ</span><b>${cs ? greg(cs.at) : ''}</b></div>
+                    ${stamp(cs && cs.stamp, org)}
+                </div>
+            </div>
+            ${cs ? `<div class="ag-annex"><b>التوقيع الإلكتروني:</b> وقّع الطرف الثاني هذه الاتفاقية إلكترونيًا عبر رابطه الخاص بتاريخ ${greg(cs.at)} الساعة ${time(cs.at)} باسم «<b>${E(cs.name)}</b>»${clientStamp ? ' مع ختمه' : ''}، مقرًّا بقراءة بنودها كاملةً والموافقة عليها، ويُعدّ توقيعه هذا ملزمًا كالتوقيع الخطي.</div>` : ''}`;
+        const barBtn = $('#ag-sign-btn');
+        if (barBtn) barBtn.hidden = !canSign;
+    }
+
+    // ── توقيع العميل: زر في الشريط وفي خانة الطرف الثاني، والتوقيع يصل لحظيًا لأي نسخة مفتوحة ──
+    function setupSigning() {
+        document.addEventListener('click', e => { if (e.target.closest('[data-sign]')) signSheet(); });
+        db.ref('offer/' + token + '/clientSign').on('value', snap => {
+            CTX.o.clientSign = snap.val() || null;
+            renderSigns();
+        }, () => { });
+    }
+
+    function signSheet() {
+        const { o, p2, p2Name, org, reply } = CTX;
+        if (o.clientSign || !window.SignKit) return;
+        const old = $('.ag-modal');
+        if (old) old.remove();
+        let name = '';
+        try { name = localStorage.getItem('rn-ag-name') || ''; } catch (e) { }
+        if (!name) name = (reply && reply.name) || (org ? p2.rep : p2Name) || '';
+        const m = document.createElement('div');
+        m.className = 'ag-modal no-print';
+        m.innerHTML = `<div class="ag-scrim" data-x></div>
+            <form class="ag-sheet sg" role="dialog" aria-modal="true" aria-labelledby="ag-sg-t" novalidate>
+                <div class="grab"></div>
+                <h3 id="ag-sg-t">توقيع الاتفاقية</h3>
+                <p class="where">«${E(o.title)}» · اتفاقية رقم <span class="en">${E(o.number || '')}</span></p>
+                <div class="sg-tabs" role="tablist">
+                    <button type="button" class="on" data-mode="draw">${svg('pen')} ارسم توقيعك</button>
+                    <button type="button" data-mode="upload">${svg('folder')} ارفع صورته</button>
+                </div>
+                <div class="sg-pad" data-pane="draw">
+                    <canvas aria-label="مساحة التوقيع"></canvas>
+                    <span class="sg-ph">وقّع هنا بإصبعك أو بالفأرة</span>
+                    <span class="sg-line"></span>
+                    <button type="button" class="sg-clear" hidden>مسح</button>
+                </div>
+                <label class="sg-drop" data-pane="upload" hidden><input type="file" accept="image/*" data-k="sign"><img alt="" hidden><span>اختر صورة توقيعك على ورقة بيضاء — نزيل الخلفية تلقائيًا</span></label>
+                <label><span>الاسم الكامل للموقّع</span><input name="name" maxlength="80" value="${E(name)}" placeholder="الاسم كما في الهوية" autocomplete="name"></label>
+                <div class="sg-stamp">
+                    <span class="lbl">ختم ${org ? 'المنشأة' : 'الجهة'} <em>(اختياري)</em></span>
+                    <label class="sg-drop sm"><input type="file" accept="image/*" data-k="stamp"><img alt="" hidden><span>إرفاق صورة الختم</span></label>
+                    <button type="button" class="sg-x" hidden>إزالة الختم</button>
+                </div>
+                <label class="sg-agree"><input type="checkbox" name="agree"><i>قرأت الاتفاقية كاملةً وأوافق على جميع بنودها، وأقرّ بأن توقيعي الإلكتروني هذا ملزم لي كالتوقيع الخطي.</i></label>
+                <p class="err" hidden></p>
+                <div class="btns">
+                    <button type="submit" class="btn primary">${svg('check')}<span>اعتماد التوقيع</span></button>
+                    <button type="button" class="btn ghost" data-x>إلغاء</button>
+                </div>
+            </form>`;
+        document.body.appendChild(m);
+        const f = m.querySelector('form'), err = m.querySelector('.err'), btn = f.querySelector('[type=submit]');
+        const clearBtn = f.querySelector('.sg-clear'), ph = f.querySelector('.sg-ph');
+        const P = SignKit.pad(f.querySelector('canvas'), has => { clearBtn.hidden = !has; ph.hidden = has; });
+        requestAnimationFrame(() => requestAnimationFrame(() => { m.classList.add('open'); P.fit(); }));
+        setTimeout(() => P.fit(), 340);
+        const close = () => { m.classList.remove('open'); setTimeout(() => m.remove(), 300); };
+        const fail = msg => { err.textContent = msg; err.hidden = false; };
+        m.addEventListener('click', e => { if (e.target.closest('[data-x]')) close(); });
+        clearBtn.addEventListener('click', () => P.clear());
+
+        let mode = 'draw';
+        const up = { sign: '', stamp: '' };
+        f.querySelectorAll('.sg-tabs button').forEach(b => b.addEventListener('click', () => {
+            mode = b.dataset.mode;
+            f.querySelectorAll('.sg-tabs button').forEach(x => x.classList.toggle('on', x === b));
+            f.querySelectorAll('[data-pane]').forEach(x => { x.hidden = x.dataset.pane !== mode; });
+            if (mode === 'draw') P.fit();
+        }));
+        f.querySelectorAll('input[type=file]').forEach(inp => inp.addEventListener('change', async () => {
+            const file = inp.files[0], k = inp.dataset.k, box = inp.closest('.sg-drop'), img = box.querySelector('img');
+            if (!file) return;
+            err.hidden = true;
+            box.classList.add('busy');
+            try {
+                up[k] = await SignKit.fromFile(file, k === 'stamp' ? 360 : 640);
+                img.src = up[k];
+                img.hidden = false;
+                box.classList.add('has');
+                if (k === 'stamp') f.querySelector('.sg-x').hidden = false;
+            } catch (x) { fail(x.message); }
+            box.classList.remove('busy');
+            inp.value = '';
+        }));
+        f.querySelector('.sg-x').addEventListener('click', e => {
+            up.stamp = '';
+            const box = f.querySelector('.sg-stamp .sg-drop');
+            box.classList.remove('has');
+            box.querySelector('img').hidden = true;
+            e.currentTarget.hidden = true;
+        });
+
+        f.addEventListener('submit', async e => {
+            e.preventDefault();
+            const sign = mode === 'draw' ? P.toDataURL() : up.sign;
+            const nm = f.name.value.trim();
+            if (!sign) return fail(mode === 'draw' ? 'ارسم توقيعك في المربع أولًا' : 'اختر صورة توقيعك أولًا');
+            if (nm.length < 2) { f.name.focus(); return fail('اكتب اسمك الكامل'); }
+            if (!f.agree.checked) return fail('أكّد قراءتك للاتفاقية وموافقتك على بنودها');
+            btn.disabled = true;
+            err.hidden = true;
+            const rec = { name: nm.slice(0, 80), sign, agree: true, at: new Date().toISOString() };
+            if (up.stamp) rec.stamp = up.stamp;
+            try {
+                await Promise.race([db.ref('offer/' + token + '/clientSign').set(rec), new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 20000))]);
+                try { localStorage.setItem('rn-ag-name', nm); } catch (x) { }
+                close();
+                toast('تم توقيع الاتفاقية ✓ يمكنك طباعتها أو حفظها PDF');
+                setTimeout(() => { const s = $('#ag-signs'); if (s) s.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 350);
+            } catch (x) {
+                btn.disabled = false;
+                fail(/permission/i.test(x && (x.code || x.message)) ? 'تعذّر حفظ التوقيع — قد تكون الاتفاقية وُقّعت مسبقًا. حدّث الصفحة أو تواصل معنا.' : 'تعذّر الحفظ، تحقّق من الاتصال وأعد المحاولة.');
+            }
+        });
     }
 
     // ── وضع التحرير: تفتح لوحة الإدارة الاتفاقية في إطار (iframe) وتحفظ ما يُعدَّل هنا عبر collect() ──
@@ -446,12 +582,17 @@
 
     async function init() {
         if (!token || !window.db) { $('#ag-doc').innerHTML = `<p class="ag-empty">الرابط غير صحيح.</p>`; return; }
-        let o = null;
+        let o = null, sign1 = null;
+        const wait = p => Promise.race([p, new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 15000))]);
         try {
-            const snap = await Promise.race([db.ref('offer/' + token).once('value'), new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 15000))]);
-            o = snap.val();
+            // توقيع رنان اختياري: تعذّر قراءته لا يمنع عرض الاتفاقية
+            [o, sign1] = await Promise.all([
+                wait(db.ref('offer/' + token).once('value')).then(s => s.val()),
+                wait(db.ref('settings/agreementSign').once('value')).then(s => s.val(), () => null)
+            ]);
         } catch (e) { o = null; }
         if (!o || !o.title) { $('#ag-doc').innerHTML = `<p class="ag-empty">الاتفاقية غير متاحة. تواصل معنا وسنرسل لك رابطًا جديدًا.</p>`; return; }
+        o._sign1 = sign1;
         render(o);
     }
 

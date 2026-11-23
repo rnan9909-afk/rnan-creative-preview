@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Readex+Pro:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/agreement.css?v=3">
+    <link rel="stylesheet" href="css/agreement.css?v=4">
 </head>
 
 <body>
@@ -23,6 +23,7 @@
             <span class="hint">للحفظ بصيغة PDF اختر «حفظ بتنسيق PDF» من نافذة الطباعة.</span>
             <span class="grow"></span>
             <a class="btn ghost" id="ag-offer" href="#" hidden><svg class="icon"><use href="#i-chevron-right"/></svg><span>العرض</span></a>
+            <button type="button" class="btn sign" id="ag-sign-btn" data-sign hidden><svg class="icon"><use href="#i-pen"/></svg><span>وقّع الاتفاقية</span></button>
             <button type="button" class="btn primary" id="ag-print" disabled><svg class="icon"><use href="#i-printer"/></svg><span>طباعة / حفظ PDF</span></button>
         </div>
     </div>
@@ -37,7 +38,8 @@
     <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script defer src="js/firebase-init.js?v=2"></script>
     <script defer src="js/rnan-core.js?v=5"></script>
-    <script defer src="js/agreement.js?v=3"></script>
+    <script defer src="js/sign-kit.js?v=1"></script>
+    <script defer src="js/agreement.js?v=4"></script>
 </body>
 
 </html>

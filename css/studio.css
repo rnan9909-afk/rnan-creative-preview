@@ -335,6 +335,24 @@ html.light-mode .st-btn.ghost { color: #0f172a; background: rgba(2, 8, 58, .04);
 .st-agedit-btn b { display: block; font-size: 14px; }
 .st-agedit-btn small { display: block; color: var(--rs-text-2); font-size: 12px; line-height: 1.7; }
 .st-agedit-btn > .material-symbols-rounded { color: #47E0AC; }
+/* توقيع رنان وختمها، وتوقيع العميل: الصور على «ورقة» بيضاء لأن الحبر كحلي */
+.st-sig-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; }
+.st-sig-slot { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.st-sig-k { color: var(--rs-text-2); font-size: 12px; font-weight: 700; }
+.st-sig-paper { position: relative; display: grid; place-items: center; height: 120px; padding: 10px; border-radius: 14px; background: #fff; border: 1px solid rgba(255, 255, 255, .14); overflow: hidden; }
+.st-sig-paper img { max-width: 100%; max-height: 100px; object-fit: contain; }
+.st-sig-paper.pad { padding: 0; height: 150px; border: 2px dashed rgba(71, 224, 172, .7); }
+.st-sig-paper.pad canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+.st-sig-ph { color: #8b93c4; font-size: 12.5px; pointer-events: none; text-align: center; }
+.st-sig-ph[hidden] { display: none; }
+.st-sig-acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.st-sig-acts label { cursor: pointer; }
+.st-csign { border-color: rgba(71, 224, 172, .35); background: rgba(71, 224, 172, .05); }
+.st-csign .st-sig-paper { height: 110px; display: flex; justify-content: center; gap: 18px; }
+.st-csign .st-sig-paper img { max-width: 60%; }
+.st-csign .st-sig-paper img.stamp { max-width: 96px; transform: rotate(-7deg); }
+.st-csign-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+@media (max-width: 640px) { .st-sig-grid { grid-template-columns: 1fr; } }
 .st-agedit { padding: 0 22px; }
 .st-agedit iframe { display: block; width: 100%; height: min(68vh, 880px); border: 0; border-radius: 16px; background: #E6E9F4; }
 @media (max-width: 640px) {

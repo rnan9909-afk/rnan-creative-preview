@@ -109,6 +109,50 @@ body { margin: 0; font-family: var(--font); color: var(--ink); background: #E6E9
 .sig .row.tall { min-height: 52px; }
 .sig.stamped .row { margin-inline-end: 92px; }
 .sig .stamp { position: absolute; left: 14px; bottom: 14px; width: 74px; height: 74px; border-radius: 50%; border: 1.5px dashed var(--mist); display: grid; place-items: center; color: var(--ink-3); font-size: 8.4pt; }
+/* التوقيع المرسوم أو المرفوع يجلس على خط التوقيع، والختم مائل قليلًا كالختم الحقيقي */
+.sig .row b.ink { display: flex; align-items: flex-end; min-height: 56px; }
+.sig .row b.ink img { display: block; max-width: 100%; max-height: 62px; margin-bottom: -4px; object-fit: contain; }
+.sig .stamp-img { position: absolute; left: 8px; bottom: 8px; width: 90px; height: 90px; object-fit: contain; transform: rotate(-7deg); mix-blend-mode: multiply; pointer-events: none; }
+.sig.signed { border-color: #BDEFD9; }
+.sig-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; margin-bottom: 6px; padding: 0 14px; border-radius: 10px; border: 1.5px dashed var(--mint-ink);
+    background: #EFFCF6; color: #0B5E45; font: 700 12.5px var(--font); cursor: pointer; transition: background .15s; }
+.sig-btn:hover { background: #DDF8EC; }
+.sig-btn .icon { width: 15px; height: 15px; }
+.btn.sign { background: #fff; color: var(--navy); }
+.btn.sign .icon { color: var(--mint-ink); }
+.btn.sign:hover { background: #EFFCF6; }
+
+/* نافذة التوقيع */
+.sg-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin-bottom: 10px; border-radius: 12px; background: var(--cloud); }
+.sg-tabs button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 38px; border: 0; border-radius: 9px; background: transparent; color: var(--ink-2); font: 600 13px var(--font); cursor: pointer; }
+.sg-tabs button.on { background: #fff; color: var(--navy); box-shadow: 0 2px 8px -3px rgba(16, 25, 101, .25); }
+.sg-tabs .icon { width: 15px; height: 15px; }
+.sg-pad { position: relative; height: 180px; margin-bottom: 12px; border-radius: 14px; border: 1.5px dashed #C9CFE6; background: #FBFCFF; }
+.sg-pad[hidden] { display: none; }
+.sg-pad canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: crosshair; z-index: 1; }
+.sg-ph { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink-3); font-size: 13.5px; pointer-events: none; }
+.sg-ph[hidden] { display: none; }
+.sg-line { position: absolute; left: 22px; right: 22px; bottom: 38px; border-bottom: 1px solid #DCE0F0; pointer-events: none; }
+.sg-clear { position: absolute; z-index: 2; top: 8px; left: 8px; height: 30px; padding: 0 12px; border-radius: 9px; border: 1px solid var(--line); background: #fff; color: var(--ink-2); font: 600 12px var(--font); cursor: pointer; }
+.sg-clear[hidden] { display: none; }
+.ag-sheet label.sg-drop { position: relative; display: grid; place-items: center; min-height: 120px; margin-bottom: 12px; padding: 12px; border-radius: 14px; border: 1.5px dashed #C9CFE6; background: #FBFCFF; cursor: pointer; text-align: center; }
+.ag-sheet label.sg-drop[hidden] { display: none; }
+.ag-sheet label.sg-drop input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; padding: 0; }
+.ag-sheet label.sg-drop span { margin: 0; color: var(--ink-3); font-size: 12.5px; font-weight: 500; line-height: 1.7; }
+.ag-sheet label.sg-drop img { max-width: 100%; max-height: 110px; object-fit: contain; }
+.ag-sheet label.sg-drop.has span { display: none; }
+.ag-sheet label.sg-drop.busy { opacity: .6; }
+.sg-stamp { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; margin-bottom: 12px; }
+.sg-stamp .lbl { flex-basis: 100%; color: var(--ink-2); font-size: 13px; font-weight: 600; }
+.sg-stamp em { color: var(--ink-3); font-style: normal; font-weight: 500; }
+.ag-sheet .sg-stamp label.sg-drop.sm { width: 96px; height: 96px; min-height: 0; margin: 0; padding: 6px; border-radius: 50%; }
+.ag-sheet .sg-stamp label.sg-drop.sm span { font-size: 11px; }
+.ag-sheet .sg-stamp label.sg-drop.sm img { max-height: 80px; }
+.sg-x { height: 32px; padding: 0 12px; border-radius: 9px; border: 1px solid var(--line); background: #fff; color: #B91C1C; font: 600 12px var(--font); cursor: pointer; }
+.sg-x[hidden] { display: none; }
+.ag-sheet label.sg-agree { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 12px; background: #EFFCF6; border: 1px solid #BDEFD9; cursor: pointer; }
+.ag-sheet label.sg-agree input { flex-shrink: 0; width: 18px; height: 18px; margin: 3px 0 0; padding: 0; accent-color: var(--mint-ink); }
+.ag-sheet label.sg-agree i { font-style: normal; color: #0B5E45; font-size: 13px; font-weight: 600; line-height: 1.75; }
 
 .ag-annex { margin-top: 16px; padding: 10px 14px; border-radius: 10px; background: #EFFCF6; border: 1px solid #BDEFD9; color: #0B5E45; font-size: 9.4pt; line-height: 1.85; break-inside: avoid; }
 .ag-annex b { color: #063F2E; }
@@ -181,6 +225,8 @@ body { margin: 0; font-family: var(--font); color: var(--ink); background: #E6E9
     .ag-sheet .grab { display: block; width: 42px; height: 5px; margin: 4px auto 12px; border-radius: 999px; background: #D5DAEC; }
     .ag-toast { white-space: normal; text-align: center; width: max-content; max-width: calc(100vw - 32px); }
     .ag-bar .hint { display: none; }
+    .ag-bar .btn { padding: 0 12px; }
+    .ag-bar .btn.sign:not([hidden]) ~ .btn span, .ag-bar #ag-offer span { display: none; }
     .ag-desk { padding: 14px 10px 40px; }
     .sheet { min-height: 0; padding: 22px 18px; font-size: 14px; }
     .ag-frame > thead > tr > td { padding-bottom: 20px; }
@@ -201,7 +247,7 @@ body { margin: 0; font-family: var(--font); color: var(--ink); background: #E6E9
 
 @media print {
     body { background: #fff; }
-    .ag-bar, .no-print, .ag-tip, .ag-ask, .ag-modal, .ag-reqs, .ag-toast, .cl-reset { display: none !important; }
+    .ag-bar, .no-print, .ag-tip, .ag-ask, .ag-modal, .ag-reqs, .ag-toast, .cl-reset, .sig-btn { display: none !important; }
     .ag-desk { padding: 0; }
     .ag-editing .cl-body { outline: 0 !important; background: none !important; }
     .sheet { max-width: none; min-height: 0; padding: 0; border-radius: 0; box-shadow: none; overflow: visible; font-size: 10.4pt; }
