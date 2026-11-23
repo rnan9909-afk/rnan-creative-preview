@@ -185,6 +185,7 @@
             <div class="st-head">
                 <div><h1>العروض والعقود</h1><p>عروض أسعار وعقود بنطاق عمل ومراحل وشروط دفع واضحة. أرسلها برابط يوافق عليه العميل بتوقيعه أو يطلب تعديلًا، ثم حوّلها لمشروع بضغطة.</p></div>
                 <div class="st-head-actions">
+                    <button class="st-btn ghost" onclick="Studio.P.signSettings()">${ic('draw')} توقيعي وختم رنان</button>
                     <button class="st-btn ghost" onclick="switchPage('templates')">${ic('library_books')} من قالب</button>
                     <button class="st-btn primary" onclick="Studio.P.edit()">${ic('add')} عرض سعر أو عقد جديد</button>
                 </div>
@@ -750,6 +751,20 @@
     }
     const sgRedraw = (k, drawing) => { const el = document.getElementById('st-sig-' + k); if (el) el.outerHTML = sgSlot(k, drawing); };
 
+    // نافذة مستقلة من رأس صفحة العروض: التوقيع والختم بلا حاجة لفتح عرض بعينه
+    async function signSettings() {
+        const sig = await S.get('settings/agreementSign');
+        ag = { id: null, sig: { sign: (sig && sig.sign) || '', stamp: (sig && sig.stamp) || '' } };
+        S.modal(`${S.mHead('draw', 'توقيعي وختم رنان', 'يظهران في خانة الطرف الأول في كل الاتفاقيات تلقائيًا، القديمة والجديدة')}
+            <div class="st-m-body">
+                <div class="st-sig-grid">${sgSlot('sign')}${sgSlot('stamp')}</div>
+                <p class="st-muted text-xs" style="margin:0;line-height:1.9">صوّر الختم أو التوقيع على ورقة بيضاء وارفعه — تُزال الخلفية البيضاء تلقائيًا. أو ارسم توقيعك مباشرة بالفأرة أو بإصبعك. أي تغيير يُحفظ فورًا.</p>
+            </div>
+            <div class="st-m-foot">
+                <button class="st-btn primary" onclick="Studio.closeModal()">${ic('check')} تم</button>
+            </div>`);
+    }
+
     async function sgCommit(k, val, btn) {
         const old = ag.sig[k];
         ag.sig[k] = val || '';
@@ -823,7 +838,7 @@
     S.register('proposals', { open, boot: async () => { await load(); badge(); } });
     S.P = {
         edit, save, send, copy, preview, extend, archive, restore, remove, duplicate, convert, doConvert, agreement, agType, agSave, agEditSave, agNoteDone,
-        sgDraw, sgDrawDone, sgPick, sgRemove, sgClientReset,
+        sgDraw, sgDrawDone, sgPick, sgRemove, sgClientReset, signSettings,
         sgDrawClear: () => { if (sgPad) sgPad.clear(); }, sgDrawCancel: () => { sgPad = null; sgRedraw('sign'); },
         tab: k => { tab = k; render(); }, kind: setKind, client: setClient, tpl: applyTemplate,
         // يُستدعى من صفحة القوالب لبدء عرض من قالب لعميل محدّد
